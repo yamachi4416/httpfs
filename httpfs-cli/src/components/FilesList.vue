@@ -1,25 +1,21 @@
 <script lang="ts">
 import { ref, watch, onBeforeMount, defineComponent } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import {
-  fetchDirectoryItems,
-  createDirectory,
-  downloadFile,
-} from "../services/FilesService";
+import { fetchDirectoryItems, downloadFile } from "../services/FilesService";
 import FileUpload from "./FileUpload.vue";
+import CreateDirectory from "./CreateDirectory.vue";
 
 export default defineComponent({
   components: {
     FileUpload,
+    CreateDirectory,
   },
   setup() {
     const route = useRoute();
     const router = useRouter();
 
-    const file = ref<HTMLInputElement>();
     const path = ref(Array.from(route.params.path));
     const list = ref([]);
-    const dirname = ref("");
 
     const fetchItems = async () => {
       list.value = await fetchDirectoryItems(path.value);
@@ -38,9 +34,7 @@ export default defineComponent({
     );
 
     return {
-      file,
       path,
-      dirname,
       list,
 
       fetchItems,
@@ -55,13 +49,6 @@ export default defineComponent({
           downloadFile(path.value, item.name);
         }
       },
-
-      async createDirectory() {
-        await createDirectory(path.value, dirname.value).finally(() => {
-          dirname.value = "";
-        });
-        await fetchItems();
-      },
     };
   },
 });
@@ -70,10 +57,7 @@ export default defineComponent({
 <template>
   <div>{{ path.join("/") }}</div>
   <FileUpload :path="path" @done="fetchItems" />
-  <div>
-    <input type="text" v-model="dirname" />
-    <button @click="createDirectory" :disabled="!dirname">フォルダ作成</button>
-  </div>
+  <CreateDirectory :path="path" @done="fetchItems" />
   <table>
     <thead>
       <th>名前</th>
