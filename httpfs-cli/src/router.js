@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from "vue-router";
-import FilesList from "./components/FilesList.vue";
+import Files from "./components/Files.vue";
 
 export default createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: "/:path(.*)*",
-      component: FilesList,
+      component: Files,
     },
   ],
 });
