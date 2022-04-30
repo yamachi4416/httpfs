@@ -1,9 +1,17 @@
 <script lang="ts">
-import { ref, watch, onBeforeMount, computed } from "vue";
+import { ref, watch, onBeforeMount, defineComponent } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import FileService from "../services/file-service";
+import {
+  fetchDirectoryItems,
+  createDirectory,
+  downloadFile,
+} from "../services/FilesService";
+import FileUpload from "./FileUpload.vue";
 
-export default {
+export default defineComponent({
+  components: {
+    FileUpload,
+  },
   setup() {
     const route = useRoute();
     const router = useRouter();
@@ -13,68 +21,55 @@ export default {
     const list = ref([]);
     const dirname = ref("");
 
+    const fetchItems = async () => {
+      list.value = await fetchDirectoryItems(path.value);
+    };
+
     onBeforeMount(async () => {
-      list.value = await FileService.list(path.value);
+      await fetchItems();
     });
 
     watch(
       () => route.params.path,
       async (newPath) => {
         path.value = Array.from(newPath);
-        list.value = await FileService.list(path.value);
+        await fetchItems();
       }
     );
-
-    const enterItem = (item: any) => {
-      if (item.directory) {
-        router.push({
-          params: {
-            path: [...path.value, item.name],
-          },
-        });
-      } else {
-        FileService.download(path.value, item.name);
-      }
-    };
-
-    const fileUpload = async () => {
-      const files = file.value.files;
-      await FileService.upload(path.value, files).finally(() => {
-        file.value.value = null;
-      });
-      list.value = await FileService.list(path.value);
-    };
-
-    const createDirectory = async () => {
-      await FileService.createDirectory(path.value, dirname.value).finally(
-        () => {
-          dirname.value = "";
-        }
-      );
-      list.value = await FileService.list(path.value);
-    };
 
     return {
       file,
       path,
-      list,
       dirname,
-      enterItem,
-      fileUpload,
-      createDirectory,
+      list,
+
+      fetchItems,
+      enterItem(item: any) {
+        if (item.directory) {
+          router.push({
+            params: {
+              path: [...path.value, item.name],
+            },
+          });
+        } else {
+          downloadFile(path.value, item.name);
+        }
+      },
+
+      async createDirectory() {
+        await createDirectory(path.value, dirname.value).finally(() => {
+          dirname.value = "";
+        });
+        await fetchItems();
+      },
     };
   },
-};
+});
 </script>
 
 <template>
   <div>{{ path.join("/") }}</div>
-  <div>
-    <input ref="file" multiple="true" type="file" @change="fileChange" />
-    <button @click="fileUpload">
-      アップロード
-    </button>
-  </div>
+  <FileUpload :path="path" @done="fetchItems" />
   <div>
     <input type="text" v-model="dirname" />
     <button @click="createDirectory" :disabled="!dirname">フォルダ作成</button>
