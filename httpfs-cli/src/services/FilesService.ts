@@ -6,20 +6,42 @@ export interface FsItem {
   mimeType: string;
   lastModified: string;
   creationTime: string;
-  size: Number;
+  size: number;
   writable: boolean;
 }
+
+export class HttpException extends Error {
+  status: number;
+  constructor(status: number, message: string = null) {
+    super(message);
+    this.status = status;
+  }
+}
+
+const fetchApi = async <T>(
+  path: string[],
+  options: RequestInit = {},
+  action: string = null
+): Promise<T> => {
+  const query = action ? `?action=${action}` : "";
+  const endPoint = `/api/files/${path.join("/")}${query}`;
+  const response = await fetch(endPoint, options);
+  if (response.status >= 400) {
+    throw new HttpException(response.status, response.statusText);
+  }
+  return await response.json();
+};
 
 export const fetchDirectoryItems = async (
   path: string[]
 ): Promise<FsItem[]> => {
-  return await fetch(`/api/files/${path.join("/")}`, {
+  return await fetchApi(path, {
     method: "get",
     cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
     },
-  }).then((res) => res.json());
+  });
 };
 
 export const uploadFiles = async (
@@ -34,15 +56,12 @@ export const uploadFiles = async (
       return form;
     })
     .map(async (form) =>
-      fetch(`/api/files/${path.join("/")}?action=upload`, {
-        method: "put",
-        body: form,
-      })
-        .then((res) => res.json())
-        .then((item) => {
+      fetchApi<FsItem>(path, { method: "put", body: form }, "upload").then(
+        (item) => {
           callback(item);
           return item;
-        })
+        }
+      )
     );
 
   return Promise.all(uploads);
@@ -54,10 +73,7 @@ export const createDirectory = async (
 ): Promise<FsItem> => {
   const form = new FormData();
   form.append("dirname", dirname);
-  return await fetch(`/api/files/${path.join("/")}?action=mkdir`, {
-    method: "put",
-    body: form,
-  }).then((res) => res.json());
+  return await fetchApi<FsItem>(path, { method: "put", body: form }, "mkdir");
 };
 
 export const downloadFile = (path: string[], name: string): void => {

@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onBeforeMount, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { downloadFile, FsItem } from "../services/FilesService";
+import {
+  downloadFile,
+  fetchDirectoryItems,
+  FsItem,
+} from "../services/FilesService";
 
 import Breadcrumb from "./files/Breadcrumb.vue";
 import FilesList from "./files/FilesList.vue";
@@ -9,46 +13,50 @@ import DirectoryMenu from "./files/DirectoryMenu.vue";
 
 const route = useRoute();
 const router = useRouter();
-const path = ref(Array.from(route.params.path));
 
-const reloadFilesList = ref(false);
+const state = reactive({
+  path: Array.from(route.params.path),
+  items: [] as FsItem[],
+});
 
 watch(
   () => route.params.path,
   async (newPath) => {
-    path.value = Array.from(newPath);
+    state.path = Array.from(newPath);
+    await fetchItems();
   }
 );
+
+const fetchItems = async () => {
+  state.items = await fetchDirectoryItems(state.path);
+};
 
 const clickItem = (item: FsItem) => {
   if (item.directory) {
     router.push({
       params: {
-        path: [...path.value, item.name],
+        path: [...state.path, item.name],
       },
     });
   } else {
-    downloadFile(path.value, item.name);
+    downloadFile(state.path, item.name);
   }
 };
+
+onBeforeMount(async () => await fetchItems());
 </script>
 
 <template>
   <div>
-    <Breadcrumb :path="path">
-      <template v-slot:default="s">
+    <Breadcrumb :path="state.path">
+      <template v-slot:default="slot">
         <DirectoryMenu
-          :path="path"
-          :name="s.item?.name"
-          @done="reloadFilesList = true"
+          :path="state.path"
+          :name="slot.item?.name"
+          @done="fetchItems()"
         />
       </template>
     </Breadcrumb>
-    <FilesList
-      :path="path"
-      :reload="reloadFilesList"
-      @select="clickItem"
-      @done="reloadFilesList = false"
-    />
+    <FilesList :path="state.path" :items="state.items" @select="clickItem" />
   </div>
 </template>

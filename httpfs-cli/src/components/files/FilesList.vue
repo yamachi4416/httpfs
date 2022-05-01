@@ -1,39 +1,21 @@
 <script setup lang="ts">
-import { ref, watch, onBeforeMount } from "vue";
-import { fetchDirectoryItems, FsItem } from "../../services/FilesService";
+import { computed, reactive } from "vue";
+import { FsItem } from "../../services/FilesService";
 
 const props = defineProps<{
-  path: string[];
-  reload: Boolean;
+  items: FsItem[];
 }>();
+
+const state = reactive({
+  sort: {
+    key: "name",
+    direction: "asc",
+  },
+});
 
 const emit = defineEmits<{
   (e: "select", item: FsItem): void;
-  (e: "done", items: FsItem[]): void;
 }>();
-
-const list = ref([]);
-
-const fetchItems = async () => {
-  list.value = await fetchDirectoryItems(props.path);
-  emit("done", list.value);
-};
-
-onBeforeMount(async () => await fetchItems());
-
-watch(
-  () => props.path,
-  async () => await fetchItems()
-);
-
-watch(
-  () => props.reload,
-  async (reload) => {
-    if (reload) {
-      await fetchItems();
-    }
-  }
-);
 
 const formatDateTime = (str: string): string => {
   if (!str) {
@@ -50,7 +32,7 @@ const formatDateTime = (str: string): string => {
 };
 
 const formatSize = (size: number): string => {
-  let s = size;
+  let s = size || 0;
   let u = "";
   for (u of ["B", "KB", "MB", "GB"]) {
     if (s < 1024) {
@@ -58,7 +40,39 @@ const formatSize = (size: number): string => {
     }
     s = Math.round(s / 1024);
   }
-  return `${s} ${u}`
+  return `${s} ${u}`;
+};
+
+const items = computed(() => {
+  const compare = (key: string, item1: FsItem, item2: FsItem): number => {
+    const v1 = item1[key];
+    const v2 = item2[key];
+    let cp = 0;
+    if (v1 == null || v2 == null) {
+      cp = v1 == v2 ? 0 : v1 == null ? 1 : -1;
+    } else {
+      cp = v1 == v2 ? 0 : v1 < v2 ? -1 : 1;
+    }
+    return direction === "desc" ? cp * -1 : cp;
+  };
+
+  const { key, direction } = state.sort;
+  return Array.from(props.items).sort((a, b) => {
+    const cp = compare(key, a, b);
+    if (cp === 0 && key !== "name") {
+      return compare("name", a, b);
+    }
+    return cp;
+  });
+});
+
+const sortBy = (key: string) => {
+  if (state.sort.key === key) {
+    state.sort.direction = state.sort.direction === "desc" ? "asc" : "desc";
+  } else {
+    state.sort.key = key;
+    state.sort.direction = "asc";
+  }
 };
 </script>
 
@@ -66,25 +80,57 @@ const formatSize = (size: number): string => {
   <figure>
     <table>
       <thead>
-        <th>名前</th>
-        <th>更新日時</th>
-        <th>タイプ</th>
-        <th>サイズ</th>
+        <th
+          v-for="item in [
+            ['name', '名前'],
+            ['lastModified', '更新日時'],
+            ['mimeType', 'タイプ'],
+            ['size', 'サイズ'],
+          ]"
+        >
+          <label
+            @click="sortBy(item[0])"
+            :class="{ [state.sort.direction]: state.sort.key === item[0] }"
+          >
+            <span>{{ item[1] }}</span>
+          </label>
+        </th>
       </thead>
       <tbody>
-        <tr v-for="item in list" :key="item.name">
-          <td>
+        <tr v-for="item in items" :key="item.name">
+          <td class="name">
             <div>
-              <a href="#" @click.prevent="$emit('select', item)">{{
+              <a href="#" @click.prevent="emit('select', item)">{{
                 item.name
               }}</a>
             </div>
           </td>
-          <td>{{ formatDateTime(item.lastModified) }}</td>
-          <td>{{ item.mimeType }}</td>
-          <td>{{ item.directory ? "" : formatSize(item.size || 0) }}</td>
+          <td class="lastModified">{{ formatDateTime(item.lastModified) }}</td>
+          <td class="mimeType">{{ item.mimeType }}</td>
+          <td class="size">{{ item.directory ? "" : formatSize(item.size) }}</td>
         </tr>
       </tbody>
     </table>
   </figure>
 </template>
+
+<style>
+th label {
+  cursor: pointer;
+  display: flex;
+}
+th label::after {
+  content: "";
+  display: block;
+  width: 1rem;
+}
+th label.asc::after {
+  content: "↓";
+}
+th label.desc::after {
+  content: "↑";
+}
+td.size {
+  text-align: right;
+}
+</style>
