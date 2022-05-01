@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
-
-interface IMenuItem {
-  name: string;
-  click: () => void;
-}
+import { computed } from "vue";
 
 const props = defineProps<{
   path: string[],
-  menues: IMenuItem[]
 }>();
 
 const items = computed(() => {
@@ -29,12 +23,6 @@ const lastItem = computed(() => {
   return items.value[items.value.length - 1] || { name: "" };
 });
 
-const menuDetails = ref<HTMLDetailsElement>();
-
-const clickMenu = (menu: { click: () => void }) => {
-  menuDetails.value.open = false;
-  menu.click();
-};
 </script>
 
 <template>
@@ -44,16 +32,7 @@ const clickMenu = (menu: { click: () => void }) => {
         <router-link :to="item.path">{{ item.name }}</router-link>
       </li>
       <li>
-        <details ref="menuDetails" role="list">
-          <summary aria-haspopup="listbox" role="link">
-            {{ lastItem.name }}
-          </summary>
-          <ul role="listbox">
-            <li v-for="menu in menues">
-              <a @click.prevent="clickMenu(menu)">{{ menu.name }}</a>
-            </li>
-          </ul>
-        </details>
+        <slot :item="lastItem"></slot>
       </li>
     </ul>
   </nav>
