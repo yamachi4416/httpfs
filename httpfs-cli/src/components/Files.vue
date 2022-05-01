@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { downloadFile } from "../services/FilesService";
+import { downloadFile, FsItem } from "../services/FilesService";
 
 import Breadcrumb from "./files/Breadcrumb.vue";
 import FilesList from "./files/FilesList.vue";
@@ -20,7 +20,7 @@ watch(
   }
 );
 
-const clickItem = (item: any) => {
+const clickItem = (item: FsItem) => {
   if (item.directory) {
     router.push({
       params: {
@@ -37,7 +37,11 @@ const clickItem = (item: any) => {
   <div>
     <Breadcrumb :path="path">
       <template v-slot:default="s">
-        <DirectoryMenu :path="path" :name="s.item?.name" />
+        <DirectoryMenu
+          :path="path"
+          :name="s.item?.name"
+          @done="reloadFilesList = true"
+        />
       </template>
     </Breadcrumb>
     <FilesList
