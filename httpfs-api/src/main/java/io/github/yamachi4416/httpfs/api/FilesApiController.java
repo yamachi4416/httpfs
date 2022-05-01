@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
 
 import javax.servlet.http.HttpServletRequest;
@@ -126,7 +127,11 @@ public class FilesApiController {
     }
     if (fsItem.isDirectory()) {
       var sub = fs.sub(fsItem.getPath());
-      return ResponseEntity.ok().body(sub.createDirectory(dirname));
+      try {
+        return ResponseEntity.ok().body(sub.createDirectory(dirname));
+      } catch (InvalidPathException | AccessDeniedException e) {
+        return ResponseEntity.badRequest().build();
+      }
     } else {
       return ResponseEntity.notFound().build();
     }
@@ -142,6 +147,12 @@ public class FilesApiController {
   public ResponseEntity<?> fileNotFound(
       FileNotFoundException e) {
     return ResponseEntity.notFound().build();
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<?> serverError(Exception e) {
+    logger.error(e.getMessage(), e);
+    return ResponseEntity.internalServerError().build();
   }
 
 }

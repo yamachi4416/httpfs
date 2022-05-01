@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { createDirectory, FsItem } from "../../../services/FilesService";
+import { reactive, ref } from "vue";
+import {
+  createDirectory,
+  FsItem,
+  HttpException,
+} from "../../../services/FilesService";
 import Modal from "../../util/Modal.vue";
 
 const props = defineProps<{
@@ -13,16 +17,24 @@ const emit = defineEmits<{
   (e: "done", item: FsItem): void;
 }>();
 
-const dirname = ref("");
+const state = reactive({
+  dirname: "",
+  invalid: false,
+});
 
 const mkdir = async () => {
-  if (dirname.value) {
-    const item = await createDirectory(props.path, dirname.value).finally(
-      () => {
-        dirname.value = "";
+  if (state.dirname) {
+    try {
+      const item = await createDirectory(props.path, state.dirname);
+      state.dirname = "";
+      emit("done", item);
+    } catch (e) {
+      if (e instanceof HttpException) {
+        state.invalid = true;
+      } else {
+        throw e;
       }
-    );
-    emit("done", item);
+    }
   }
 };
 </script>
@@ -31,7 +43,12 @@ const mkdir = async () => {
   <Modal :show="show" @close="emit('close')">
     <h3>新しいフォルダ</h3>
     <p>
-      <input type="text" v-model="dirname" />
+      <input
+        type="text"
+        v-model="state.dirname"
+        :aria-invalid="state.invalid || null"
+        @input="state.invalid = false"
+      />
     </p>
     <footer>
       <a href="#" @click.prevent="emit('close')">キャンセル</a>
