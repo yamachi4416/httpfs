@@ -13,10 +13,6 @@ const state = reactive({
   },
 });
 
-const emit = defineEmits<{
-  (e: "select", item: FsItem): void;
-}>();
-
 const formatDateTime = (str: string): string => {
   if (!str) {
     return "";
@@ -74,6 +70,7 @@ const sortBy = (key: string) => {
     state.sort.direction = "asc";
   }
 };
+
 </script>
 
 <template>
@@ -97,17 +94,20 @@ const sortBy = (key: string) => {
         </th>
       </thead>
       <tbody>
-        <tr v-for="item in items" :key="item.name">
+        <tr v-for="item in items" :key="item.path">
           <td class="name">
-            <div>
-              <a href="#" @click.prevent="emit('select', item)">{{
-                item.name
-              }}</a>
+            <div v-if="item.directory">
+              <router-link :to="item.path">{{ item.name }}</router-link>
+            </div>
+            <div v-else>
+              <a :href="item.endpoint" target="_blank">{{ item.name }}</a>
             </div>
           </td>
           <td class="lastModified">{{ formatDateTime(item.lastModified) }}</td>
           <td class="mimeType">{{ item.mimeType }}</td>
-          <td class="size">{{ item.directory ? "" : formatSize(item.size) }}</td>
+          <td class="size">
+            {{ item.directory ? "" : formatSize(item.size) }}
+          </td>
         </tr>
       </tbody>
     </table>
