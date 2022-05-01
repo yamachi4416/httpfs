@@ -3,6 +3,7 @@ package io.github.yamachi4416.httpfs.fs;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -49,13 +50,13 @@ public class SubFs {
   }
 
   public FsItem createFile(String fileName, InputStream content) throws IOException {
-    var path = docRoot.resolve(fileName);
+    var path = safePath(fileName);
     Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
     return new FsItem(path);
   }
 
   public FsItem createDirectory(String dirname) throws IOException {
-    var path = docRoot.resolve(dirname);
+    var path = safePath(dirname);
     Files.createDirectory(path);
     return new FsItem(path);
   }
@@ -63,6 +64,14 @@ public class SubFs {
   private boolean isChild(Path path) {
     Path p = path.toAbsolutePath().normalize();
     return p.startsWith(this.docRoot);
+  }
+
+  private Path safePath(String name) throws AccessDeniedException {
+    var path = docRoot.resolve(name);
+    if (isChild(path)) {
+      return path;
+    }
+    throw new AccessDeniedException(path.toString());
   }
 
   private Path safeDirectory(Path path) throws FileNotFoundException {

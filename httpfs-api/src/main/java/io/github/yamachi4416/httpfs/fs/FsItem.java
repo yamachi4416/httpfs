@@ -27,7 +27,7 @@ public class FsItem {
     this.directory = file.isDirectory();
     this.writable = file.canWrite();
     this.name = file.getName();
-    this.size = file.length();
+    this.size = directory ? 0 : file.length();
     this.mimeType = URLConnection.guessContentTypeFromName(this.name);
 
     try {
