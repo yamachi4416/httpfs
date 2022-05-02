@@ -11,10 +11,12 @@ export class FsItem {
   creationTime: string;
   size: number;
   writable: boolean;
+  selected: boolean;
   constructor(item: object, path: string[]) {
     Object.assign(this, item);
-    this.path = `/${[...path, this.name].join("/")}`
-    this.endpoint = `${endpoint}${this.path}`
+    this.path = `/${[...path, this.name].join("/")}`;
+    this.endpoint = `${endpoint}${this.path}`;
+    this.selected = false;
   }
 }
 

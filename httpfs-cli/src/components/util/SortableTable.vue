@@ -2,12 +2,13 @@
 import { computed } from "@vue/reactivity";
 import { reactive } from "vue";
 import { comparatorKey } from "../../functions/util";
+import { FsItem } from "../../services/FilesService";
 
 const props = defineProps<{
   items: Array<{}>;
   idKey: string;
-  defaultKey?: string,
-  defaultDirection?: "asc" | "desc",
+  defaultKey?: string;
+  defaultDirection?: "asc" | "desc";
   headers: Array<{ key: string; label: string }>;
 }>();
 
@@ -26,7 +27,7 @@ const items = computed(() => {
   const comparator = comparatorKey(...keys);
   return Array.from(props.items).sort((a, b) => {
     return comparator(a, b) * dir;
-  });
+  }) as FsItem[];
 });
 
 const sortBy = (key: string) => {
@@ -52,9 +53,7 @@ const sortBy = (key: string) => {
       </th>
     </thead>
     <tbody>
-      <tr v-for="item in items" :key="item[props.idKey]">
-        <slot :item="item"></slot>
-      </tr>
+      <slot v-for="item in items" :key="item[props.idKey]" :item="item"></slot>
     </tbody>
   </table>
 </template>

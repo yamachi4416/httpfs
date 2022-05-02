@@ -2,7 +2,7 @@
 import { computed } from "vue";
 
 const props = defineProps<{
-  path: string[],
+  path: string[];
 }>();
 
 const items = computed(() => {
@@ -22,7 +22,6 @@ const listItems = computed(() => {
 const lastItem = computed(() => {
   return items.value[items.value.length - 1] || { name: "" };
 });
-
 </script>
 
 <template>
@@ -39,8 +38,12 @@ const lastItem = computed(() => {
 </template>
 
 <style scoped>
+.breadcrumb {
+  flex-wrap: wrap;
+}
 .breadcrumb > li {
   padding-right: 0;
+  white-space: nowrap;
 }
 .breadcrumb > li:not(:last-child)::after {
   content: "/";
