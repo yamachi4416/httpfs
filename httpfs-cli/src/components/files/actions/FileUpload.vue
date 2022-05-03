@@ -10,6 +10,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: "close"): void;
   (e: "done", items: FsItem[]): void;
+  (e: "upload", items: FsItem[]): void;
 }>();
 
 const file = ref<HTMLInputElement>();
@@ -29,7 +30,9 @@ watch(
 const fileUpload = async () => {
   const files = file.value.files;
   if (files.length > 0) {
-    const items = await uploadFiles(props.path, files).finally(() => {
+    const items = await uploadFiles(props.path, files, (items) => {
+      emit("upload", items);
+    }).finally(() => {
       file.value.value = null;
     });
     emit("done", items);

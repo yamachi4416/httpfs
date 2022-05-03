@@ -42,6 +42,16 @@ const fetchItems = async () => {
   state.items = await fetchDirectoryItems(state.path);
 };
 
+const onUpload = (items: FsItem[]) => {
+  const map = new Map<string, FsItem>();
+  state.items.forEach((item) => map.set(item.path, item));
+  items.forEach((item) =>
+    map.has(item.path)
+      ? Object.assign(map.get(item.path), item)
+      : state.items.push(item)
+  );
+};
+
 const deleteSelectedItems = async (items: FsItem[]) => {
   await deleteItems(state.path, items).finally(async () => await fetchItems());
 };
@@ -76,6 +86,7 @@ onBeforeMount(async () => {
           :path="state.path"
           :name="slot.item?.name"
           @done="fetchItems()"
+          @upload="onUpload"
         />
       </template>
     </Breadcrumb>

@@ -55,25 +55,42 @@ export async function fetchDirectoryItems(path: string[]): Promise<FsItem[]> {
 export async function uploadFiles(
   path: string[],
   files: FileList,
-  callback: (item: FsItem) => void = nop
-): Promise<FsItem[]> => {
-  const uploads = Array.from(files)
-    .map((file) => {
-      const form = new FormData();
-      form.append("files", file);
-      return form;
-    })
-    .map(async (form) =>
-      fetchApi<object>(path, { method: "put", body: form }, "upload")
-        .then((item) => new FsItem(item, path))
-        .then((item) => {
-          callback(item);
-          return item;
-        })
-  );
+  callback: (items: FsItem[]) => void = nop
+): Promise<FsItem[]> {
+  const maxSize = 1048576; //TODO
+  const groups = [[]];
 
-  return Promise.all(uploads);
-};
+  let size = 0;
+  let chunks = groups[0];
+  for (let file of Array.from(files)) {
+    if (size + file.size >= maxSize) {
+      size = 0;
+      chunks = [file];
+      groups.push(chunks);
+    } else {
+      size += file.size;
+      chunks.push(file);
+    }
+  }
+
+  const uploads = groups
+    .filter((chunks) => chunks.length > 0)
+    .map(async (chunks) => {
+      const form = new FormData();
+      chunks.forEach((file) => form.append("files", file));
+      return fetchApi<object[]>(path, { method: "put", body: form }, "upload")
+        .then((items) => items.map((item) => new FsItem(item, path)))
+        .then((items) => {
+          callback(items);
+          return items;
+        });
+    });
+
+  return (await Promise.all(uploads)).reduce(
+    (result, items) => [...result, ...items],
+    []
+  );
+}
 
 export async function createDirectory(
   path: string[],

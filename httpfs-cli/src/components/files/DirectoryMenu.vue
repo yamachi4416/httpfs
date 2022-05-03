@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 
 import FileUpload from "./actions/FileUpload.vue";
 import CreateDirectory from "./actions/CreateDirectory.vue";
+import { FsItem } from "../../services/FilesService";
 
 const props = defineProps<{
   path: string[];
@@ -11,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: "done"): void;
+  (e: "upload", items: FsItem[]): void;
 }>();
 
 const showCreateDirectory = ref(false);
@@ -30,6 +32,10 @@ const doneMenuAction = () => {
 const openMenuAction = (action: () => void) => {
   menuDetails.value.open = false;
   action();
+};
+
+const uploadProgress = (items: FsItem[]) => {
+  emit("upload", items);
 };
 </script>
 
@@ -68,6 +74,7 @@ const openMenuAction = (action: () => void) => {
       :show="showFileUpload"
       @close="closeMenuAction"
       @done="doneMenuAction"
+      @upload="uploadProgress"
     />
     <CreateDirectory
       :path="props.path"
