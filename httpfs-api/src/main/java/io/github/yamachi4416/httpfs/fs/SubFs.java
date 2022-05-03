@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.FileSystemUtils;
 
 public class SubFs {
   private static final Logger logger = LoggerFactory.getLogger(SubFs.class);
@@ -59,6 +60,14 @@ public class SubFs {
     var path = safePath(dirname);
     Files.createDirectory(path);
     return new FsItem(path);
+  }
+
+  public FsItem delete(String name) throws IOException {
+    var path = safePath(name);
+    if (FileSystemUtils.deleteRecursively(path)) {
+      return new FsItem(path);
+    }
+    return null;
   }
 
   private boolean isChild(Path path) {

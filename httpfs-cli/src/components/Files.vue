@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { onBeforeMount, reactive, computed, watch } from "vue";
 import { useRoute } from "vue-router";
-import { fetchDirectoryItems, FsItem } from "../services/FilesService";
+import {
+  fetchDirectoryItems,
+  deleteItems,
+  FsItem,
+} from "../services/FilesService";
 
 import Breadcrumb from "./files/Breadcrumb.vue";
 import FilesList from "./files/FilesList.vue";
@@ -38,6 +42,10 @@ const fetchItems = async () => {
   state.items = await fetchDirectoryItems(state.path);
 };
 
+const deleteSelectedItems = async (items: FsItem[]) => {
+  await deleteItems(state.path, items).finally(async () => await fetchItems());
+};
+
 onBeforeMount(async () => {
   await fetchItems();
   state.ready = true;
@@ -51,7 +59,13 @@ onBeforeMount(async () => {
         <router-link v-if="parentPath" :to="parentPath">←</router-link>
       </li>
       <li>
-        <SelectAll v-if="state.ready" :items="state.items" />
+        <SelectAll v-if="state.ready" :items="state.items">
+          <template v-slot="{ items, count }">
+            <button v-if="count > 0" @click="deleteSelectedItems(items)">
+              削除
+            </button>
+          </template>
+        </SelectAll>
       </li>
     </ul>
   </nav>

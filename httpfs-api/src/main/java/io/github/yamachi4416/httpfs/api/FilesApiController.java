@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.InvalidPathException;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,12 +21,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -106,7 +110,8 @@ public class FilesApiController {
       var uploads = new ArrayList<>();
       for (var file : files) {
         try (var content = file.getInputStream()) {
-          uploads.add(sub.createFile(file.getOriginalFilename(), content));
+          var uploaded = sub.createFile(file.getOriginalFilename(), content);
+          uploads.add(uploaded);
         } catch (IOException e) {
           logger.error("File Save Fail.", e);
         }
@@ -126,12 +131,34 @@ public class FilesApiController {
       throw new AccessDeniedException(fsItem.getPath().toString());
     }
     if (fsItem.isDirectory()) {
-      var sub = fs.sub(fsItem.getPath());
       try {
+        var sub = fs.sub(fsItem.getPath());
         return ResponseEntity.ok().body(sub.createDirectory(dirname));
       } catch (InvalidPathException | AccessDeniedException e) {
         return ResponseEntity.badRequest().build();
       }
+    } else {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
+  @DeleteMapping
+  public ResponseEntity<?> delete(
+      FsItem fsItem,
+      @RequestParam(name = "name", required = true) String[] names)
+      throws IOException {
+    if (!fsItem.isWritable()) {
+      throw new AccessDeniedException(fsItem.getPath().toString());
+    }
+    if (fsItem.isDirectory()) {
+      var sub = fs.sub(fsItem.getPath());
+      return ResponseEntity.ok().body(Stream.of(names).map(name -> {
+        try {
+          return sub.delete(name).getPath();
+        } catch (IOException e) {
+          return null;
+        }
+      }).filter(path -> path != null));
     } else {
       return ResponseEntity.notFound().build();
     }
