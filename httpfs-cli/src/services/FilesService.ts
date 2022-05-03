@@ -30,11 +30,9 @@ export class HttpException extends Error {
 
 async function fetchApi<T>(
   path: string[],
-  options: RequestInit = {},
-  action: string = null
+  options: RequestInit = {}
 ): Promise<T> {
-  const query = action ? `?action=${action}` : "";
-  const endPoint = `${endpoint}/${path.join("/")}${query}`;
+  const endPoint = `${endpoint}/${path.join("/")}`;
   const response = await fetch(endPoint, options);
   if (response.status >= 400) {
     throw new HttpException(response.status, response.statusText);
@@ -78,7 +76,7 @@ export async function uploadFiles(
     .map(async (chunks) => {
       const form = new FormData();
       chunks.forEach((file) => form.append("files", file));
-      return fetchApi<object[]>(path, { method: "put", body: form }, "upload")
+      return fetchApi<object[]>(path, { method: "put", body: form })
         .then((items) => items.map((item) => new FsItem(item, path)))
         .then((items) => {
           callback(items);
@@ -98,24 +96,21 @@ export async function createDirectory(
 ): Promise<FsItem> {
   const form = new FormData();
   form.append("dirname", dirname);
-  return await fetchApi<object>(
-    path,
-    { method: "put", body: form },
-    "mkdir"
-  ).then((item) => new FsItem(item, path));
+  return await fetchApi<object>(path, { method: "post", body: form }).then(
+    (item) => new FsItem(item, path)
+  );
 }
 
 export async function deleteItems(
   path: string[],
   items: FsItem[]
 ): Promise<string[]> {
-  const form = new FormData();
-  for (let item of items) {
-    form.append("name", item.name);
-  }
   return await fetchApi<string[]>(path, {
     method: "delete",
-    body: form,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(items.map((item) => item.name)),
   });
 }
 

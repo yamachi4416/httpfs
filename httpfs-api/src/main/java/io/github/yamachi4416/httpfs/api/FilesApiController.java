@@ -25,11 +25,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -82,6 +82,7 @@ public class FilesApiController {
     if (fsItem.isDirectory()) {
       return ResponseEntity.notFound().build();
     }
+
     var resource = new FileSystemResource(fsItem.getPath());
     return ResponseEntity.ok()
         .contentLength(resource.contentLength())
@@ -96,7 +97,7 @@ public class FilesApiController {
         .body(resource);
   }
 
-  @PutMapping(params = { "action=upload" })
+  @PutMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
   public ResponseEntity<?> upload(
       FsItem fsItem,
       @RequestParam(required = true) MultipartFile[] files)
@@ -122,7 +123,7 @@ public class FilesApiController {
     }
   }
 
-  @PutMapping(params = { "action=mkdir" })
+  @PostMapping(params = { "dirname" })
   public ResponseEntity<?> createDirectory(
       FsItem fsItem,
       @RequestParam(name = "dirname", required = true) String dirname)
@@ -130,6 +131,7 @@ public class FilesApiController {
     if (!fsItem.isWritable()) {
       throw new AccessDeniedException(fsItem.getPath().toString());
     }
+
     if (fsItem.isDirectory()) {
       try {
         var sub = fs.sub(fsItem.getPath());
@@ -145,11 +147,12 @@ public class FilesApiController {
   @DeleteMapping
   public ResponseEntity<?> delete(
       FsItem fsItem,
-      @RequestParam(name = "name", required = true) String[] names)
+      @RequestBody(required = true) String[] names)
       throws IOException {
     if (!fsItem.isWritable()) {
       throw new AccessDeniedException(fsItem.getPath().toString());
     }
+
     if (fsItem.isDirectory()) {
       var sub = fs.sub(fsItem.getPath());
       return ResponseEntity.ok().body(Stream.of(names).map(name -> {
