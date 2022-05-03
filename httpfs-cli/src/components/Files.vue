@@ -48,9 +48,7 @@ onBeforeMount(async () => {
   <nav>
     <ul>
       <li>
-        <router-link v-if="parentPath" :to="parentPath" class="secondary"
-          >←</router-link
-        >
+        <router-link v-if="parentPath" :to="parentPath">←</router-link>
       </li>
       <li>
         <SelectAll v-if="state.ready" :items="state.items" />

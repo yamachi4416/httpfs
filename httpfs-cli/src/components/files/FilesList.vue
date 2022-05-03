@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { FsItem } from "../../services/FilesService";
 import { formatSize, formatDateTime } from "../../functions/fmt";
-import SortableTable from "../util/SortableTable.vue";
+import { sortable } from "../util/Sortable";
 
-const props = defineProps<{
+defineProps<{
   items: FsItem[];
 }>();
 
@@ -13,59 +13,74 @@ const headers = [
   { key: "mimeType", label: "タイプ" },
   { key: "size", label: "サイズ" },
 ];
+
+const sort = sortable({ key: "name", direction: "asc" });
 </script>
 
 <template>
   <figure>
-    <SortableTable
-      :items="props.items"
-      :headers="headers"
-      id-key="path"
-      default-key="name"
-      default-direction="asc"
-      v-slot:default="{ item }: { item: FsItem }"
-    >
-      <tr :data-selected="item.selected">
-        <td class="name">
-          <div>
-            <input type="checkbox" v-model="item.selected" />
-            <router-link v-if="item.directory" class="secondary" :to="item.path"
-              >{{ item.name }}
-            </router-link>
-            <a v-else class="secondary" target="_blank" :href="item.endpoint">{{
-              item.name
-            }}</a>
-          </div>
-        </td>
-        <td class="lastModified">{{ formatDateTime(item.lastModified) }}</td>
-        <td class="mimeType">{{ item.mimeType }}</td>
-        <td class="size">
-          {{ item.directory ? "" : formatSize(item.size) }}
-        </td>
-      </tr>
-    </SortableTable>
+    <table>
+      <thead>
+        <tr>
+          <th v-for="header in sort.headers(headers)">
+            <label @click="header.sort" :data-sort="header.direction">
+              {{ header.label }}
+            </label>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="item in sort.sorted(items)" :data-selected="item.selected">
+          <td class="name">
+            <div>
+              <input type="checkbox" v-model="item.selected" />
+              <router-link v-if="item.directory" :to="item.path"
+                >{{ item.name }}
+              </router-link>
+              <a v-else target="_blank" :href="item.endpoint">{{
+                item.name
+              }}</a>
+            </div>
+          </td>
+          <td class="lastModified">{{ formatDateTime(item.lastModified) }}</td>
+          <td class="mimeType">{{ item.mimeType }}</td>
+          <td class="size">
+            {{ item.directory ? "" : formatSize(item.size) }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </figure>
 </template>
 
-<style>
-tr[data-selected="true"] {
+<style scoped lang="scss">
+th label {
+  display: flex;
   cursor: pointer;
-  background-color: var(--table-row-stripped-background-color);
+  white-space: nowrap;
+  &::after {
+    content: "";
+    display: block;
+    width: 1em;
+  }
+  &[data-sort="asc"]::after {
+    content: "↓";
+  }
+
+  &[data-sort="desc"]::after {
+    content: "↑";
+  }
+}
+td.name {
+  > div {
+    display: flex;
+    align-items: center;
+    a {
+      flex: 1;
+    }
+  }
 }
 
-td,
-th {
-  white-space: nowrap;
-}
-td.name > div {
-  display: flex;
-  align-items: center;
-  column-gap: 0.375em;
-}
-td.name a {
-  flex: 1;
-  text-decoration: none;
-}
 td.size {
   text-align: right;
 }

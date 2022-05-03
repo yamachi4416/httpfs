@@ -26,7 +26,7 @@ const lastItem = computed(() => {
 
 <template>
   <nav>
-    <ul class="breadcrumb">
+    <ul>
       <li v-for="item in listItems">
         <router-link :to="item.path">{{ item.name }}</router-link>
       </li>
@@ -36,17 +36,3 @@ const lastItem = computed(() => {
     </ul>
   </nav>
 </template>
-
-<style scoped>
-.breadcrumb {
-  flex-wrap: wrap;
-}
-.breadcrumb > li {
-  padding-right: 0;
-  white-space: nowrap;
-}
-.breadcrumb > li:not(:last-child)::after {
-  content: "/";
-  padding-left: var(--nav-element-spacing-horizontal);
-}
-</style>

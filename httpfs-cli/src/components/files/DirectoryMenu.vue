@@ -41,6 +41,7 @@ const openMenuAction = (action: () => void) => {
     <ul role="listbox">
       <li>
         <a
+          href="#"
           @click.prevent="
             openMenuAction(() => {
               showCreateDirectory = true;
@@ -49,6 +50,7 @@ const openMenuAction = (action: () => void) => {
           >フォルダ作成</a
         >
         <a
+          href="#"
           @click.prevent="
             openMenuAction(() => {
               showFileUpload = true;

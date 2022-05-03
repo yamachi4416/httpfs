@@ -9,7 +9,7 @@ import Modal from "../../util/Modal.vue";
 
 const props = defineProps<{
   path: string[];
-  show: Boolean;
+  show: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -40,8 +40,7 @@ const mkdir = async () => {
 </script>
 
 <template>
-  <Modal :show="show" @close="emit('close')">
-    <h3>新しいフォルダ</h3>
+  <Modal :show="show" title="新しいフォルダ" @close="emit('close')">
     <p>
       <input
         type="text"
@@ -56,15 +55,3 @@ const mkdir = async () => {
     </footer>
   </Modal>
 </template>
-
-<style scoped>
-h3 {
-  margin-bottom: 1rem;
-}
-footer {
-  margin-top: 1rem;
-  display: flex;
-  column-gap: 1rem;
-  justify-content: flex-end;
-}
-</style>

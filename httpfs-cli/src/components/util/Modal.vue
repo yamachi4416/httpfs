@@ -2,7 +2,8 @@
 import { watch, onBeforeUnmount, defineProps, defineEmits } from "vue";
 
 const props = defineProps<{
-  show: Boolean;
+  show: boolean;
+  title: string;
 }>();
 
 const emit = defineEmits<{
@@ -38,16 +39,18 @@ watch(
 </script>
 
 <template>
-  <dialog :open="props.show ? true : null" @click.self="emit('close')">
+  <dialog open v-if="props.show" @click.self="emit('close')">
     <article>
+      <header>
+        <a
+          href="#"
+          aria-label="Close"
+          class="close"
+          @click.prevent="emit('close')"
+        ></a>
+        {{ props.title }}
+      </header>
       <slot></slot>
     </article>
   </dialog>
 </template>
-
-<style scoped>
-article {
-  width: 600px;
-  max-width: 100%;
-}
-</style>
