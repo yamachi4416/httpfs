@@ -7,7 +7,7 @@ const props = defineProps<{
 
 const items = computed(() => {
   const paths = Array.from(props.path);
-  return [{ name: "TOP", path: "/" }].concat(
+  return [{ name: "ROOT", path: "/" }].concat(
     paths.map((p, i) => ({
       name: p,
       path: `/${paths.slice(0, i + 1).join("/")}`,
@@ -25,14 +25,26 @@ const lastItem = computed(() => {
 </script>
 
 <template>
-  <nav>
-    <ul>
-      <li v-for="item in listItems">
-        <router-link :to="item.path">{{ item.name }}</router-link>
-      </li>
-      <li>
-        <slot :item="lastItem"></slot>
-      </li>
-    </ul>
-  </nav>
+  <ul>
+    <li v-for="item in listItems">
+      <router-link :to="item.path">{{ item.name }}</router-link>
+    </li>
+    <li>
+      <span>{{ lastItem.name }}</span>
+    </li>
+  </ul>
 </template>
+
+<style scoped lang="scss">
+ul {
+  li {
+    display: flex;
+    padding-right: 0;
+    &:not(:last-of-type)::after {
+      content: "▸";
+      color: var(--muted-color);
+      padding-left: var(--nav-element-spacing-horizontal);
+    }
+  }
+}
+</style>

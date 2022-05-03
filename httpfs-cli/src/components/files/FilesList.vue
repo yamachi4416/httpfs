@@ -61,7 +61,8 @@ th label {
   &::after {
     content: "";
     display: block;
-    width: 1em;
+    width: 2em;
+    text-align: center;
   }
   &[data-sort="asc"]::after {
     content: "↓";

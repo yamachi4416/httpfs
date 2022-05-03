@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 
 import FileUpload from "./actions/FileUpload.vue";
 import CreateDirectory from "./actions/CreateDirectory.vue";
@@ -7,7 +7,6 @@ import { FsItem } from "../../services/FilesService";
 
 const props = defineProps<{
   path: string[];
-  name: string;
 }>();
 
 const emit = defineEmits<{
@@ -17,7 +16,6 @@ const emit = defineEmits<{
 
 const showCreateDirectory = ref(false);
 const showFileUpload = ref(false);
-const menuDetails = ref<HTMLDetailsElement>();
 
 const closeMenuAction = () => {
   showCreateDirectory.value = false;
@@ -29,45 +27,21 @@ const doneMenuAction = () => {
   emit("done");
 };
 
-const openMenuAction = (action: () => void) => {
-  menuDetails.value.open = false;
-  action();
-};
-
 const uploadProgress = (items: FsItem[]) => {
   emit("upload", items);
 };
+
+defineExpose({
+  openCreateDirectory() {
+    showCreateDirectory.value = true;
+  },
+  openFileUpload() {
+    showFileUpload.value = true;
+  },
+});
 </script>
 
 <template>
-  <details ref="menuDetails" role="list">
-    <summary aria-haspopup="listbox" role="link">
-      {{ props.name }}
-    </summary>
-    <ul role="listbox">
-      <li>
-        <a
-          href="#"
-          @click.prevent="
-            openMenuAction(() => {
-              showCreateDirectory = true;
-            })
-          "
-          >フォルダ作成</a
-        >
-        <a
-          href="#"
-          @click.prevent="
-            openMenuAction(() => {
-              showFileUpload = true;
-            })
-          "
-          >ファイル追加</a
-        >
-      </li>
-    </ul>
-  </details>
-
   <Teleport to="body">
     <FileUpload
       :path="props.path"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, reactive, computed, watch } from "vue";
+import { onBeforeMount, reactive, computed, watch, ref } from "vue";
 import { useRoute } from "vue-router";
 import {
   fetchDirectoryItems,
@@ -7,9 +7,9 @@ import {
   FsItem,
 } from "../services/FilesService";
 
-import Breadcrumb from "./files/Breadcrumb.vue";
 import FilesList from "./files/FilesList.vue";
 import DirectoryMenu from "./files/DirectoryMenu.vue";
+import Breadcrumb from "./util/Breadcrumb.vue";
 import SelectAll from "./util/SelectAll.vue";
 
 const route = useRoute();
@@ -19,6 +19,10 @@ const state = reactive({
   items: [] as FsItem[],
   ready: false,
 });
+
+const selectAll = ref<InstanceType<typeof SelectAll>>();
+const menuDetaileElement = ref<HTMLDetailsElement>();
+const directoryMenu = ref<InstanceType<typeof DirectoryMenu>>();
 
 const parentPath = computed(() => {
   const path = state.path;
@@ -39,6 +43,9 @@ watch(
 );
 
 const fetchItems = async () => {
+  if (menuDetaileElement?.value) {
+    menuDetaileElement.value.open = false;
+  }
   state.items = await fetchDirectoryItems(state.path);
 };
 
@@ -63,33 +70,61 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <nav>
-    <ul>
-      <li>
-        <router-link v-if="parentPath" :to="parentPath">←</router-link>
-      </li>
-      <li>
-        <SelectAll v-if="state.ready" :items="state.items">
-          <template v-slot="{ items, count }">
-            <button v-if="count > 0" @click="deleteSelectedItems(items)">
-              削除
-            </button>
-          </template>
-        </SelectAll>
-      </li>
-    </ul>
-  </nav>
-  <div>
-    <Breadcrumb :path="state.path">
-      <template v-slot:default="slot">
-        <DirectoryMenu
-          :path="state.path"
-          :name="slot.item?.name"
-          @done="fetchItems()"
-          @upload="onUpload"
-        />
-      </template>
-    </Breadcrumb>
-    <FilesList :path="state.path" :items="state.items" />
-  </div>
+  <header>
+    <nav>
+      <ul>
+        <li v-if="(selectAll?.count || 0) === 0">
+          <router-link v-if="parentPath" :to="parentPath">&#x25C0;</router-link>
+        </li>
+        <li>
+          <SelectAll ref="selectAll" v-if="state.ready" :items="state.items" />
+        </li>
+      </ul>
+      <ul></ul>
+      <ul>
+        <details ref="menuDetaileElement" role="list" dir="rtl">
+          <summary aria-haspopup="listbox" role="link">︙</summary>
+          <ul role="listbox">
+            <li v-if="selectAll?.count > 0">
+              <a @click="deleteSelectedItems(selectAll?.items)">削除</a>
+            </li>
+            <li>
+              <a @click="directoryMenu?.openCreateDirectory">フォルダ作成</a>
+            </li>
+            <li>
+              <a @click="directoryMenu?.openFileUpload">ファイル追加</a>
+            </li>
+          </ul>
+        </details>
+      </ul>
+    </nav>
+    <nav class="breadcrumb">
+      <Breadcrumb :path="state.path" />
+    </nav>
+  </header>
+  <main class="container-fluid">
+    <article>
+      <FilesList :path="state.path" :items="state.items" />
+    </article>
+  </main>
+  <DirectoryMenu
+    ref="directoryMenu"
+    :path="state.path"
+    @done="fetchItems"
+    @upload="onUpload"
+  />
 </template>
+
+<style scoped lang="scss">
+header {
+  position: sticky;
+  top: 0;
+  padding-right: var(--spacing);
+  padding-left: var(--spacing);
+  background-color: var(--background-color);
+  box-shadow: 0 1px 0 var(--muted-border-color);
+}
+details {
+  text-align: left;
+}
+</style>

@@ -50,8 +50,17 @@ const mkdir = async () => {
       />
     </p>
     <footer>
-      <a href="#" @click.prevent="emit('close')">キャンセル</a>
-      <a href="#" @click.prevent="mkdir">作成</a>
+      <a href="#" role="button" class="secondary" @click.prevent="emit('close')"
+        >キャンセル</a
+      >
+      <a href="#" role="button" @click.prevent="mkdir">作成</a>
     </footer>
   </Modal>
 </template>
+
+<style scoped lang="scss">
+p input[type="text"] {
+  width: 600px;
+  max-width: 100%;
+}
+</style>

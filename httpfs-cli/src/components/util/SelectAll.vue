@@ -5,35 +5,36 @@ const props = defineProps<{
   items: Array<{ selected: boolean }>;
 }>();
 
-const selectedItems = computed(() =>
-  props.items.filter((item) => item.selected)
-);
-
-const selectedCount = computed(() => selectedItems.value.length);
-
-const selectAll = ref(selectedCount.value === props.items?.length);
+const items = computed(() => props.items.filter((item) => item.selected));
+const count = computed(() => items.value.length);
+const value = ref(count.value === props.items?.length);
 
 watch(
-  () => selectedCount.value,
+  () => count.value,
   (count) => {
-    selectAll.value = count === props.items?.length;
+    value.value = count === props.items?.length;
   }
 );
 
-const changeSelectAll = () => {
-  props.items?.forEach((item) => (item.selected = selectAll.value));
+const changeValue = () => {
+  props.items?.forEach((item) => (item.selected = value.value));
 };
+
+defineExpose({
+  items,
+  count,
+  value,
+});
 </script>
 
 <template>
-  <label v-if="selectedCount > 0">
+  <label v-if="count > 0">
     <input
       type="checkbox"
-      :indeterminate="selectAll"
-      v-model="selectAll"
-      @change="changeSelectAll"
+      :indeterminate="value"
+      v-model="value"
+      @change="changeValue"
     />
-    {{ selectedCount }} 件選択
+    {{ count }} 件選択
   </label>
-  <slot :items="selectedItems" :count="selectedCount"></slot>
 </template>

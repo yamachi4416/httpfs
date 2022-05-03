@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onErrorCaptured } from "vue";
 import { useRouter } from "vue-router";
-import { HttpException } from "./services/FilesService"
+import { HttpException } from "./services/FilesService";
 
 const router = useRouter();
 
@@ -16,7 +16,5 @@ onErrorCaptured((err, instalce, info) => {
 </script>
 
 <template>
-  <main class="container-fluid">
-    <router-view></router-view>
-  </main>
+  <router-view></router-view>
 </template>
