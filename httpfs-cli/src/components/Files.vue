@@ -115,7 +115,9 @@ onBeforeMount(async () => await fetchItems());
     </header>
 
     <main class="container-fluid">
-      <FilesList :path="state.path" :items="state.items" @click="enterItem" />
+      <figure>
+        <FilesList :path="state.path" :items="state.items" @click="enterItem" />
+      </figure>
     </main>
 
     <DirectoryMenu
