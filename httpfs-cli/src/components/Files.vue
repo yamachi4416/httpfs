@@ -17,74 +17,74 @@ const route = useRoute();
 const state = reactive({
   path: Array.from(route.params.path),
   items: [] as FsItem[],
-  ready: false,
+  parentPath: computed(() => {
+    const path = state.path;
+    if (path.length > 0) {
+      return `/${path.slice(0, path.length - 1).join("/")}`;
+    }
+    return "";
+  }),
 });
 
 const selectAll = ref<InstanceType<typeof SelectAll>>();
 const menuDetaileElement = ref<HTMLDetailsElement>();
 const directoryMenu = ref<InstanceType<typeof DirectoryMenu>>();
 
-const parentPath = computed(() => {
-  const path = state.path;
-  if (path.length > 0) {
-    return `/${path.slice(0, path.length - 1).join("/")}`;
-  }
-  return "";
-});
-
-watch(
-  () => route.params.path,
-  async (newPath) => {
-    state.ready = false;
-    state.path = Array.from(newPath);
-    await fetchItems();
-    state.ready = true;
-  }
-);
-
-const fetchItems = async () => {
+async function fetchItems() {
   if (menuDetaileElement?.value) {
     menuDetaileElement.value.open = false;
   }
   state.items = await fetchDirectoryItems(state.path);
-};
+}
 
-const onUpload = (items: FsItem[]) => {
+async function onUpload(items: FsItem[]) {
   const map = new Map<string, FsItem>();
-  state.items.forEach((item) => map.set(item.path, item));
+  state.items.forEach((item: FsItem) => map.set(item.path, item));
   items.forEach((item) =>
     map.has(item.path)
       ? Object.assign(map.get(item.path), item)
       : state.items.push(item)
   );
-};
+}
 
-const deleteSelectedItems = async (items: FsItem[]) => {
+async function deleteSelectedItems(items: FsItem[]) {
   await deleteItems(state.path, items).finally(async () => await fetchItems());
-};
+}
 
-onBeforeMount(async () => {
-  await fetchItems();
-  state.ready = true;
-});
+watch(
+  () => route.params.path,
+  async (newPath) => {
+    state.path = Array.from(newPath);
+    await fetchItems();
+  }
+);
+
+onBeforeMount(async () => await fetchItems());
 </script>
 
 <template>
-  <header>
+  <header :class="$style.header">
     <nav>
       <ul>
         <li v-if="(selectAll?.count || 0) === 0">
-          <router-link v-if="parentPath" :to="parentPath">&#x25C0;</router-link>
+          <router-link v-if="state.parentPath" :to="state.parentPath"
+            >&#x25C0;</router-link
+          >
         </li>
         <li>
-          <SelectAll ref="selectAll" v-if="state.ready" :items="state.items" />
+          <SelectAll ref="selectAll" :items="state.items" />
         </li>
       </ul>
       <ul></ul>
       <ul>
-        <details ref="menuDetaileElement" role="list" dir="rtl">
-          <summary aria-haspopup="listbox" role="link">︙</summary>
-          <ul role="listbox">
+        <details
+          :class="$style.details"
+          ref="menuDetaileElement"
+          role="list"
+          dir="rtl"
+        >
+          <summary role="link">︙</summary>
+          <ul>
             <li v-if="selectAll?.count > 0">
               <a @click="deleteSelectedItems(selectAll?.items)">削除</a>
             </li>
@@ -98,15 +98,15 @@ onBeforeMount(async () => {
         </details>
       </ul>
     </nav>
-    <nav class="breadcrumb">
-      <Breadcrumb :path="state.path" />
-    </nav>
+    <Breadcrumb :path="state.path" />
   </header>
+
   <main class="container-fluid">
     <article>
       <FilesList :path="state.path" :items="state.items" />
     </article>
   </main>
+
   <DirectoryMenu
     ref="directoryMenu"
     :path="state.path"
@@ -115,8 +115,8 @@ onBeforeMount(async () => {
   />
 </template>
 
-<style scoped lang="scss">
-header {
+<style module lang="scss">
+.header {
   position: sticky;
   top: 0;
   padding-right: var(--spacing);
@@ -124,7 +124,14 @@ header {
   background-color: var(--background-color);
   box-shadow: 0 1px 0 var(--muted-border-color);
 }
-details {
+
+.details {
   text-align: left;
+  margin-right: var(--spacing);
+  &[role="list"] summary {
+    &::after {
+      content: none;
+    }
+  }
 }
 </style>

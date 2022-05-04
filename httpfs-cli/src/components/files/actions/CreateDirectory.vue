@@ -22,7 +22,12 @@ const state = reactive({
   invalid: false,
 });
 
-const mkdir = async () => {
+function close() {
+  state.dirname = "";
+  emit("close");
+}
+
+async function mkdir() {
   if (state.dirname) {
     try {
       const item = await createDirectory(props.path, state.dirname);
@@ -36,11 +41,11 @@ const mkdir = async () => {
       }
     }
   }
-};
+}
 </script>
 
 <template>
-  <Modal :show="show" title="新しいフォルダ" @close="emit('close')">
+  <Modal :show="show" title="新しいフォルダ" @close="close">
     <p>
       <input
         type="text"
@@ -50,7 +55,7 @@ const mkdir = async () => {
       />
     </p>
     <footer>
-      <a href="#" role="button" class="secondary" @click.prevent="emit('close')"
+      <a href="#" role="button" class="secondary" @click.prevent="close"
         >キャンセル</a
       >
       <a href="#" role="button" @click.prevent="mkdir">作成</a>
