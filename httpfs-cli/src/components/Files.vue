@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeMount, reactive, computed, watch, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import {
   fetchDirectoryItems,
   deleteItems,
@@ -13,6 +13,7 @@ import Breadcrumb from "./util/Breadcrumb.vue";
 import SelectAll from "./util/SelectAll.vue";
 
 const route = useRoute();
+const router = useRouter();
 
 const state = reactive({
   path: Array.from(route.params.path),
@@ -35,6 +36,14 @@ async function fetchItems() {
     menuDetaileElement.value.open = false;
   }
   state.items = await fetchDirectoryItems(state.path);
+}
+
+async function enterItem(item: FsItem) {
+  if (item.directory) {
+    await router.push(item.path);
+  } else {
+    window.open(item.endpoint, "_blank");
+  }
 }
 
 async function onUpload(items: FsItem[]) {
@@ -63,74 +72,92 @@ onBeforeMount(async () => await fetchItems());
 </script>
 
 <template>
-  <header :class="$style.header">
-    <nav>
-      <ul>
-        <li v-if="(selectAll?.count || 0) === 0">
-          <router-link v-if="state.parentPath" :to="state.parentPath"
-            >&#x25C0;</router-link
-          >
-        </li>
-        <li>
-          <SelectAll ref="selectAll" :items="state.items" />
-        </li>
-      </ul>
-      <ul></ul>
-      <ul>
-        <details
-          :class="$style.details"
-          ref="menuDetaileElement"
-          role="list"
-          dir="rtl"
-        >
-          <summary role="link">︙</summary>
-          <ul>
-            <li v-if="selectAll?.count > 0">
-              <a @click="deleteSelectedItems(selectAll?.items)">削除</a>
-            </li>
-            <li>
-              <a @click="directoryMenu?.openCreateDirectory">フォルダ作成</a>
-            </li>
-            <li>
-              <a @click="directoryMenu?.openFileUpload">ファイル追加</a>
-            </li>
-          </ul>
-        </details>
-      </ul>
-    </nav>
-    <Breadcrumb :path="state.path" />
-  </header>
+  <div class="files">
+    <header>
+      <nav>
+        <ul>
+          <li v-if="(selectAll?.count || 0) === 0">
+            <router-link
+              class="back secondary"
+              v-if="state.parentPath"
+              :to="state.parentPath"
+            >
+              <span class="icon">arrow_back_ios_new</span>
+            </router-link>
+          </li>
+          <li>
+            <SelectAll ref="selectAll" :items="state.items" v-slot="{ count }">
+              {{ count }} 件選択
+            </SelectAll>
+          </li>
+        </ul>
+        <ul></ul>
+        <ul>
+          <details ref="menuDetaileElement" role="list" dir="rtl">
+            <summary role="link" class="secondary">
+              <span class="icon">more_vert</span>
+            </summary>
+            <ul>
+              <li v-if="selectAll?.count > 0">
+                <a @click="deleteSelectedItems(selectAll?.items)">削除</a>
+              </li>
+              <li>
+                <a @click="directoryMenu?.openCreateDirectory">フォルダ作成</a>
+              </li>
+              <li>
+                <a @click="directoryMenu?.openFileUpload">ファイル追加</a>
+              </li>
+            </ul>
+          </details>
+        </ul>
+      </nav>
+      <Breadcrumb :path="state.path" />
+    </header>
 
-  <main class="container-fluid">
-    <article>
-      <FilesList :path="state.path" :items="state.items" />
-    </article>
-  </main>
+    <main class="container-fluid">
+      <FilesList :path="state.path" :items="state.items" @click="enterItem" />
+    </main>
 
-  <DirectoryMenu
-    ref="directoryMenu"
-    :path="state.path"
-    @done="fetchItems"
-    @upload="onUpload"
-  />
+    <DirectoryMenu
+      ref="directoryMenu"
+      :path="state.path"
+      @done="fetchItems"
+      @upload="onUpload"
+    />
+  </div>
 </template>
 
-<style module lang="scss">
-.header {
-  position: sticky;
-  top: 0;
-  padding-right: var(--spacing);
-  padding-left: var(--spacing);
-  background-color: var(--background-color);
-  box-shadow: 0 1px 0 var(--muted-border-color);
-}
+<style scoped lang="scss">
+.files {
+  > header {
+    position: sticky;
+    top: 0;
+    padding-right: var(--spacing);
+    padding-left: var(--spacing);
+    background-color: var(--background-color);
+    box-shadow: 0 1px 0 var(--muted-border-color);
 
-.details {
-  text-align: left;
-  margin-right: var(--spacing);
-  &[role="list"] summary {
-    &::after {
-      content: none;
+    > nav {
+      > ul {
+        .back {
+          display: flex;
+        }
+
+        > details {
+          text-align: left;
+          margin-right: var(--spacing);
+          margin-bottom: 0;
+          a {
+            cursor: pointer;
+          }
+          > summary {
+            cursor: pointer;
+            &::after {
+              display: none;
+            }
+          }
+        }
+      }
     }
   }
 }

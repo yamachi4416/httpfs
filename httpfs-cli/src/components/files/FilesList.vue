@@ -2,9 +2,15 @@
 import { FsItem } from "../../services/FilesService";
 import { formatSize, formatDateTime } from "../../functions/fmt";
 import { sortable } from "../util/Sortable";
+import SelectAll from "../util/SelectAll.vue";
+import FileIcon from "./fileslist/FileIcon.vue";
 
 defineProps<{
   items: FsItem[];
+}>();
+
+const emit = defineEmits<{
+  (e: "click", item: FsItem): void;
 }>();
 
 const headers = [
@@ -18,77 +24,127 @@ const sort = sortable({ key: "name", direction: "asc" });
 </script>
 
 <template>
-  <figure>
-    <table>
-      <thead>
-        <tr>
-          <th v-for="header in sort.headers(headers)" :key="header.key">
-            <label @click="header.sort" :data-sort="header.direction">
-              {{ header.label }}
-            </label>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="item in sort.sorted(items)"
-          :key="item.path"
-          :data-selected="item.selected"
+  <div class="files-list">
+    <ul class="headers">
+      <li>
+        <SelectAll :items="items" :hide-non-selected="false" />
+        <span
+          v-for="header in sort.headers(headers)"
+          :key="header.key"
+          :class="header.key"
         >
-          <td class="name">
-            <div>
-              <input type="checkbox" v-model="item.selected" />
-              <router-link v-if="item.directory" :to="item.path"
-                >{{ item.name }}
-              </router-link>
-              <a v-else target="_blank" :href="item.endpoint">{{
-                item.name
-              }}</a>
-            </div>
-          </td>
-          <td class="lastModified">{{ formatDateTime(item.lastModified) }}</td>
-          <td class="mimeType">{{ item.mimeType }}</td>
-          <td class="size">
-            {{ item.directory ? "" : formatSize(item.size) }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </figure>
+          <a
+            href="#"
+            class="secondary icons"
+            @click="header.sort"
+            :data-sort="header.direction"
+          >
+            {{ header.label }}
+          </a>
+        </span>
+      </li>
+    </ul>
+    <ul class="items">
+      <li v-for="item in sort.sorted(items)" :key="item.path">
+        <span class="selected">
+          <input type="checkbox" v-model="item.selected" />
+        </span>
+        <span class="name">
+          <a href="#" class="secondary" @click.prevent="emit('click', item)">
+            <FileIcon :item="item" />
+            <span>{{ item.name }}</span>
+          </a>
+        </span>
+        <span class="lastModified">
+          {{ formatDateTime(item.lastModified) }}
+        </span>
+        <span class="mimeType">{{ item.mimeType }}</span>
+        <span class="size">
+          {{ item.directory ? "" : formatSize(item.size) }}
+        </span>
+      </li>
+    </ul>
+  </div>
 </template>
 
 <style scoped lang="scss">
-th label {
-  display: flex;
-  cursor: pointer;
-  white-space: nowrap;
+.files-list {
+  display: table;
+  min-width: 100%;
 
-  &::after {
-    content: "";
-    display: block;
-    width: 2em;
-    text-align: center;
-  }
+  .headers,
+  .items {
+    display: table-row-group;
+    width: 100%;
 
-  &[data-sort="asc"]::after {
-    content: "↓";
-  }
+    li {
+      display: table-row;
+      list-style: none;
 
-  &[data-sort="desc"]::after {
-    content: "↑";
-  }
-}
-td.name {
-  > div {
-    display: flex;
-    align-items: center;
-    a {
-      flex: 1;
+      > * {
+        display: table-cell;
+        padding: calc(var(--spacing) / 2) var(--spacing);
+        vertical-align: middle;
+
+        &:first-child {
+          width: 1px;
+          padding: 0;
+        }
+
+        a {
+          display: flex;
+        }
+
+        &.name {
+          width: 50%;
+          a {
+            display: flex;
+            align-items: center;
+            column-gap: 0.5em;
+            text-decoration: none;
+          }
+        }
+      }
     }
   }
-}
 
-td.size {
-  text-align: right;
+  .headers {
+    white-space: nowrap;
+    li {
+      > * {
+        border-bottom: var(--border-width) solid var(--table-border-color);
+      }
+    }
+    a {
+      text-decoration: none;
+      align-items: center;
+      &:focus {
+        background: inherit;
+      }
+      &::after {
+        content: "";
+        font-size: 1em;
+        width: 2em;
+        text-align: center;
+      }
+      &[data-sort="asc"]::after {
+        content: "south";
+      }
+      &[data-sort="desc"]::after {
+        content: "north";
+      }
+    }
+  }
+
+  .items {
+    .lastModified,
+    .mimeType,
+    .size {
+      white-space: nowrap;
+    }
+    .size {
+      text-align: right;
+    }
+  }
 }
 </style>

@@ -19,8 +19,11 @@ const items = computed(() => {
 <template>
   <nav :class="$style.breadcrumb">
     <ul>
-      <li v-for="item in items" :key="item.path">
-        <router-link :to="item.path">{{ item.name }}</router-link>
+      <li v-for="item in items" :key="item.path" class="icons">
+        <router-link :to="item.path" class="secondary">
+          <span v-if="item.path === '/'" class="icon">home</span>
+          <span v-else>{{ item.name }}</span>
+        </router-link>
       </li>
     </ul>
   </nav>
@@ -34,19 +37,17 @@ const items = computed(() => {
       padding-right: 0;
 
       &:not(:last-of-type)::after {
-        content: "▸";
+        content: "play_arrow";
         color: var(--muted-color);
         padding-left: var(--nav-element-spacing-horizontal);
       }
 
-      &:first-of-type {
-        a::before {
-          content: "ROOT";
-        }
-      }
+      a {
+        display: flex;
 
-      a[aria-current="page"] {
-        color: var(--secondary) !important;
+        &[aria-current="page"] {
+          color: var(--secondary) !important;
+        }
       }
     }
   }
