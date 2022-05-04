@@ -22,7 +22,7 @@ const sort = sortable({ key: "name", direction: "asc" });
     <table>
       <thead>
         <tr>
-          <th v-for="header in sort.headers(headers)">
+          <th v-for="header in sort.headers(headers)" :key="header.key">
             <label @click="header.sort" :data-sort="header.direction">
               {{ header.label }}
             </label>
@@ -30,7 +30,11 @@ const sort = sortable({ key: "name", direction: "asc" });
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in sort.sorted(items)" :data-selected="item.selected">
+        <tr
+          v-for="item in sort.sorted(items)"
+          :key="item.path"
+          :data-selected="item.selected"
+        >
           <td class="name">
             <div>
               <input type="checkbox" v-model="item.selected" />
@@ -58,12 +62,14 @@ th label {
   display: flex;
   cursor: pointer;
   white-space: nowrap;
+
   &::after {
     content: "";
     display: block;
     width: 2em;
     text-align: center;
   }
+
   &[data-sort="asc"]::after {
     content: "↓";
   }
