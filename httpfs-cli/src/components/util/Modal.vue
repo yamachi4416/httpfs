@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { watch, onBeforeUnmount, defineProps, defineEmits } from "vue";
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
 const props = defineProps<{
   show: boolean;
@@ -10,29 +11,45 @@ const emit = defineEmits<{
   (e: "close"): void;
 }>();
 
-const escapeEvent = (event: KeyboardEvent) => {
-  if (event.key === "Escape") {
+function close() {
+  if (props.show) {
     emit("close");
+    return false;
   }
-};
+  return true;
+}
 
-const addEscapeEvent = () => {
+function escapeEvent(event: KeyboardEvent) {
+  if (event.key === "Escape") {
+    close();
+  }
+}
+
+function initialize() {
   document.addEventListener("keydown", escapeEvent);
-};
+}
 
-const removeEscapeEvent = () => {
+function dispose() {
   document.removeEventListener("keydown", escapeEvent);
-};
+  document.body.classList.remove("modal-is-open");
+  document.body.classList.remove("modal-is-opening");
+}
 
-onBeforeUnmount(() => removeEscapeEvent());
+onBeforeUnmount(() => dispose());
+
+onBeforeRouteLeave(() => close());
+
+onBeforeRouteUpdate(() => close());
 
 watch(
   () => props.show,
   (show) => {
     if (show) {
-      addEscapeEvent();
+      initialize();
+      document.body.classList.add("modal-is-open");
+      document.body.classList.add("modal-is-opening");
     } else {
-      removeEscapeEvent();
+      dispose();
     }
   }
 );
