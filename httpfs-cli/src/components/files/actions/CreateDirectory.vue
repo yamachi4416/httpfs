@@ -45,27 +45,25 @@ async function mkdir() {
 </script>
 
 <template>
-  <Modal :show="show" title="新しいフォルダ" @close="close">
-    <p>
-      <input
-        type="text"
-        v-model="state.dirname"
-        :aria-invalid="state.invalid || null"
-        @input="state.invalid = false"
-      />
-    </p>
-    <footer>
-      <a href="#" role="button" class="secondary" @click.prevent="close"
-        >キャンセル</a
-      >
-      <a href="#" role="button" @click.prevent="mkdir">作成</a>
-    </footer>
+  <Modal :show="show" @close="close">
+    <article>
+      <h3>新しいフォルダ</h3>
+      <p>
+        <input
+          type="text"
+          tabindex="1"
+          v-model="state.dirname"
+          :aria-invalid="state.invalid || null"
+          @input="state.invalid = false"
+        />
+      </p>
+      <nav>
+        <a href="#" tabindex="1" role="link" @click.prevent="close"
+          >キャンセル</a
+        >
+        <span class="devider"></span>
+        <a href="#" tabindex="2" role="link" @click.prevent="mkdir">作成</a>
+      </nav>
+    </article>
   </Modal>
 </template>
-
-<style scoped lang="scss">
-p input[type="text"] {
-  width: 600px;
-  max-width: 100%;
-}
-</style>

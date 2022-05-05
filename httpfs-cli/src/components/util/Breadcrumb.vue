@@ -29,36 +29,3 @@ const items = computed(() => {
     </ul>
   </nav>
 </template>
-
-<style scoped lang="scss">
-.breadcrumb {
-  overflow-x: scroll;
-  white-space: nowrap;
-  padding: calc(var(--nav-element-spacing-vertical) / 2)
-    var(--nav-element-spacing-horizontal);
-
-  > ul {
-    li {
-      display: flex;
-      padding: 0;
-
-      &:not(:last-of-type)::after {
-        content: "play_arrow";
-        color: var(--muted-color);
-      }
-
-      a {
-        display: flex;
-
-        &[aria-current="page"] {
-          color: var(--secondary) !important;
-        }
-
-        &:focus {
-          background-color: inherit;
-        }
-      }
-    }
-  }
-}
-</style>

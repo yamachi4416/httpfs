@@ -2,10 +2,13 @@
 
 @import "../../../node_modules/@picocss/pico/scss/content/form-checkbox-radio";
 
-@import "../../../node_modules/@picocss/pico/scss/components/modal";
 @import "../../../node_modules/@picocss/pico/scss/components/nav";
 @import "../../../node_modules/@picocss/pico/scss/components/dropdown";
 @import "../../../node_modules/@picocss/pico/scss/components/card";
+
+:root {
+  --border-radius: 0.5rem;
+}
 
 *::-webkit-scrollbar {
   height: 5px;
@@ -49,3 +52,6 @@
     font-family: "Material Icons Round";
   }
 }
+
+@import "./components/modal";
+@import "./components/breadcrumb";

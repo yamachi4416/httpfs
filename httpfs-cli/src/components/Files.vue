@@ -134,8 +134,8 @@ onBeforeMount(async () => await fetchItems());
   height: 100vh;
   > header {
     z-index: 9;
-    padding-right: var(--spacing);
-    padding-left: var(--spacing);
+    padding-right: calc(var(--spacing) / 2);
+    padding-left: calc(var(--spacing) / 2);
     background-color: var(--background-color);
     box-shadow: 0 1px 0 var(--muted-border-color);
 

@@ -1,0 +1,94 @@
+@import "../variables";
+
+.modal {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-color: rgba(0, 0, 0, 0.3);
+  animation: forwards showModal 0.3s;
+
+  > :where(*) {
+    width: fit-content;
+    height: fit-content;
+    max-width: 100%;
+    max-height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    padding: calc(var(--spacing) * 1.5);
+    row-gap: calc(var(--spacing) * 1.5);
+
+    > * {
+      display: flex;
+      align-items: center;
+      margin: 0;
+
+      > input[type="text"] {
+        margin: 0;
+      }
+    }
+
+    > h3 {
+      font-size: 1.2em;
+      margin: 0;
+    }
+
+    > nav {
+      justify-content: flex-end;
+      .devider {
+        margin-left: 1em;
+        margin-right: 1em;
+        height: 1.5em;
+        width: 1px;
+        background-color: var(--muted-border-color);
+      }
+
+      a {
+        text-decoration: none;
+      }
+    }
+  }
+
+  > article {
+    width: 600px;
+    max-width: 100%;
+
+    transform: translateY(0);
+    animation: forwards modalContentDown 0.3s;
+
+    border-radius: calc(var(--border-radius) * 2);
+
+    @if map-get($breakpoints, "sm") {
+      @media (max-width: map-get($breakpoints, "sm")) {
+        align-self: flex-end;
+        animation: forwards modalContentUp 0.3s;
+      }
+    }
+  }
+
+  @keyframes showModal {
+    0% {
+      background-color: rgba(0, 0, 0, 0);
+    }
+  }
+
+  @keyframes modalContentDown {
+    0% {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes modalContentUp {
+    0% {
+      transform: translateY(100%);
+    }
+  }
+}

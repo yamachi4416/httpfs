@@ -4,7 +4,6 @@ import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
 const props = defineProps<{
   show: boolean;
-  title: string;
 }>();
 
 const emit = defineEmits<{
@@ -31,8 +30,6 @@ function initialize() {
 
 function dispose() {
   document.removeEventListener("keydown", escapeEvent);
-  document.body.classList.remove("modal-is-open");
-  document.body.classList.remove("modal-is-opening");
 }
 
 onBeforeUnmount(() => dispose());
@@ -46,8 +43,6 @@ watch(
   (show) => {
     if (show) {
       initialize();
-      document.body.classList.add("modal-is-open");
-      document.body.classList.add("modal-is-opening");
     } else {
       dispose();
     }
@@ -56,18 +51,7 @@ watch(
 </script>
 
 <template>
-  <dialog open v-if="props.show" @click.self="emit('close')">
-    <article>
-      <header>
-        <a
-          href="#"
-          aria-label="Close"
-          class="close"
-          @click.prevent="emit('close')"
-        ></a>
-        {{ props.title }}
-      </header>
-      <slot></slot>
-    </article>
-  </dialog>
+  <div v-if="props.show" class="modal" @click.self="emit('close')">
+    <slot></slot>
+  </div>
 </template>
