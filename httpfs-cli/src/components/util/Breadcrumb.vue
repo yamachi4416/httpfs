@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { vScrollTo } from "../../directives/vScrollTo";
 
 const props = defineProps<{
   path: string[];
@@ -17,7 +18,7 @@ const items = computed(() => {
 </script>
 
 <template>
-  <nav :class="$style.breadcrumb">
+  <nav v-scroll-to="'right'" class="breadcrumb">
     <ul>
       <li v-for="item in items" :key="item.path" class="icons">
         <router-link :to="item.path" class="secondary">
@@ -29,17 +30,21 @@ const items = computed(() => {
   </nav>
 </template>
 
-<style module lang="scss">
+<style scoped lang="scss">
 .breadcrumb {
+  overflow-x: scroll;
+  white-space: nowrap;
+  padding: calc(var(--nav-element-spacing-vertical) / 2)
+    var(--nav-element-spacing-horizontal);
+
   > ul {
     li {
       display: flex;
-      padding-right: 0;
+      padding: 0;
 
       &:not(:last-of-type)::after {
         content: "play_arrow";
         color: var(--muted-color);
-        padding-left: var(--nav-element-spacing-horizontal);
       }
 
       a {
@@ -47,6 +52,10 @@ const items = computed(() => {
 
         &[aria-current="page"] {
           color: var(--secondary) !important;
+        }
+
+        &:focus {
+          background-color: inherit;
         }
       }
     }
