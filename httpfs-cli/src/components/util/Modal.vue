@@ -1,35 +1,35 @@
 <script setup lang="ts">
-import { watch, onBeforeUnmount } from "vue";
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
+import { watch, onBeforeUnmount } from 'vue';
+import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
 
 const props = defineProps<{
   show: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "close"): void;
+  (e: 'close'): void;
 }>();
 
 function close() {
   if (props.show) {
-    emit("close");
+    emit('close');
     return false;
   }
   return true;
 }
 
 function escapeEvent(event: KeyboardEvent) {
-  if (event.key === "Escape") {
+  if (event.key === 'Escape') {
     close();
   }
 }
 
 function initialize() {
-  document.addEventListener("keydown", escapeEvent);
+  document.addEventListener('keydown', escapeEvent);
 }
 
 function dispose() {
-  document.removeEventListener("keydown", escapeEvent);
+  document.removeEventListener('keydown', escapeEvent);
 }
 
 onBeforeUnmount(() => dispose());
@@ -40,7 +40,7 @@ onBeforeRouteUpdate(() => close());
 
 watch(
   () => props.show,
-  (show) => {
+  show => {
     if (show) {
       initialize();
     } else {

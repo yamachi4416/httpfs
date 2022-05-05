@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { onBeforeMount, reactive, computed, watch, ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { onBeforeMount, reactive, computed, watch, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import {
   fetchDirectoryItems,
   deleteItems,
   FsItem,
-} from "../services/FilesService";
+} from '../services/FilesService';
 
-import FilesList from "./files/FilesList.vue";
-import DirectoryMenu from "./files/DirectoryMenu.vue";
-import Breadcrumb from "./util/Breadcrumb.vue";
-import SelectAll from "./util/SelectAll.vue";
+import FilesList from './files/FilesList.vue';
+import DirectoryMenu from './files/DirectoryMenu.vue';
+import Breadcrumb from './util/Breadcrumb.vue';
+import SelectAll from './util/SelectAll.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,11 +19,11 @@ const state = reactive({
   path: Array.from(route.params.path),
   items: [] as FsItem[],
   parentPath: computed(() => {
-    const path = state.path;
+    const { path } = state;
     if (path.length > 0) {
-      return `/${path.slice(0, path.length - 1).join("/")}`;
+      return `/${path.slice(0, path.length - 1).join('/')}`;
     }
-    return "";
+    return '';
   }),
 });
 
@@ -42,14 +42,14 @@ async function enterItem(item: FsItem) {
   if (item.directory) {
     await router.push(item.path);
   } else {
-    window.open(item.endpoint, "_blank");
+    window.open(item.endpoint, '_blank');
   }
 }
 
 async function onUpload(items: FsItem[]) {
   const map = new Map<string, FsItem>();
   state.items.forEach((item: FsItem) => map.set(item.path, item));
-  items.forEach((item) =>
+  items.forEach(item =>
     map.has(item.path)
       ? Object.assign(map.get(item.path), item)
       : state.items.push(item)
@@ -62,7 +62,7 @@ async function deleteSelectedItems(items: FsItem[]) {
 
 watch(
   () => route.params.path,
-  async (newPath) => {
+  async newPath => {
     state.path = Array.from(newPath);
     await fetchItems();
   }

@@ -1,26 +1,26 @@
 <script setup lang="ts">
-import { FsItem } from "../../services/FilesService";
-import { formatSize, formatDateTime } from "../../functions/fmt";
-import { sortable } from "../util/Sortable";
-import SelectAll from "../util/SelectAll.vue";
-import FileIcon from "./fileslist/FileIcon.vue";
+import { FsItem } from '../../services/FilesService';
+import { formatSize, formatDateTime } from '../../functions/fmt';
+import { sortable } from '../util/Sortable';
+import SelectAll from '../util/SelectAll.vue';
+import FileIcon from './fileslist/FileIcon.vue';
 
 defineProps<{
   items: FsItem[];
 }>();
 
 const emit = defineEmits<{
-  (e: "click", item: FsItem): void;
+  (e: 'click', item: FsItem): void;
 }>();
 
 const headers = [
-  { key: "name", label: "名前" },
-  { key: "lastModified", label: "更新日時" },
-  { key: "mimeType", label: "タイプ" },
-  { key: "size", label: "サイズ" },
+  { key: 'name', label: '名前' },
+  { key: 'lastModified', label: '更新日時' },
+  { key: 'mimeType', label: 'タイプ' },
+  { key: 'size', label: 'サイズ' },
 ];
 
-const sort = sortable({ key: "name", direction: "asc" });
+const sort = sortable({ key: 'name', direction: 'asc' });
 </script>
 
 <template>
@@ -62,7 +62,7 @@ const sort = sortable({ key: "name", direction: "asc" });
           <span>{{ item.mimeType }}</span>
         </span>
         <span class="size">
-          <span>{{ item.directory ? "" : formatSize(item.size) }}</span>
+          <span>{{ item.directory ? '' : formatSize(item.size) }}</span>
         </span>
       </li>
     </ul>
@@ -134,16 +134,16 @@ const sort = sortable({ key: "name", direction: "asc" });
         background: inherit;
       }
       &::after {
-        content: "";
+        content: '';
         font-size: 1em;
         width: 1em;
         text-align: center;
       }
-      &[data-sort="asc"]::after {
-        content: "south";
+      &[data-sort='asc']::after {
+        content: 'south';
       }
-      &[data-sort="desc"]::after {
-        content: "north";
+      &[data-sort='desc']::after {
+        content: 'north';
       }
     }
   }

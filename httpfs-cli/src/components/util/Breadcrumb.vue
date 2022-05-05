@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { vScrollTo } from "../../directives/vScrollTo";
+import { computed } from 'vue';
+import { vScrollTo } from '../../directives/vScrollTo';
 
 const props = defineProps<{
   path: string[];
@@ -8,10 +8,10 @@ const props = defineProps<{
 
 const items = computed(() => {
   const paths = Array.from(props.path);
-  return [{ name: "", path: "/" }].concat(
+  return [{ name: '', path: '/' }].concat(
     paths.map((p, i) => ({
       name: p,
-      path: `/${paths.slice(0, i + 1).join("/")}`,
+      path: `/${paths.slice(0, i + 1).join('/')}`,
     }))
   );
 });

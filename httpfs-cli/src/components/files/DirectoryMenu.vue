@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref } from 'vue';
 
-import FileUpload from "./actions/FileUpload.vue";
-import CreateDirectory from "./actions/CreateDirectory.vue";
-import { FsItem } from "../../services/FilesService";
+import FileUpload from './actions/FileUpload.vue';
+import CreateDirectory from './actions/CreateDirectory.vue';
+import { FsItem } from '../../services/FilesService';
 
 const props = defineProps<{
   path: string[];
 }>();
 
 const emit = defineEmits<{
-  (e: "done"): void;
-  (e: "upload", items: FsItem[]): void;
+  (e: 'done'): void;
+  (e: 'upload', items: FsItem[]): void;
 }>();
 
 const showCreateDirectory = ref(false);
@@ -24,11 +24,11 @@ const closeMenuAction = () => {
 
 const doneMenuAction = () => {
   closeMenuAction();
-  emit("done");
+  emit('done');
 };
 
 const uploadProgress = (items: FsItem[]) => {
-  emit("upload", items);
+  emit('upload', items);
 };
 
 defineExpose({
