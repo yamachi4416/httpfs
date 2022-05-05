@@ -1,10 +1,11 @@
 @import "../variables";
 
 .breadcrumb {
+  padding:
+    calc(var(--nav-element-spacing-vertical) / 2)
+    var(--nav-element-spacing-horizontal);
   overflow-x: scroll;
   white-space: nowrap;
-  padding: calc(var(--nav-element-spacing-vertical) / 2)
-    var(--nav-element-spacing-horizontal);
 
   > ul {
     li {
@@ -12,8 +13,8 @@
       padding: 0;
 
       &:not(:last-of-type)::after {
-        content: "play_arrow";
         color: var(--muted-color);
+        content: "play_arrow";
       }
 
       a {

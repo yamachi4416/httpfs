@@ -3,27 +3,24 @@
 .modal {
   position: fixed;
   top: 0;
+  right: 0;
   bottom: 0;
   left: 0;
-  right: 0;
   z-index: 10;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgb(0 0 0 / 30%);
 
   > :where(*) {
-    width: fit-content;
-    height: fit-content;
-    max-width: 100%;
-    max-height: 100%;
-
     display: flex;
     flex-direction: column;
-    padding: calc(var(--spacing) * 1.5);
     row-gap: calc(var(--spacing) * 1.5);
+    width: fit-content;
+    max-width: 100%;
+    height: fit-content;
+    max-height: 100%;
+    padding: calc(var(--spacing) * 1.5);
 
     > * {
       display: flex;
@@ -36,17 +33,18 @@
     }
 
     > h3 {
-      font-size: 1.2em;
       margin: 0;
+      font-size: 1.2em;
     }
 
     > nav {
       justify-content: flex-end;
+
       .devider {
-        margin-left: 1em;
-        margin-right: 1em;
-        height: 1.5em;
         width: 1px;
+        height: 1.5em;
+        margin-right: 1em;
+        margin-left: 1em;
         background-color: var(--muted-border-color);
       }
 
@@ -57,12 +55,12 @@
   }
 
   > article {
+    align-self: flex-start;
     width: 600px;
     max-width: 100%;
-    align-self: flex-start;
-    transform: translateY(0);
     border-radius: calc(var(--border-radius) * 2);
-    
+    transform: translateY(0);
+
     @include media-less-sm {
       align-self: flex-end;
     }
@@ -79,10 +77,11 @@
 
   &-enter-from,
   &-leave-to {
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgb(0 0 0 / 0%);
 
     > article {
       transform: translateY(-150%);
+
       @include media-less-sm {
         transform: translateY(150%);
       }

@@ -1,18 +1,51 @@
-@import "../../../node_modules/@picocss/pico/scss/pico.slim.scss";
+// Enable responsive spacings for <header>, <main>, <footer>, <section>, <article>
+$enable-responsive-spacings: false;
 
-@import "../../../node_modules/@picocss/pico/scss/content/form-checkbox-radio";
+// Enable transitions
+$enable-transitions: false;
 
-@import "../../../node_modules/@picocss/pico/scss/components/nav";
-@import "../../../node_modules/@picocss/pico/scss/components/dropdown";
-@import "../../../node_modules/@picocss/pico/scss/components/card";
+// Enable overriding with !important
+$enable-important: false;
+
+// Pico Lib
+// --------------------
+
+// Config
+@import "@picocss/pico/scss/variables";
+
+// Theming
+@import "@picocss/pico/scss/themes/default";
+
+// Layout
+@import "@picocss/pico/scss/layout/document"; // html
+@import "@picocss/pico/scss/layout/sectioning"; // body, header, main, footer
+
+// Content
+@import "@picocss/pico/scss/content/typography"; // a, headings, p, ul, blockquote, ...
+@import "@picocss/pico/scss/content/button"; // button, a[role=button], type=button, type=submit ...
+@import "@picocss/pico/scss/content/form"; // input, select, textarea, label, fieldset, legend
+@import "@picocss/pico/scss/content/form-checkbox-radio"; // type=checkbox, type=radio, role=switch
+
+// Component
+@import "@picocss/pico/scss/components/nav";
+@import "@picocss/pico/scss/components/dropdown";
+@import "@picocss/pico/scss/components/card";
+
+// Utilities
+@import "@picocss/pico/scss/utilities/accessibility"; // -ms-touch-action, aria-*
+@import "@picocss/pico/scss/utilities/reduce-motion"; // prefers-reduced-motion
+
+// --------------------
+@import "./components/modal";
+@import "./components/breadcrumb";
 
 :root {
   --border-radius: 0.5rem;
 }
 
 *::-webkit-scrollbar {
-  height: 5px;
   width: 8px;
+  height: 5px;
 }
 
 *::-webkit-scrollbar-thumb {
@@ -29,29 +62,29 @@
 }
 
 .icon {
-  font-family: "Material Icons Round";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 1.5em;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
   display: inline-block;
-  white-space: nowrap;
+  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+  font-family: "Material Icons Round";
+  font-size: 1.5em;
+  font-style: normal;
+  font-weight: normal;
+  font-feature-settings: "liga";
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
   word-wrap: normal;
+  white-space: nowrap;
   direction: ltr;
-  -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
 }
 
 .icons {
   align-items: center;
+
   &::after,
   &::before {
-    font-size: 1.5em;
+    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
     font-family: "Material Icons Round";
+    font-size: 1.5em;
   }
 }
-
-@import "./components/modal";
-@import "./components/breadcrumb";

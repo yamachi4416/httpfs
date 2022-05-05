@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, onBeforeUnmount, defineProps, defineEmits } from "vue";
+import { watch, onBeforeUnmount } from "vue";
 import { onBeforeRouteLeave, onBeforeRouteUpdate } from "vue-router";
 
 const props = defineProps<{
