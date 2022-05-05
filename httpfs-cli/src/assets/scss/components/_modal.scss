@@ -13,7 +13,6 @@
   justify-content: center;
 
   background-color: rgba(0, 0, 0, 0.3);
-  animation: forwards showModal 0.3s;
 
   > :where(*) {
     width: fit-content;
@@ -60,35 +59,33 @@
   > article {
     width: 600px;
     max-width: 100%;
-
+    align-self: flex-start;
     transform: translateY(0);
-    animation: forwards modalContentDown 0.3s;
-
     border-radius: calc(var(--border-radius) * 2);
+    
+    @include media-less-sm {
+      align-self: flex-end;
+    }
+  }
 
-    @if map-get($breakpoints, "sm") {
-      @media (max-width: map-get($breakpoints, "sm")) {
-        align-self: flex-end;
-        animation: forwards modalContentUp 0.3s;
+  &-enter-active,
+  &-leave-active {
+    transition: background-color 0.3s ease;
+
+    > article {
+      transition: transform 0.2s ease-in-out;
+    }
+  }
+
+  &-enter-from,
+  &-leave-to {
+    background-color: rgba(0, 0, 0, 0);
+
+    > article {
+      transform: translateY(-150%);
+      @include media-less-sm {
+        transform: translateY(150%);
       }
-    }
-  }
-
-  @keyframes showModal {
-    0% {
-      background-color: rgba(0, 0, 0, 0);
-    }
-  }
-
-  @keyframes modalContentDown {
-    0% {
-      transform: translateY(-100%);
-    }
-  }
-
-  @keyframes modalContentUp {
-    0% {
-      transform: translateY(100%);
     }
   }
 }

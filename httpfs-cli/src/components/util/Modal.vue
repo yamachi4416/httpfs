@@ -51,7 +51,9 @@ watch(
 </script>
 
 <template>
-  <div v-if="props.show" class="modal" @click.self="emit('close')">
-    <slot></slot>
-  </div>
+  <transition name="modal">
+    <div v-if="props.show" class="modal" @click.self="emit('close')">
+      <slot></slot>
+    </div>
+  </transition>
 </template>

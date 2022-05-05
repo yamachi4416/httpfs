@@ -1,1 +1,17 @@
 @import "@picocss/pico/scss/variables";
+
+@mixin media-less-sm {
+  @if map-get($breakpoints, "sm") {
+    @media (max-width: map-get($breakpoints, "sm")) {
+      @content;
+    }
+  }
+}
+
+@mixin media-less-md {
+  @if map-get($breakpoints, "md") {
+    @media (max-width: map-get($breakpoints, "sm")) {
+      @content;
+    }
+  }
+}
