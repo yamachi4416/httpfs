@@ -27,7 +27,7 @@ const sort = sortable({ key: "name", direction: "asc" });
   <div class="files-list">
     <ul class="headers">
       <li>
-        <SelectAll :items="items" :hide-non-selected="false" />
+        <SelectAll class="selected" :items="items" :hide-non-selected="false" />
         <span
           v-for="header in sort.headers(headers)"
           :key="header.key"
@@ -56,11 +56,13 @@ const sort = sortable({ key: "name", direction: "asc" });
           </a>
         </span>
         <span class="lastModified">
-          {{ formatDateTime(item.lastModified) }}
+          <span>{{ formatDateTime(item.lastModified) }}</span>
         </span>
-        <span class="mimeType">{{ item.mimeType }}</span>
+        <span class="mimeType">
+          <span>{{ item.mimeType }}</span>
+        </span>
         <span class="size">
-          {{ item.directory ? "" : formatSize(item.size) }}
+          <span>{{ item.directory ? "" : formatSize(item.size) }}</span>
         </span>
       </li>
     </ul>
@@ -83,16 +85,23 @@ const sort = sortable({ key: "name", direction: "asc" });
 
       > * {
         display: table-cell;
-        padding: calc(var(--spacing) / 2) var(--spacing);
         vertical-align: middle;
+        background-color: var(--background-color);
 
-        &:first-child {
-          width: 1px;
-          padding: 0;
+        > * {
+          padding: calc(var(--spacing) / 2);
         }
 
-        a {
-          display: flex;
+        &:first-child {
+          padding-left: calc(var(--spacing) / 2);
+        }
+
+        &:last-child {
+          padding-left: calc(var(--spacing) / 2);
+        }
+
+        &.selected {
+          width: 1px;
         }
 
         &.name {
@@ -109,6 +118,8 @@ const sort = sortable({ key: "name", direction: "asc" });
   }
 
   .headers {
+    position: sticky;
+    top: 0;
     white-space: nowrap;
     li {
       > * {
@@ -116,15 +127,16 @@ const sort = sortable({ key: "name", direction: "asc" });
       }
     }
     a {
-      text-decoration: none;
+      display: flex;
       align-items: center;
+      text-decoration: none;
       &:focus {
         background: inherit;
       }
       &::after {
         content: "";
         font-size: 1em;
-        width: 2em;
+        width: 1em;
         text-align: center;
       }
       &[data-sort="asc"]::after {

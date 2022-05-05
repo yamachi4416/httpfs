@@ -114,10 +114,8 @@ onBeforeMount(async () => await fetchItems());
       <Breadcrumb :path="state.path" />
     </header>
 
-    <main class="container-fluid">
-      <figure>
-        <FilesList :path="state.path" :items="state.items" @click="enterItem" />
-      </figure>
+    <main>
+      <FilesList :path="state.path" :items="state.items" @click="enterItem" />
     </main>
 
     <DirectoryMenu
@@ -131,9 +129,11 @@ onBeforeMount(async () => await fetchItems());
 
 <style scoped lang="scss">
 .files {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   > header {
-    position: sticky;
-    top: 0;
+    z-index: 9;
     padding-right: var(--spacing);
     padding-left: var(--spacing);
     background-color: var(--background-color);
@@ -161,6 +161,11 @@ onBeforeMount(async () => await fetchItems());
         }
       }
     }
+  }
+
+  > main {
+    flex: 1;
+    overflow: auto;
   }
 }
 </style>
