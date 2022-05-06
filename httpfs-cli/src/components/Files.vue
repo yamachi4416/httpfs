@@ -9,7 +9,7 @@ import {
 
 import FilesList from './files/FilesList.vue';
 import DirectoryMenu from './files/DirectoryMenu.vue';
-import Breadcrumb from './util/Breadcrumb.vue';
+import Breadcrumb from './files/Breadcrumb.vue';
 import SelectAll from './util/SelectAll.vue';
 
 const route = useRoute();
