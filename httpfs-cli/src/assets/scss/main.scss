@@ -7,6 +7,10 @@ $enable-transitions: false;
 // Enable overriding with !important
 $enable-important: false;
 
+// Enable responsive typography
+// Fixed root element size if disabled
+$enable-responsive-typography: false;
+
 // Pico Lib
 // --------------------
 
@@ -21,28 +25,28 @@ $enable-important: false;
 
 // Content
 @import '@picocss/pico/scss/content/typography'; // a, headings, p, ul, blockquote, ...
-@import '@picocss/pico/scss/content/button'; // button, a[role=button], type=button, type=submit ...
 @import '@picocss/pico/scss/content/form'; // input, select, textarea, label, fieldset, legend
 @import '@picocss/pico/scss/content/form-checkbox-radio'; // type=checkbox, type=radio, role=switch
 
 // Component
 @import '@picocss/pico/scss/components/nav';
-@import '@picocss/pico/scss/components/card';
 
 // Utilities
 @import '@picocss/pico/scss/utilities/accessibility'; // -ms-touch-action, aria-*
 @import '@picocss/pico/scss/utilities/reduce-motion'; // prefers-reduced-motion
 
+// Custom Styles
 // --------------------
-@import "./layout/document";
-@import "./layout/filllayout";
+@import './layout/document';
+@import './layout/filllayout';
 @import './components/modal';
 @import './components/breadcrumb';
 @import './components/table';
+@import './components/card';
 @import './utilities/icons';
 @import './utilities/transition';
 
-
 :root {
   --border-radius: 0.5rem;
+  --font-size: 105%;
 }

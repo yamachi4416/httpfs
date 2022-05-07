@@ -100,10 +100,6 @@ const sort = sortable({ key: 'name', direction: 'asc' });
     > * {
       cursor: pointer;
 
-      .name {
-        white-space: initial;
-      }
-
       .size > * {
         justify-content: flex-end;
       }
