@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, reactive, computed, watch, ref } from 'vue';
+import { onBeforeMount, computed, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   fetchDirectoryItems,
@@ -11,31 +11,27 @@ import FilesList from './files/FilesList.vue';
 import DirectoryMenu from './files/DirectoryMenu.vue';
 import Breadcrumb from './files/Breadcrumb.vue';
 import SelectAll from './util/SelectAll.vue';
+import Modal from './util/Modal.vue';
 
 const route = useRoute();
 const router = useRouter();
 
-const state = reactive({
-  path: Array.from(route.params.path),
-  items: [] as FsItem[],
-  parentPath: computed(() => {
-    const { path } = state;
-    if (path.length > 0) {
-      return `/${path.slice(0, path.length - 1).join('/')}`;
-    }
-    return '';
-  }),
+const path = ref(Array.from(route.params.path));
+const items = ref([] as FsItem[]);
+const parentPath = computed(() => {
+  if (path.value.length > 0) {
+    return `/${path.value.slice(0, path.value.length - 1).join('/')}`;
+  }
+  return '';
 });
+const openMenu = ref(false);
 
 const selectAll = ref<InstanceType<typeof SelectAll>>();
-const menuDetaileElement = ref<HTMLDetailsElement>();
 const directoryMenu = ref<InstanceType<typeof DirectoryMenu>>();
 
 async function fetchItems() {
-  if (menuDetaileElement?.value) {
-    menuDetaileElement.value.open = false;
-  }
-  state.items = await fetchDirectoryItems(state.path);
+  openMenu.value = false;
+  items.value = await fetchDirectoryItems(path.value);
 }
 
 async function enterItem(item: FsItem) {
@@ -46,24 +42,26 @@ async function enterItem(item: FsItem) {
   }
 }
 
-async function onUpload(items: FsItem[]) {
+async function onUpload(uploads: FsItem[]) {
   const map = new Map<string, FsItem>();
-  state.items.forEach((item: FsItem) => map.set(item.path, item));
-  items.forEach(item =>
+  items.value.forEach((item: FsItem) => map.set(item.path, item));
+  uploads.forEach(item =>
     map.has(item.path)
       ? Object.assign(map.get(item.path), item)
-      : state.items.push(item)
+      : items.value.push(item)
   );
 }
 
-async function deleteSelectedItems(items: FsItem[]) {
-  await deleteItems(state.path, items).finally(async () => await fetchItems());
+async function deleteSelectedItems(deletes: FsItem[]) {
+  await deleteItems(path.value, deletes).finally(
+    async () => await fetchItems()
+  );
 }
 
 watch(
   () => route.params.path,
   async newPath => {
-    state.path = Array.from(newPath);
+    path.value = Array.from(newPath);
     await fetchItems();
   }
 );
@@ -79,8 +77,8 @@ onBeforeMount(async () => await fetchItems());
           <li v-if="(selectAll?.count || 0) === 0">
             <router-link
               class="back secondary"
-              v-if="state.parentPath"
-              :to="state.parentPath"
+              v-if="parentPath"
+              :to="parentPath"
             >
               <span class="icon">arrow_back_ios_new</span>
             </router-link>
@@ -89,7 +87,7 @@ onBeforeMount(async () => await fetchItems());
             <SelectAll
               v-show="(selectAll?.count || 0) > 0"
               ref="selectAll"
-              :items="state.items"
+              :items="items"
               v-slot="{ count }"
             >
               {{ count }} 件選択
@@ -98,34 +96,60 @@ onBeforeMount(async () => await fetchItems());
         </ul>
         <ul></ul>
         <ul>
-          <details ref="menuDetaileElement" role="list" dir="rtl">
-            <summary role="link" class="secondary">
-              <span class="icon">more_vert</span>
-            </summary>
-            <ul>
-              <li v-if="selectAll?.count > 0">
-                <a @click="deleteSelectedItems(selectAll?.items)">削除</a>
-              </li>
-              <li>
-                <a @click="directoryMenu?.openCreateDirectory">フォルダ作成</a>
-              </li>
-              <li>
-                <a @click="directoryMenu?.openFileUpload">ファイル追加</a>
-              </li>
-            </ul>
-          </details>
+          <li id="openMenu">
+            <a href="#" class="icon secondary" @click.prevent="openMenu = true">
+              more_vert
+            </a>
+            <Modal
+              class="menu-modal"
+              :show="openMenu"
+              @close="openMenu = false"
+            >
+              <Teleport to="#openMenu">
+                <ul role="listbox">
+                  <li v-if="selectAll?.count > 0">
+                    <a
+                      href="#"
+                      class="secondary"
+                      @click.prevent="deleteSelectedItems(selectAll?.items)"
+                    >
+                      削除
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      class="secondary"
+                      @click.prevent="directoryMenu?.openCreateDirectory"
+                    >
+                      フォルダ作成
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="#"
+                      class="secondary"
+                      @click.prevent="directoryMenu?.openFileUpload"
+                    >
+                      ファイル追加
+                    </a>
+                  </li>
+                </ul>
+              </Teleport>
+            </Modal>
+          </li>
         </ul>
       </nav>
-      <Breadcrumb :path="state.path" />
+      <Breadcrumb :path="path" />
     </header>
 
     <main>
-      <FilesList :path="state.path" :items="state.items" @click="enterItem" />
+      <FilesList :path="path" :items="items" @click="enterItem" />
     </main>
 
     <DirectoryMenu
       ref="directoryMenu"
-      :path="state.path"
+      :path="path"
       @done="fetchItems"
       @upload="onUpload"
     />
@@ -139,7 +163,7 @@ onBeforeMount(async () => await fetchItems());
 
   > header {
     z-index: 9;
-    padding-right: calc(var(--spacing) / 2);
+    padding-right: var(--spacing);
     padding-left: calc(var(--spacing) / 2);
     background-color: var(--background-color);
     box-shadow: 0 1px 0 var(--muted-border-color);
@@ -149,25 +173,6 @@ onBeforeMount(async () => await fetchItems());
         .back {
           display: flex;
         }
-
-        > details {
-          text-align: left;
-          margin-right: var(--spacing);
-          margin-bottom: 0;
-          a {
-            cursor: pointer;
-          }
-
-          > summary {
-            cursor: pointer;
-            &::-webkit-details-marker {
-              display: none;
-            }
-            &::after {
-              display: none;
-            }
-          }
-        }
       }
     }
   }
@@ -175,6 +180,29 @@ onBeforeMount(async () => await fetchItems());
   > main {
     flex: 1;
     overflow: auto;
+  }
+
+  #openMenu {
+    position: relative;
+    .modal {
+      background-color: unset;
+    }
+
+    ul {
+      position: absolute;
+      top: 1em;
+      right: 1em;
+      display: flex;
+      flex-direction: column;
+      padding: 1em;
+      z-index: 11;
+      background: var(--background-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-box-shadow);
+      li {
+        white-space: nowrap;
+      }
+    }
   }
 }
 </style>

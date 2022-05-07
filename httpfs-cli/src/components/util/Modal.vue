@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { watch, onBeforeUnmount } from 'vue';
-import { onBeforeRouteLeave, onBeforeRouteUpdate } from 'vue-router';
+import { onBeforeUnmount, watch } from 'vue';
+import { defineModal } from '../../plugins/modals';
 
 const props = defineProps<{
   show: boolean;
@@ -10,41 +10,24 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-function close() {
+const modal = defineModal(() => {
   if (props.show) {
     emit('close');
-    return false;
+    return true;
   }
-  return true;
-}
+  return false;
+});
 
-function escapeEvent(event: KeyboardEvent) {
-  if (event.key === 'Escape') {
-    close();
-  }
-}
-
-function initialize() {
-  document.addEventListener('keydown', escapeEvent);
-}
-
-function dispose() {
-  document.removeEventListener('keydown', escapeEvent);
-}
-
-onBeforeUnmount(() => dispose());
-
-onBeforeRouteLeave(() => close());
-
-onBeforeRouteUpdate(() => close());
+onBeforeUnmount(() => modal.remove());
 
 watch(
   () => props.show,
-  show => {
-    if (show) {
-      initialize();
+  (value, oldValue) => {
+    if (!value === !oldValue) return;
+    if (value) {
+      modal.add();
     } else {
-      dispose();
+      modal.remove();
     }
   }
 );
@@ -52,7 +35,7 @@ watch(
 
 <template>
   <transition name="modal">
-    <div v-if="props.show" class="modal" @click.self="emit('close')">
+    <div v-if="props.show" class="modal" @click.self="modal.close()">
       <slot></slot>
     </div>
   </transition>
