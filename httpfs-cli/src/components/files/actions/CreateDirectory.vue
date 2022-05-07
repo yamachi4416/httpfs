@@ -6,6 +6,7 @@ import {
   HttpException,
 } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
+import { vAutoFocus } from "../../../directives/vAutoFocus"
 
 const props = defineProps<{
   path: string[];
@@ -52,6 +53,7 @@ async function mkdir() {
         <input
           type="text"
           tabindex="1"
+          v-auto-focus="show"
           v-model="state.dirname"
           :aria-invalid="state.invalid || null"
           @input="state.invalid = false"
