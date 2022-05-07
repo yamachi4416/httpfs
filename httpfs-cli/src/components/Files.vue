@@ -72,7 +72,7 @@ onBeforeMount(async () => await fetchItems());
 </script>
 
 <template>
-  <div class="files">
+  <div class="files fill-height">
     <header>
       <nav>
         <ul>
@@ -86,7 +86,12 @@ onBeforeMount(async () => await fetchItems());
             </router-link>
           </li>
           <li>
-            <SelectAll ref="selectAll" :items="state.items" v-slot="{ count }">
+            <SelectAll
+              v-show="(selectAll?.count || 0) > 0"
+              ref="selectAll"
+              :items="state.items"
+              v-slot="{ count }"
+            >
               {{ count }} 件選択
             </SelectAll>
           </li>
@@ -131,7 +136,7 @@ onBeforeMount(async () => await fetchItems());
 .files {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+
   > header {
     z-index: 9;
     padding-right: calc(var(--spacing) / 2);
@@ -152,8 +157,12 @@ onBeforeMount(async () => await fetchItems());
           a {
             cursor: pointer;
           }
+
           > summary {
             cursor: pointer;
+            &::-webkit-details-marker {
+              display: none;
+            }
             &::after {
               display: none;
             }

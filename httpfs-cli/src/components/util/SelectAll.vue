@@ -4,11 +4,9 @@ import { ref, computed, watch, withDefaults } from 'vue';
 const props = withDefaults(
   defineProps<{
     items: Array<{ selected: boolean }>;
-    hideNonSelected?: boolean;
   }>(),
   {
     items: () => [],
-    hideNonSelected: true,
   }
 );
 
@@ -35,7 +33,7 @@ defineExpose({
 </script>
 
 <template>
-  <label v-if="!props.hideNonSelected || count > 0">
+  <label>
     <input type="checkbox" v-model="value" @change="changeValue" />
     <slot :items="items" :count="count" :value="value"></slot>
   </label>

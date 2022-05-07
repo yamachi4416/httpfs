@@ -11,80 +11,38 @@ $enable-important: false;
 // --------------------
 
 // Config
-@import "@picocss/pico/scss/variables";
+@import '@picocss/pico/scss/variables';
 
 // Theming
-@import "@picocss/pico/scss/themes/default";
+@import '@picocss/pico/scss/themes/default';
 
 // Layout
-@import "@picocss/pico/scss/layout/document"; // html
-@import "@picocss/pico/scss/layout/sectioning"; // body, header, main, footer
+@import '@picocss/pico/scss/layout/document'; // html
 
 // Content
-@import "@picocss/pico/scss/content/typography"; // a, headings, p, ul, blockquote, ...
-@import "@picocss/pico/scss/content/button"; // button, a[role=button], type=button, type=submit ...
-@import "@picocss/pico/scss/content/form"; // input, select, textarea, label, fieldset, legend
-@import "@picocss/pico/scss/content/form-checkbox-radio"; // type=checkbox, type=radio, role=switch
+@import '@picocss/pico/scss/content/typography'; // a, headings, p, ul, blockquote, ...
+@import '@picocss/pico/scss/content/button'; // button, a[role=button], type=button, type=submit ...
+@import '@picocss/pico/scss/content/form'; // input, select, textarea, label, fieldset, legend
+@import '@picocss/pico/scss/content/form-checkbox-radio'; // type=checkbox, type=radio, role=switch
 
 // Component
-@import "@picocss/pico/scss/components/nav";
-@import "@picocss/pico/scss/components/dropdown";
-@import "@picocss/pico/scss/components/card";
+@import '@picocss/pico/scss/components/nav';
+@import '@picocss/pico/scss/components/dropdown';
+@import '@picocss/pico/scss/components/card';
 
 // Utilities
-@import "@picocss/pico/scss/utilities/accessibility"; // -ms-touch-action, aria-*
-@import "@picocss/pico/scss/utilities/reduce-motion"; // prefers-reduced-motion
+@import '@picocss/pico/scss/utilities/accessibility'; // -ms-touch-action, aria-*
+@import '@picocss/pico/scss/utilities/reduce-motion'; // prefers-reduced-motion
 
 // --------------------
-@import "./components/modal";
-@import "./components/breadcrumb";
+@import "./layout/document";
+@import "./layout/filllayout";
+@import './components/modal';
+@import './components/breadcrumb';
+@import './components/table';
+@import './utilities/icons';
+
 
 :root {
   --border-radius: 0.5rem;
-}
-
-*::-webkit-scrollbar {
-  width: 8px;
-  height: 5px;
-}
-
-*::-webkit-scrollbar-thumb {
-  border-radius: 5px;
-}
-
-* {
-  &:hover,
-  &:focus {
-    &::-webkit-scrollbar-thumb {
-      background-color: var(--muted-border-color);
-    }
-  }
-}
-
-.icon {
-  display: inline-block;
-  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-  font-family: "Material Icons Round";
-  font-size: 1.5em;
-  font-style: normal;
-  font-weight: normal;
-  font-feature-settings: "liga";
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-}
-
-.icons {
-  align-items: center;
-
-  &::after,
-  &::before {
-    /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-    font-family: "Material Icons Round";
-    font-size: 1.5em;
-  }
 }
