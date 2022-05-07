@@ -100,42 +100,6 @@ onBeforeMount(async () => await fetchItems());
             <a href="#" class="icon secondary" @click.prevent="openMenu = true">
               more_vert
             </a>
-            <Modal
-              class="menu-modal"
-              :show="openMenu"
-              transision="scale"
-              @close="openMenu = false"
-            >
-              <ul>
-                <li v-if="selectAll?.count > 0">
-                  <a
-                    href="#"
-                    class="secondary"
-                    @click.prevent="deleteSelectedItems(selectAll?.items)"
-                  >
-                    削除
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="secondary"
-                    @click.prevent="directoryMenu?.openCreateDirectory"
-                  >
-                    フォルダ作成
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="secondary"
-                    @click.prevent="directoryMenu?.openFileUpload"
-                  >
-                    ファイル追加
-                  </a>
-                </li>
-              </ul>
-            </Modal>
           </li>
         </ul>
       </nav>
@@ -152,6 +116,40 @@ onBeforeMount(async () => await fetchItems());
       @done="fetchItems"
       @upload="onUpload"
     />
+
+    <Teleport to="body">
+      <Modal :show="openMenu" transision="scale" @close="openMenu = false">
+        <ul class="card" :class="$style.menu">
+          <li v-if="selectAll?.count > 0">
+            <a
+              href="#"
+              class="secondary"
+              @click.prevent="deleteSelectedItems(selectAll?.items)"
+            >
+              削除
+            </a>
+          </li>
+          <li v-if="selectAll?.count == 0">
+            <a
+              href="#"
+              class="secondary"
+              @click.prevent="directoryMenu?.openCreateDirectory()"
+            >
+              フォルダ作成
+            </a>
+          </li>
+          <li v-if="selectAll?.count == 0">
+            <a
+              href="#"
+              class="secondary"
+              @click.prevent="directoryMenu?.openFileUpload()"
+            >
+              ファイル追加
+            </a>
+          </li>
+        </ul>
+      </Modal>
+    </Teleport>
   </div>
 </template>
 
@@ -180,28 +178,32 @@ onBeforeMount(async () => await fetchItems());
     flex: 1;
     overflow: auto;
   }
+}
+</style>
 
-  .menu-modal {
-    background-color: unset;
+<style module lang="scss">
+.menu {
+  --block-spacing-vertical: 1rem;
 
-    ul {
-      position: absolute;
-      top: 1em;
-      right: 1em;
-      padding: 1em;
-      background: var(--background-color);
-      border-radius: var(--border-radius);
-      box-shadow: var(--card-box-shadow);
-      transform-origin: top right;
-      li {
-        padding: 0;
-      }
-      li, a {
-        width: 100%;
-        white-space: nowrap;
-        margin: 0;
-      }
-    }
+  position: absolute;
+  top: var(--block-spacing-vertical);
+  right: var(--block-spacing-horizontal);
+  transform-origin: top right;
+  border-radius: calc(var(--border-radius) * 2);
+
+  li,
+  a {
+    width: 100%;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  li {
+    padding: 0;
+  }
+
+  a {
+    text-decoration: none;
   }
 }
 </style>

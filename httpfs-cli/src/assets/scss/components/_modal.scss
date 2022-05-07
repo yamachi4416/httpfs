@@ -14,12 +14,11 @@
   > :where(*) {
     display: flex;
     flex-direction: column;
-    row-gap: calc(var(--spacing) * 1.5);
+    row-gap: var(--spacing);
     width: fit-content;
     max-width: 100%;
     height: fit-content;
     max-height: 100%;
-    padding: calc(var(--spacing) * 1.5);
 
     > * {
       display: flex;

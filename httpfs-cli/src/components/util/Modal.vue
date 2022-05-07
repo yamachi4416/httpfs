@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
+import { computed, ref } from '@vue/reactivity';
 import { onBeforeUnmount, watch } from 'vue';
 import { defineModal } from '../../plugins/modals';
 
@@ -28,6 +28,8 @@ const modal = defineModal(() => {
   return false;
 });
 
+const zIndex = ref(0);
+
 onBeforeUnmount(() => modal.remove());
 
 watch(
@@ -35,7 +37,7 @@ watch(
   (value, oldValue) => {
     if (!value === !oldValue) return;
     if (value) {
-      modal.add();
+      zIndex.value = modal.add();
     } else {
       modal.remove();
     }
@@ -50,6 +52,7 @@ watch(
       class="modal"
       :class="transisionName"
       @click.self="modal.close()"
+      :style="{ zIndex }"
     >
       <slot></slot>
     </div>

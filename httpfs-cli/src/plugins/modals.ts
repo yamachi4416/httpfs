@@ -1,16 +1,19 @@
 import { Plugin } from 'vue';
 import { Router } from 'vue-router';
 
+const zIndexStart = 10;
+
 export interface Modal {
   close(): boolean;
-  add(): void;
+  add(): number;
   remove(): void;
 }
 
 const modals = [] as Modal[];
 
-function addModal(modal: Modal) {
+function addModal(modal: Modal) : number {
   modals.push(modal);
+  return modals.length + zIndexStart;
 }
 
 function removeModal(modal: Modal) {
@@ -32,7 +35,7 @@ export function defineModal(close: () => boolean): Modal {
   return {
     close,
     add() {
-      addModal(this);
+      return addModal(this);
     },
     remove() {
       removeModal(this);
