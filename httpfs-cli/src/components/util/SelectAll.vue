@@ -10,7 +10,7 @@ const props = withDefaults(
   }
 );
 
-const items = computed(() => props.items.filter(item => item.selected));
+const items = computed(() => props.items?.filter(item => item.selected) || []);
 const count = computed(() => items.value.length);
 const value = ref(count.value > 0 && count.value === props.items?.length);
 
@@ -22,7 +22,11 @@ watch(
 );
 
 const changeValue = () => {
-  props.items?.forEach(item => (item.selected = value.value));
+  if (props.items.length > 0) {
+    props.items?.forEach(item => (item.selected = value.value));
+  } else {
+    value.value = false;
+  }
 };
 
 defineExpose({
@@ -34,7 +38,12 @@ defineExpose({
 
 <template>
   <label>
-    <input type="checkbox" v-model="value" @change="changeValue" />
+    <input
+      :disabled="props.items.length === 0"
+      type="checkbox"
+      v-model="value"
+      @change="changeValue"
+    />
     <slot :items="items" :count="count" :value="value"></slot>
   </label>
 </template>
