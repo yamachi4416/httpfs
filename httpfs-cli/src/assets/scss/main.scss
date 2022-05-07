@@ -27,7 +27,6 @@ $enable-important: false;
 
 // Component
 @import '@picocss/pico/scss/components/nav';
-@import '@picocss/pico/scss/components/dropdown';
 @import '@picocss/pico/scss/components/card';
 
 // Utilities
@@ -41,6 +40,7 @@ $enable-important: false;
 @import './components/breadcrumb';
 @import './components/table';
 @import './utilities/icons';
+@import './utilities/transition';
 
 
 :root {

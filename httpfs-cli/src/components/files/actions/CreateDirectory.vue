@@ -46,7 +46,7 @@ async function mkdir() {
 </script>
 
 <template>
-  <Modal :show="show" @close="close">
+  <Modal :show="show" transision="slide" @close="close">
     <article>
       <h3>新しいフォルダ</h3>
       <p>

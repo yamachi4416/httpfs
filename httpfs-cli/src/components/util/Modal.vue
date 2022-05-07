@@ -1,10 +1,20 @@
 <script setup lang="ts">
+import { computed } from '@vue/reactivity';
 import { onBeforeUnmount, watch } from 'vue';
 import { defineModal } from '../../plugins/modals';
 
 const props = defineProps<{
   show: boolean;
+  transision?: 'slide' | 'fade' | 'scale';
 }>();
+
+const transisionName = computed(() => {
+  if (props.transision) {
+    return `transision-modal-${props.transision}`;
+  } else {
+    return null;
+  }
+});
 
 const emit = defineEmits<{
   (e: 'close'): void;
@@ -34,8 +44,13 @@ watch(
 </script>
 
 <template>
-  <transition name="modal">
-    <div v-if="props.show" class="modal" @click.self="modal.close()">
+  <transition :name="transisionName">
+    <div
+      v-if="props.show"
+      class="modal"
+      :class="transisionName"
+      @click.self="modal.close()"
+    >
       <slot></slot>
     </div>
   </transition>

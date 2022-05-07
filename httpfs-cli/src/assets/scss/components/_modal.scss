@@ -10,7 +10,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(0 0 0 / 30%);
 
   > :where(*) {
     display: flex;
@@ -55,36 +54,8 @@
   }
 
   > article {
-    align-self: flex-start;
     width: 600px;
     max-width: 100%;
     border-radius: calc(var(--border-radius) * 2);
-    transform: translateY(0);
-
-    @include media-less-sm {
-      align-self: flex-end;
-    }
-  }
-
-  &-enter-active,
-  &-leave-active {
-    transition: background-color 0.3s ease;
-
-    > article {
-      transition: transform 0.2s ease-in-out;
-    }
-  }
-
-  &-enter-from,
-  &-leave-to {
-    background-color: rgb(0 0 0 / 0%);
-
-    > article {
-      transform: translateY(-150%);
-
-      @include media-less-sm {
-        transform: translateY(150%);
-      }
-    }
   }
 }
