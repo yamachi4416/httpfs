@@ -44,9 +44,9 @@ const sort = sortable({ key: 'name', direction: 'asc' });
       <li
         v-for="item in sort.sorted(items)"
         :key="item.path"
-        @click="emit('click', item)"
+        @dblclick="emit('click', item)"
       >
-        <span class="selected" @click.stop>
+        <span class="selected" @click.stop @dblclick.stop>
           <input type="checkbox" v-model="item.selected" />
         </span>
         <span class="name">
