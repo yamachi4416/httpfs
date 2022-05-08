@@ -74,6 +74,7 @@ const sort = sortable({ key: 'name', direction: 'asc' });
   .thead,
   .tbody {
     white-space: nowrap;
+    user-select: none;
 
     * > * > * {
       display: flex;

@@ -6,11 +6,10 @@ import {
   HttpException,
 } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
-import { vAutoFocus } from "../../../directives/vAutoFocus"
+import { vAutoFocus } from '../../../directives/vAutoFocus';
 
 const props = defineProps<{
   path: string[];
-  show: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -19,11 +18,13 @@ const emit = defineEmits<{
 }>();
 
 const state = reactive({
+  show: false,
   dirname: '',
   invalid: false,
 });
 
 function close() {
+  state.show = false;
   state.dirname = '';
   emit('close');
 }
@@ -32,6 +33,7 @@ async function mkdir() {
   if (state.dirname) {
     try {
       const item = await createDirectory(props.path, state.dirname);
+      state.show = false;
       state.dirname = '';
       emit('done', item);
     } catch (e) {
@@ -43,17 +45,23 @@ async function mkdir() {
     }
   }
 }
+
+defineExpose({
+  open() {
+    state.show = true;
+  },
+});
 </script>
 
 <template>
-  <Modal :show="show" transision="slide" @close="close">
+  <Modal :show="state.show" transision="slide" @close="close">
     <article class="card">
       <h3>新しいフォルダ</h3>
       <p>
         <input
           type="text"
           tabindex="1"
-          v-auto-focus="show"
+          v-auto-focus="state.show"
           v-model="state.dirname"
           :aria-invalid="state.invalid || null"
           @input="state.invalid = false"
@@ -69,3 +77,9 @@ async function mkdir() {
     </article>
   </Modal>
 </template>
+
+<style scoped lang="scss">
+.card {
+  width: 600px;
+}
+</style>

@@ -12,11 +12,13 @@ export class FsItem {
   size = 0;
   writable = false;
   selected = false;
+  parent: string;
 
   static fromJson(json: object, path: string[]): FsItem {
     const item = new FsItem();
     Object.assign(item, json);
     item.path = `/${[...path, item.name].join('/')}`;
+    item.parent = `/${path.join('/')}`;
     item.endpoint = `${endpoint}${item.path}`;
     item.selected = false;
     return item;

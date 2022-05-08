@@ -8,10 +8,11 @@ import {
 } from '../services/FilesService';
 
 import FilesList from './files/FilesList.vue';
-import DirectoryMenu from './files/DirectoryMenu.vue';
 import Breadcrumb from './files/Breadcrumb.vue';
 import SelectAll from './util/SelectAll.vue';
 import Modal from './util/Modal.vue';
+import FileUpload from './files/actions/FileUpload.vue';
+import CreateDirectory from './files/actions/CreateDirectory.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -24,10 +25,11 @@ const parentPath = computed(() => {
   }
   return '';
 });
-const openMenu = ref(false);
 
+const openMenu = ref(false);
 const selectAll = ref<InstanceType<typeof SelectAll>>();
-const directoryMenu = ref<InstanceType<typeof DirectoryMenu>>();
+const createDirectory = ref<InstanceType<typeof CreateDirectory>>();
+const fileUpload = ref<InstanceType<typeof FileUpload>>();
 
 async function fetchItems() {
   openMenu.value = false;
@@ -43,13 +45,16 @@ async function enterItem(item: FsItem) {
 }
 
 async function onUpload(uploads: FsItem[]) {
+  const cdp = path.value.join('/');
   const map = new Map<string, FsItem>();
   items.value.forEach((item: FsItem) => map.set(item.path, item));
-  uploads.forEach(item =>
-    map.has(item.path)
-      ? Object.assign(map.get(item.path), item)
-      : items.value.push(item)
-  );
+  uploads.forEach(item => {
+    if (item.parent === cdp) {
+      map.has(item.path)
+        ? Object.assign(map.get(item.path), item)
+        : items.value.push(item);
+    }
+  });
 }
 
 async function deleteSelectedItems(deletes: FsItem[]) {
@@ -67,6 +72,33 @@ watch(
 );
 
 onBeforeMount(async () => await fetchItems());
+
+const menuItems = [
+  {
+    name: 'delete',
+    label: '削除',
+    get show() {
+      return !!selectAll.value?.count;
+    },
+    click: () => deleteSelectedItems(selectAll.value?.items as FsItem[]),
+  },
+  {
+    name: 'createDirectory',
+    label: 'フォルダ作成',
+    get show() {
+      return !selectAll.value?.count;
+    },
+    click: () => createDirectory.value?.open(),
+  },
+  {
+    name: 'fileUpload',
+    label: 'ファイル追加',
+    get show() {
+      return !selectAll.value?.count;
+    },
+    click: () => fileUpload.value?.open(),
+  },
+];
 </script>
 
 <template>
@@ -110,41 +142,19 @@ onBeforeMount(async () => await fetchItems());
       <FilesList :path="path" :items="items" @click="enterItem" />
     </main>
 
-    <DirectoryMenu
-      ref="directoryMenu"
-      :path="path"
-      @done="fetchItems"
-      @upload="onUpload"
-    />
-
     <Teleport to="body">
+      <FileUpload
+        ref="fileUpload"
+        :path="path"
+        @done="fetchItems"
+        @upload="onUpload"
+      />
+      <CreateDirectory ref="createDirectory" :path="path" @done="fetchItems" />
       <Modal :show="openMenu" transision="scale" @close="openMenu = false">
         <ul class="card" :class="$style.menu">
-          <li v-if="selectAll?.count > 0">
-            <a
-              href="#"
-              class="secondary"
-              @click.prevent="deleteSelectedItems(selectAll?.items)"
-            >
-              削除
-            </a>
-          </li>
-          <li v-if="selectAll?.count == 0">
-            <a
-              href="#"
-              class="secondary"
-              @click.prevent="directoryMenu?.openCreateDirectory()"
-            >
-              フォルダ作成
-            </a>
-          </li>
-          <li v-if="selectAll?.count == 0">
-            <a
-              href="#"
-              class="secondary"
-              @click.prevent="directoryMenu?.openFileUpload()"
-            >
-              ファイル追加
+          <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
+            <a href="#" class="secondary" @click.prevent="item.click">
+              {{ item.label }}
             </a>
           </li>
         </ul>
