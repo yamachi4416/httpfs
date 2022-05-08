@@ -6,6 +6,10 @@ const props = defineProps<{
   path: string[];
 }>();
 
+const emit = defineEmits<{
+  (e: 'click', path: string): void;
+}>();
+
 const items = computed(() => {
   const paths = Array.from(props.path);
   return [{ name: '', path: '/' }].concat(
@@ -21,10 +25,10 @@ const items = computed(() => {
   <nav v-scroll-to="'right'" class="breadcrumb">
     <ul>
       <li v-for="item in items" :key="item.path" class="icons">
-        <router-link :to="item.path" class="secondary">
+        <a href="#" class="secondary" @click.prevent="emit('click', item.path)">
           <span v-if="item.path === '/'" class="icon">home</span>
           <span v-else>{{ item.name }}</span>
-        </router-link>
+        </a>
       </li>
     </ul>
   </nav>

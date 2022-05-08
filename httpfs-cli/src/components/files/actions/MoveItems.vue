@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { FsItem, fetchDirectoryItems } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
 import FilesListPanel from '../fileslist/FilesListPanel.vue';
+import Breadcrumb from '../Breadcrumb.vue';
 
 const { t } = useI18n();
 
@@ -14,7 +15,7 @@ const state = reactive({
   items: [] as FsItem[],
 });
 
-const path = computed(() => state.paths?.join('/'));
+const current = computed(() => state.paths?.join('/'));
 
 function back() {
   if (state.paths.length > 0) {
@@ -22,29 +23,33 @@ function back() {
   }
 }
 
+function movePath(path: string) {
+  if (path !== current.value) {
+    state.paths = path.split('/').filter(p => p);
+  }
+}
+
 function close() {
   state.show = false;
 }
-
-watch(
-  () => path.value,
-  async (value, oldValue) => {
-    if (value !== oldValue) {
-      if (value != null) {
-        state.items = [];
-        state.items = await fetchDirectoryItems(state.paths);
-      } else {
-        state.items = [];
-      }
-    }
-  }
-);
 
 function enterItem(item: FsItem) {
   if (item.directory) {
     state.paths = [...item.paths];
   }
 }
+
+watch(
+  () => current.value,
+  async (value, oldValue) => {
+    if (value !== oldValue) {
+      state.items = [];
+      if (value != null) {
+        state.items = await fetchDirectoryItems(state.paths);
+      }
+    }
+  }
+);
 
 defineExpose({
   open(path: string[]) {
@@ -71,9 +76,11 @@ defineExpose({
         >
           <span class="icon">arrow_back_ios_new</span>
         </a>
-        <span class="move-items-panel-header-title">
-          {{ state.paths.join(' / ') }}
-        </span>
+        <Breadcrumb
+          class="move-items-panel-header-title"
+          :path="state.paths"
+          @click="movePath"
+        />
       </div>
       <div class="move-items-panel-body">
         <FilesListPanel
@@ -99,7 +106,7 @@ defineExpose({
 
   &-panel {
     margin: 0;
-    min-width: 90%;
+    width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;

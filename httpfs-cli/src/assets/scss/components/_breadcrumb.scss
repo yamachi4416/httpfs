@@ -1,10 +1,32 @@
-@import "../variables";
+@import '../variables';
 
 .breadcrumb {
-  padding:
-    calc(var(--nav-element-spacing-vertical) / 2)
+  --scrollbar-width: 8px;
+  --scrollbar-height: 5px;
+
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+    height: var(--scrollbar-height);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--scrollbar-height);
+  }
+
+  &:hover,
+  &:focus {
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--muted-border-color);
+    }
+  }
+
+  padding: calc(var(--nav-element-spacing-vertical) / 2)
+    var(--nav-element-spacing-horizontal)
+    calc(var(--nav-element-spacing-vertical) / 2 - var(--scrollbar-height))
     var(--nav-element-spacing-horizontal);
   overflow-x: scroll;
+  overflow-y: hidden;
   white-space: nowrap;
 
   > ul {
@@ -14,13 +36,13 @@
 
       &:not(:last-of-type)::after {
         color: var(--muted-color);
-        content: "play_arrow";
+        content: 'play_arrow';
       }
 
       a {
         display: flex;
 
-        &[aria-current="page"] {
+        &[aria-current='page'] {
           color: var(--secondary) !important;
         }
 

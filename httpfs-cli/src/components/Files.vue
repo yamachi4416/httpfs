@@ -144,7 +144,7 @@ const menuItems = [
           </li>
         </ul>
       </nav>
-      <Breadcrumb :path="path" />
+      <Breadcrumb :path="path" @click="(p) => router.push(p)" />
     </header>
 
     <main>
