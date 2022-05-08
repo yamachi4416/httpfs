@@ -1,7 +1,3 @@
 .fill-height {
-  height: 100vh;
-  @supports (-webkit-touch-callout: none) {
-    /* stylelint-disable-next-line value-no-vendor-prefix */
-    height: -webkit-fill-available;
-  }
+  height: var(--vh, 100vh);
 }
