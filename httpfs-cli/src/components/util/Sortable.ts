@@ -1,7 +1,7 @@
 import { reactive } from 'vue';
 import { comparatorKey } from '../../functions/util';
 
-interface SortableOptions {
+export interface SortableOptions {
   idKey?: string;
   key?: string;
   direction?: 'asc' | 'desc';

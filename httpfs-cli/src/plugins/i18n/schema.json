@@ -32,6 +32,9 @@
         },
         "createDirectory": {
           "type": "string"
+        },
+        "moveItems": {
+          "type": "string"
         }
       }
     },

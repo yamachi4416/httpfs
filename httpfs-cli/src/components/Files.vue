@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onBeforeMount, computed, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+
 import {
   fetchDirectoryItems,
   deleteItems,
@@ -13,7 +15,7 @@ import SelectAll from './util/SelectAll.vue';
 import Modal from './util/Modal.vue';
 import FileUpload from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
-import { useI18n } from 'vue-i18n';
+import MoveItems from './files/actions/MoveItems.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -32,6 +34,7 @@ const openMenu = ref(false);
 const selectAll = ref<InstanceType<typeof SelectAll>>();
 const createDirectory = ref<InstanceType<typeof CreateDirectory>>();
 const fileUpload = ref<InstanceType<typeof FileUpload>>();
+const moveItems = ref<InstanceType<typeof MoveItems>>();
 
 async function fetchItems() {
   openMenu.value = false;
@@ -82,6 +85,13 @@ const menuItems = [
       return !!selectAll.value?.count;
     },
     click: () => deleteSelectedItems(selectAll.value?.items as FsItem[]),
+  },
+  {
+    name: 'moveItems',
+    get show() {
+      return !!selectAll.value?.count;
+    },
+    click: () => moveItems.value?.open(path.value),
   },
   {
     name: 'createDirectory',
@@ -149,6 +159,7 @@ const menuItems = [
         @upload="onUpload"
       />
       <CreateDirectory ref="createDirectory" :path="path" @done="fetchItems" />
+      <MoveItems ref="moveItems" />
       <Modal :show="openMenu" transision="scale" @close="openMenu = false">
         <ul class="card" :class="$style.menu">
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">

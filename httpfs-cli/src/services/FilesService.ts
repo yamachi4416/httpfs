@@ -3,6 +3,7 @@ const endpoint = '/api/files';
 
 export class FsItem {
   readonly path: string;
+  readonly paths: string[];
   readonly endpoint: string;
   readonly directory = false;
   readonly name: string;
@@ -22,12 +23,14 @@ export class FsItem {
   static fromJson(json: any, path: string[]): FsItem {
     const { lastModified, creationTime, ...props } = json;
     const item = props as FsItem;
+    const paths = [...path].filter(p => p);
     return new FsItem({
       ...item,
       lastModified: lastModified && new Date(lastModified),
       creationTime: creationTime && new Date(creationTime), 
-      path: `/${[...path, item?.name].join('/')}`,
-      parent: `/${path.join('/')}`,
+      path: `/${[...paths, item.name].join('/')}`,
+      paths: [...paths, item.name],
+      parent: `/${paths.join('/')}`,
     } as FsItem);
   }
 

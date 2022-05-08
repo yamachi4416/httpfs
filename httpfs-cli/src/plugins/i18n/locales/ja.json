@@ -8,8 +8,9 @@
     "cancel": "キャンセル",
     "create": "作成",
     "createDirectory": "フォルダ作成",
-    "deleteFiles": "削除",
-    "uploadFiles": "ファイル追加"
+    "deleteFiles": "削除する",
+    "uploadFiles": "ファイル追加",
+    "moveItems": "移動する"
   },
   "fsItem": {
     "name": "名前",
