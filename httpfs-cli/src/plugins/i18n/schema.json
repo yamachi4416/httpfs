@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "type": "object",
+  "properties": {
+    "messages": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "newDirectory": {
+          "type": "string"
+        },
+        "selectedCount": {
+          "type": "string"
+        }
+      }
+    },
+    "actions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cancel": {
+          "type": "string"
+        },
+        "create": {
+          "type": "string"
+        },
+        "deleteFiles": {
+          "type": "string"
+        },
+        "uploadFiles": {
+          "type": "string"
+        },
+        "createDirectory": {
+          "type": "string"
+        }
+      }
+    },
+    "fsItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "lastModified": {
+          "type": "string"
+        },
+        "creationTime": {
+          "type": "string"
+        },
+        "mimeType": {
+          "type": "string"
+        },
+        "size": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

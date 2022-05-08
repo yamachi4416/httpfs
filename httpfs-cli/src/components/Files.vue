@@ -13,9 +13,11 @@ import SelectAll from './util/SelectAll.vue';
 import Modal from './util/Modal.vue';
 import FileUpload from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
 
 const path = ref(Array.from(route.params.path));
 const items = ref([] as FsItem[]);
@@ -75,8 +77,7 @@ onBeforeMount(async () => await fetchItems());
 
 const menuItems = [
   {
-    name: 'delete',
-    label: '削除',
+    name: 'deleteFiles',
     get show() {
       return !!selectAll.value?.count;
     },
@@ -84,15 +85,13 @@ const menuItems = [
   },
   {
     name: 'createDirectory',
-    label: 'フォルダ作成',
     get show() {
       return !selectAll.value?.count;
     },
     click: () => createDirectory.value?.open(),
   },
   {
-    name: 'fileUpload',
-    label: 'ファイル追加',
+    name: 'uploadFiles',
     get show() {
       return !selectAll.value?.count;
     },
@@ -122,7 +121,7 @@ const menuItems = [
               :items="items"
               v-slot="{ count }"
             >
-              {{ count }} 件選択
+              {{ t('messages.selectedCount', [count]) }}
             </SelectAll>
           </li>
         </ul>
@@ -154,7 +153,7 @@ const menuItems = [
         <ul class="card" :class="$style.menu">
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
             <a href="#" class="secondary" @click.prevent="item.click">
-              {{ item.label }}
+              {{ t(`actions.${item.name}`) }}
             </a>
           </li>
         </ul>

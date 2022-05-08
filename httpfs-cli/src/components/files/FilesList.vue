@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import { FsItem } from '../../services/FilesService';
-import { formatSize, formatDateTime } from '../../functions/fmt';
+import { formatSize } from '../../functions/fmt';
 import { sortable } from '../util/Sortable';
 import SelectAll from '../util/SelectAll.vue';
 import FileIcon from './fileslist/FileIcon.vue';
+import { useI18n } from 'vue-i18n';
 
 defineProps<{
   items: FsItem[];
 }>();
 
+const { d, t } = useI18n();
+
 const emit = defineEmits<{
   (e: 'click', item: FsItem): void;
 }>();
 
-const headers = [
-  { key: 'name', label: '名前' },
-  { key: 'lastModified', label: '更新日時' },
-  { key: 'mimeType', label: 'タイプ' },
-  { key: 'size', label: 'サイズ' },
-];
+const headers = ['name', 'lastModified', 'mimeType', 'size'].map(key => ({
+  key,
+}));
 
 const sort = sortable({ key: 'name', direction: 'asc' });
 </script>
@@ -34,7 +34,7 @@ const sort = sortable({ key: 'name', direction: 'asc' });
           :class="header.key"
         >
           <span @click="header.sort">
-            <span>{{ header.label }}</span>
+            <span>{{ t(`fsItem.${header.key}`, header.key) }}</span>
             <span class="icons" :data-sort="header.direction"></span>
           </span>
         </span>
@@ -56,7 +56,7 @@ const sort = sortable({ key: 'name', direction: 'asc' });
           </span>
         </span>
         <span class="lastModified">
-          <span>{{ formatDateTime(item.lastModified) }}</span>
+          <span>{{ d(item.lastModified, 'long') }}</span>
         </span>
         <span class="mimeType">
           <span>{{ item.mimeType }}</span>

@@ -7,10 +7,13 @@ import {
 } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
 import { vAutoFocus } from '../../../directives/vAutoFocus';
+import { useI18n } from 'vue-i18n';
 
 const props = defineProps<{
   path: string[];
 }>();
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: 'close'): void;
@@ -56,7 +59,7 @@ defineExpose({
 <template>
   <Modal :show="state.show" transision="slide" @close="close">
     <article class="card">
-      <h3>新しいフォルダ</h3>
+      <h3>{{ t('messages.newDirectory') }}</h3>
       <p>
         <input
           type="text"
@@ -69,10 +72,12 @@ defineExpose({
       </p>
       <nav>
         <a href="#" tabindex="1" role="link" @click.prevent="close">
-          キャンセル
+          {{ t('actions.cancel') }}
         </a>
         <span class="devider"></span>
-        <a href="#" tabindex="2" role="link" @click.prevent="mkdir">作成</a>
+        <a href="#" tabindex="2" role="link" @click.prevent="mkdir">
+          {{ t('actions.create') }}
+        </a>
       </nav>
     </article>
   </Modal>

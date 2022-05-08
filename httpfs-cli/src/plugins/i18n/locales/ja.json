@@ -1,0 +1,21 @@
+{
+  "$schema": "../schema.json",
+  "messages": {
+    "newDirectory": "新しいフォルダ",
+    "selectedCount": "{0} 件選択"
+  },
+  "actions": {
+    "cancel": "キャンセル",
+    "create": "作成",
+    "createDirectory": "フォルダ作成",
+    "deleteFiles": "削除",
+    "uploadFiles": "ファイル追加"
+  },
+  "fsItem": {
+    "name": "名前",
+    "lastModified": "更新日時",
+    "creationTime": "作成日時",
+    "mimeType": "タイプ",
+    "size": "サイズ"
+  }
+}

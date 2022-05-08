@@ -2,26 +2,33 @@ const nop = () => {};
 const endpoint = '/api/files';
 
 export class FsItem {
-  path: string;
-  endpoint: string;
-  directory = false;
-  name: string;
-  mimeType: string;
-  lastModified: string;
-  creationTime: string;
-  size = 0;
-  writable = false;
+  readonly path: string;
+  readonly endpoint: string;
+  readonly directory = false;
+  readonly name: string;
+  readonly mimeType: string;
+  readonly lastModified?: Date;
+  readonly creationTime?: Date;
+  readonly size = 0;
+  readonly writable = false;
+  readonly parent: string;
   selected = false;
-  parent: string;
 
-  static fromJson(json: object, path: string[]): FsItem {
-    const item = new FsItem();
-    Object.assign(item, json);
-    item.path = `/${[...path, item.name].join('/')}`;
-    item.parent = `/${path.join('/')}`;
-    item.endpoint = `${endpoint}${item.path}`;
-    item.selected = false;
-    return item;
+  constructor(props: FsItem) {
+    Object.assign(this, props);
+    this.endpoint = `${endpoint}${this.path}`;
+  }
+
+  static fromJson(json: any, path: string[]): FsItem {
+    const { lastModified, creationTime, ...props } = json;
+    const item = props as FsItem;
+    return new FsItem({
+      ...item,
+      lastModified: lastModified && new Date(lastModified),
+      creationTime: creationTime && new Date(creationTime), 
+      path: `/${[...path, item?.name].join('/')}`,
+      parent: `/${path.join('/')}`,
+    } as FsItem);
   }
 
   static fromFile(file: File, path: string[]): FsItem {
