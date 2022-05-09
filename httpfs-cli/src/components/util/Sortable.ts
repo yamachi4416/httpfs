@@ -1,19 +1,21 @@
-import { reactive } from 'vue';
+import { shallowReactive } from 'vue';
 import { comparatorKey } from '../../functions/util';
 
-export interface SortableOptions {
-  idKey?: string;
-  key?: string;
+export interface SortableOptions<T> {
+  idKey?: keyof T;
+  key?: keyof T;
   direction?: 'asc' | 'desc';
 }
 
-export function sortable(options: SortableOptions) {
-  const state = reactive<SortableOptions>({
+export function sortable<T>(options: SortableOptions<T>) {
+  type Keys = keyof T;
+
+  const state = shallowReactive<SortableOptions<T>>({
     ...{ idKey: options.key },
     ...options,
   });
 
-  function sorted<T>(items: T[]) {
+  function sorted(items: T[]) {
     const { key } = state;
     const dir = state.direction === 'desc' ? -1 : 1;
     const keys = [key];
@@ -24,7 +26,7 @@ export function sortable(options: SortableOptions) {
     return Array.from(items).sort((a, b) => comparator(a, b) * dir) as T[];
   }
 
-  function sortBy(key: string) {
+  function sortBy(key: Keys) {
     if (state.key === key) {
       state.direction = state.direction === 'asc' ? 'desc' : 'asc';
     } else {
@@ -33,7 +35,7 @@ export function sortable(options: SortableOptions) {
     }
   }
 
-  function headers<T extends { key: string }>(items: T[]) {
+  function headers<H extends { key: Keys }>(items: H[]) {
     return items.map(item => ({
       ...item,
       sort() {
@@ -49,7 +51,7 @@ export function sortable(options: SortableOptions) {
     sorted,
     sortBy,
     headers,
-    isSortKey(key: string) {
+    isSortKey(key: Keys) {
       return key === state.key;
     },
     get key() {

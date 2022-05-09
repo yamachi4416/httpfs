@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES5",
     "lib": ["ES2021", "DOM"],
-    "types": ["@intlify/vite-plugin-vue-i18n/client"]
+    "types": ["@intlify/vite-plugin-vue-i18n/client"],
+    "jsx": "preserve"
   }
 }

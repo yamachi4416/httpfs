@@ -16,8 +16,8 @@ export function compare<T>(a: T, b: T): number {
   return a < b ? -1 : 1;
 }
 
-export function comparatorKey<T>(...keys: string[]): compareFunc<T> {
-  return function <T>(a: T, b: T): number {
+export function comparatorKey<T>(...keys: (keyof T)[]): compareFunc<T> {
+  return function (a: T, b: T): number {
     for (const key of keys) {
       const c = compare(a && a[key], b && b[key]);
       if (c !== 0) {

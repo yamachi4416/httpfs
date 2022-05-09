@@ -4,7 +4,7 @@ import { reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { FsItem, fetchDirectoryItems } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
-import FilesListPanel from '../fileslist/FilesListPanel.vue';
+import FilesList from '../FilesList.vue';
 import Breadcrumb from '../Breadcrumb.vue';
 
 const { t } = useI18n();
@@ -83,7 +83,7 @@ defineExpose({
         />
       </div>
       <div class="move-items-panel-body">
-        <FilesListPanel
+        <FilesList
           :items="state.items"
           :sort-options="{ key: 'directory', direction: 'desc' }"
           @click="enterItem"

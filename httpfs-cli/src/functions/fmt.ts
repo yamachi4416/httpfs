@@ -1,5 +1,5 @@
 export function formatSize(size: number): string {
-  let s = size || 0;
+  let s = size ?? 0;
   let u = '';
   for (u of ['B', 'KB', 'MB', 'GB']) {
     if (s < 1024) {

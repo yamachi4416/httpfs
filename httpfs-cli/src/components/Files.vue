@@ -144,11 +144,16 @@ const menuItems = [
           </li>
         </ul>
       </nav>
-      <Breadcrumb :path="path" @click="(p) => router.push(p)" />
+      <Breadcrumb :path="path" @click="p => router.push(p)" />
     </header>
 
     <main>
-      <FilesList :path="path" :items="items" @click="enterItem" />
+      <FilesList
+        :items="items"
+        :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
+        @click="(item) => item.directory && enterItem(item)"
+        @dblclick="(item) => enterItem(item)"
+      />
     </main>
 
     <Teleport to="body">

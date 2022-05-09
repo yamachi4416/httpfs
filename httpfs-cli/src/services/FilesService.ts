@@ -5,15 +5,16 @@ export class FsItem {
   readonly path: string;
   readonly paths: string[];
   readonly endpoint: string;
-  readonly directory = false;
+  readonly directory: boolean = false;
   readonly name: string;
   readonly mimeType: string;
   readonly lastModified?: Date;
   readonly creationTime?: Date;
-  readonly size = 0;
-  readonly writable = false;
+  readonly size: number = 0;
+  readonly writable: boolean = false;
   readonly parent: string;
-  selected = false;
+
+  selected: boolean = false;
 
   constructor(props: FsItem) {
     Object.assign(this, props);
@@ -27,7 +28,7 @@ export class FsItem {
     return new FsItem({
       ...item,
       lastModified: lastModified && new Date(lastModified),
-      creationTime: creationTime && new Date(creationTime), 
+      creationTime: creationTime && new Date(creationTime),
       path: `/${[...paths, item.name].join('/')}`,
       paths: [...paths, item.name],
       parent: `/${paths.join('/')}`,
