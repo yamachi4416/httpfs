@@ -11,11 +11,11 @@ import {
 
 import FilesList from './files/FilesList.vue';
 import Breadcrumb from './files/Breadcrumb.vue';
-import SelectAll from './util/SelectAll.vue';
 import Modal from './util/Modal.vue';
 import FileUpload from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
 import MoveItems from './files/actions/MoveItems.vue';
+import { selectAllable } from './util/SelectAllable';
 
 const route = useRoute();
 const router = useRouter();
@@ -31,7 +31,7 @@ const parentPath = computed(() => {
 });
 
 const openMenu = ref(false);
-const selectAll = ref<InstanceType<typeof SelectAll>>();
+const selectAll = selectAllable({ items });
 const createDirectory = ref<InstanceType<typeof CreateDirectory>>();
 const fileUpload = ref<InstanceType<typeof FileUpload>>();
 const moveItems = ref<InstanceType<typeof MoveItems>>();
@@ -82,28 +82,28 @@ const menuItems = [
   {
     name: 'deleteFiles',
     get show() {
-      return !!selectAll.value?.count;
+      return selectAll.any;
     },
-    click: () => deleteSelectedItems(selectAll.value?.items as FsItem[]),
+    click: () => deleteSelectedItems(selectAll.items as FsItem[]),
   },
   {
     name: 'moveItems',
     get show() {
-      return !!selectAll.value?.count;
+      return selectAll.any;
     },
     click: () => moveItems.value?.open(path.value),
   },
   {
     name: 'createDirectory',
     get show() {
-      return !selectAll.value?.count;
+      return !selectAll.any;
     },
     click: () => createDirectory.value?.open(),
   },
   {
     name: 'uploadFiles',
     get show() {
-      return !selectAll.value?.count;
+      return !selectAll.any;
     },
     click: () => fileUpload.value?.open(),
   },
@@ -125,14 +125,10 @@ const menuItems = [
             </router-link>
           </li>
           <li>
-            <SelectAll
-              v-show="(selectAll?.count || 0) > 0"
-              ref="selectAll"
-              :items="items"
-              v-slot="{ count }"
-            >
-              {{ t('messages.selectedCount', [count]) }}
-            </SelectAll>
+            <label v-show="selectAll.any">
+              <input type="checkbox" v-model="selectAll.value" />
+              {{ t('messages.selectedCount', [selectAll.count]) }}
+            </label>
           </li>
         </ul>
         <ul></ul>
@@ -151,8 +147,8 @@ const menuItems = [
       <FilesList
         :items="items"
         :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
-        @click="(item) => item.directory && enterItem(item)"
-        @dblclick="(item) => enterItem(item)"
+        @click="item => item.directory && enterItem(item)"
+        @dblclick="item => enterItem(item)"
       />
     </main>
 

@@ -60,6 +60,9 @@ export function sortable<T>(options: SortableOptions<T>) {
     get direction() {
       return state.direction;
     },
+    get options() {
+      return state;
+    },
   };
 }
 
