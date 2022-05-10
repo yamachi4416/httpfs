@@ -166,13 +166,8 @@ const menuItems = [
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
             <a
               href="#"
-            <a href="#" class="secondary" @click.prevent="item.click">
-              @click.prevent="
-                () => {
-                  item.click();
-                  openMenu = false;
-                }
-              "
+              class="secondary"
+              @click.prevent="(openMenu = false), item.click()"
             >
               {{ t(`actions.${item.name}`) }}
             </a>
