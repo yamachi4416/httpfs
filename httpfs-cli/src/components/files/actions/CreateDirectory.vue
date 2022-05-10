@@ -29,6 +29,7 @@ const state = reactive({
 function close() {
   state.show = false;
   state.dirname = '';
+  state.invalid = false;
   emit('close');
 }
 
