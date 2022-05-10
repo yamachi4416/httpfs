@@ -1,10 +1,12 @@
 package io.github.yamachi4416.httpfs.fs;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
@@ -76,7 +78,7 @@ public class SubFs {
   }
 
   private Path safePath(String name) throws AccessDeniedException {
-    var path = docRoot.resolve(name);
+    var path = docRoot.resolve(withoutSeparator(name));
     if (isChild(path)) {
       return path;
     }
@@ -103,5 +105,15 @@ public class SubFs {
       logger.error("Can't read hidden attribute.", e);
       return false;
     }
+  }
+
+  private String withoutSeparator(String name) {
+    for (String c : new String[] { "/", File.separator }) {
+      int idx = name.indexOf(c);
+      if (idx != -1) {
+        throw new InvalidPathException(c, String.format("Illegal char <%s>", c), idx);
+      }
+    }
+    return name;
   }
 }
