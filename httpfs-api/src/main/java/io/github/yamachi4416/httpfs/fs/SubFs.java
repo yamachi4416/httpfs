@@ -3,7 +3,6 @@ package io.github.yamachi4416.httpfs.fs;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -69,9 +68,13 @@ public class SubFs {
         .map(FsItem::new);
   }
 
-  public FsItem createFile(String fileName, InputStream content) throws IOException {
+  public FsItem createFile(String fileName, GetInputStream getInputStream) throws AccessDeniedException {
     var path = safePath(fileName);
-    Files.copy(content, path, StandardCopyOption.REPLACE_EXISTING);
+    try (var in = getInputStream.get()) {
+      Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      logger.error("File Save Fail.", e);
+    }
     return new FsItem(path);
   }
 

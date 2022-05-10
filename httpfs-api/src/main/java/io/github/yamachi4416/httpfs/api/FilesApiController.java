@@ -106,13 +106,10 @@ public class FilesApiController {
     var uploads = new ArrayList<>();
 
     for (var file : files) {
-      try (var content = file.getInputStream()) {
-        var uploaded = sub.createFile(file.getOriginalFilename(), content);
-        uploads.add(uploaded);
-      } catch (IOException e) {
-        logger.error("File Save Fail.", e);
-      }
+      uploads.add(sub.createFile(
+          file.getOriginalFilename(), () -> file.getInputStream()));
     }
+
     return ResponseEntity.ok().body(uploads);
   }
 
