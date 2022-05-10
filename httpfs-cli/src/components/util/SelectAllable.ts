@@ -4,11 +4,11 @@ interface Selectable {
   selected: boolean;
 }
 
-interface SelectableOptions {
-  items: Ref<Selectable[]>;
+interface SelectableOptions<T extends Selectable> {
+  items: Ref<T[]>;
 }
 
-export function selectAllable(options: SelectableOptions) {
+export function selectAllable<T extends Selectable>(options: SelectableOptions<T>) {
   const value = ref(false);
   const items = options.items;
   const selectedItems = computed(

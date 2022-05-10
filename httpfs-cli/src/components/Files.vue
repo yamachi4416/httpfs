@@ -84,7 +84,7 @@ const menuItems = [
     get show() {
       return selectAll.any;
     },
-    click: () => deleteSelectedItems(selectAll.items as FsItem[]),
+    click: () => deleteSelectedItems(selectAll.items),
   },
   {
     name: 'moveItems',
@@ -115,7 +115,7 @@ const menuItems = [
     <header>
       <nav>
         <ul>
-          <li v-if="(selectAll?.count || 0) === 0">
+          <li v-if="!selectAll.any">
             <router-link
               class="back secondary"
               v-if="parentPath"
@@ -164,7 +164,16 @@ const menuItems = [
       <Modal :show="openMenu" transision="scale" @close="openMenu = false">
         <ul class="card" :class="$style.menu">
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
+            <a
+              href="#"
             <a href="#" class="secondary" @click.prevent="item.click">
+              @click.prevent="
+                () => {
+                  item.click();
+                  openMenu = false;
+                }
+              "
+            >
               {{ t(`actions.${item.name}`) }}
             </a>
           </li>
