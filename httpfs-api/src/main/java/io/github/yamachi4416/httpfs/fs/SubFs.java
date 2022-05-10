@@ -28,6 +28,14 @@ public class SubFs {
     this.docRoot = docRoot.toAbsolutePath().normalize();
   }
 
+  public Path getPath() {
+    return docRoot;
+  }
+
+  public boolean isWritable() {
+    return Files.isWritable(docRoot);
+  }
+
   public FsItem resolve(String... paths) throws FileNotFoundException {
     Path path = this.docRoot;
 
@@ -44,6 +52,15 @@ public class SubFs {
   public SubFs sub(Path path) throws FileNotFoundException {
     var subPath = safeDirectory(path);
     return new SubFs(subPath.toAbsolutePath().toString());
+  }
+
+  public SubFs wSub(Path path)
+      throws FileNotFoundException, AccessDeniedException {
+    var sub = sub(path);
+    if (sub.isWritable()) {
+      return sub;
+    }
+    throw new AccessDeniedException(sub.docRoot.toString());
   }
 
   public Stream<FsItem> list() throws IOException {

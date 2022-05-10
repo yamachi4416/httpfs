@@ -102,9 +102,7 @@ public class FilesApiController {
       FsItem fsItem,
       @RequestParam(required = true) MultipartFile[] files)
       throws AccessDeniedException, FileNotFoundException {
-    expectWritableDirectory(fsItem);
-
-    var sub = fs.sub(fsItem.getPath());
+    var sub = fs.wSub(fsItem.getPath());
     var uploads = new ArrayList<>();
 
     for (var file : files) {
@@ -123,10 +121,8 @@ public class FilesApiController {
       FsItem fsItem,
       @RequestParam(name = "dirname", required = true) String dirname)
       throws IOException {
-    expectWritableDirectory(fsItem);
-
     try {
-      var sub = fs.sub(fsItem.getPath());
+      var sub = fs.wSub(fsItem.getPath());
       return ResponseEntity.ok().body(sub.createDirectory(dirname));
     } catch (InvalidPathException e) {
       return ResponseEntity.badRequest().build();
@@ -138,27 +134,14 @@ public class FilesApiController {
       FsItem fsItem,
       @RequestBody(required = true) String[] names)
       throws IOException {
-    expectWritableDirectory(fsItem);
-
-    var sub = fs.sub(fsItem.getPath());
+    var sub = fs.wSub(fsItem.getPath());
     return ResponseEntity.ok().body(Stream.of(names).map(name -> {
       try {
-        return sub.delete(name).getPath();
+        return sub.delete(name);
       } catch (IOException e) {
         return null;
       }
     }).filter(path -> path != null));
-  }
-
-  private void expectWritableDirectory(FsItem fsItem)
-      throws FileNotFoundException, AccessDeniedException {
-    if (!fsItem.isDirectory()) {
-      throw new FileNotFoundException(fsItem.getPath().toString());
-    }
-
-    if (!fsItem.isWritable()) {
-      throw new AccessDeniedException(fsItem.getPath().toString());
-    }
   }
 
   @ExceptionHandler(AccessDeniedException.class)
