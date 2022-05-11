@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { uploadFiles, FsItem } from '../../../services/FilesService';
+import { uploadFiles } from '../../../services/FilesService';
+import { FsItem } from '../../../services/FsItem';
 
 const props = defineProps<{
   path: string[];

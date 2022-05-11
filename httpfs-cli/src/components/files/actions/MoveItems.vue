@@ -2,10 +2,11 @@
 import { computed } from '@vue/reactivity';
 import { reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { FsItem, fetchDirectoryItems } from '../../../services/FilesService';
+import { fetchDirectoryItems } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
 import FilesList from '../FilesList.vue';
 import Breadcrumb from '../Breadcrumb.vue';
+import { FsItem } from '../../../services/FsItem';
 
 const { t } = useI18n();
 

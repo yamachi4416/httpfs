@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { FsItem } from '../../../services/FilesService';
+import { FsItem } from '../../../services/FsItem';
 
 const props = defineProps<{
   item: FsItem;

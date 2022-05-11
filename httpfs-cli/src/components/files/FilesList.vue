@@ -2,11 +2,11 @@
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatSize } from '../../functions/fmt';
-import { FsItem } from '../../services/FilesService';
 import { sortable, SortableOptions } from '../util/Sortable';
 import FileIcon from './fileslist/FileIcon.vue';
 import { computed } from '@vue/reactivity';
 import { selectAllable } from '../util/SelectAllable';
+import { FsItem } from '../../services/FsItem';
 
 const props = withDefaults(
   defineProps<{

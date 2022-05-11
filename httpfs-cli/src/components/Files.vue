@@ -3,11 +3,7 @@ import { onBeforeMount, computed, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import {
-  fetchDirectoryItems,
-  deleteItems,
-  FsItem,
-} from '../services/FilesService';
+import { fetchDirectoryItems, deleteItems } from '../services/FilesService';
 
 import FilesList from './files/FilesList.vue';
 import Breadcrumb from './files/Breadcrumb.vue';
@@ -16,6 +12,7 @@ import FileUpload from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
 import MoveItems from './files/actions/MoveItems.vue';
 import { selectAllable } from './util/SelectAllable';
+import { FsItem } from '../services/FsItem';
 
 const route = useRoute();
 const router = useRouter();
