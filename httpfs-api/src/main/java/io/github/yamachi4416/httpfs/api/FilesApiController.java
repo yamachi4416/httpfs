@@ -16,13 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -140,23 +138,4 @@ public class FilesApiController {
       }
     }).filter(path -> path != null));
   }
-
-  @ExceptionHandler(AccessDeniedException.class)
-  public ResponseEntity<?> accessDenied(
-      AccessDeniedException e) {
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-  }
-
-  @ExceptionHandler(FileNotFoundException.class)
-  public ResponseEntity<?> fileNotFound(
-      FileNotFoundException e) {
-    return ResponseEntity.notFound().build();
-  }
-
-  @ExceptionHandler(Exception.class)
-  public ResponseEntity<?> serverError(Exception e) {
-    logger.error(e.getMessage(), e);
-    return ResponseEntity.internalServerError().build();
-  }
-
 }

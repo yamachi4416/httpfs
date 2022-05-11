@@ -1,6 +1,4 @@
-import { AppConfig } from '../config';
-
-const { ApiEndpoint } = AppConfig;
+import { ApiEndpoint } from '../config';
 
 export class FsItem {
   readonly path: string;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { uploadFiles } from '../../../services/FilesService';
+import { HttpException, uploadFiles } from '../../../services/FilesService';
 import { FsItem } from '../../../services/FsItem';
 
 const props = defineProps<{
@@ -10,7 +10,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'done', items: FsItem[]): void;
-  (e: 'upload', items: FsItem[]): void;
+  (e: 'upload', items: FsItem[], err?: HttpException): void;
 }>();
 
 const file = ref<HTMLInputElement>();

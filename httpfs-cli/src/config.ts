@@ -1,4 +1,2 @@
-export const AppConfig = {
-  ApiEndpoint: import.meta.env.VITE_APP_API_URL,
-  MaximumUploadSize: import.meta.env.VITE_APP_API_UPLOAD_MAX_SIZE,
-} as const;
+export const ApiEndpoint = import.meta.env.VITE_API_URL;
+export const MaximumUploadSize = parseInt(import.meta.env.VITE_API_UPLOAD_MAX_SIZE);

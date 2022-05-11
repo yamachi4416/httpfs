@@ -1,7 +1,5 @@
-import { AppConfig } from '../config';
+import { ApiEndpoint, MaximumUploadSize } from '../config';
 import { FsItem } from './FsItem';
-
-const { ApiEndpoint, MaximumUploadSize } = AppConfig;
 
 export class HttpException extends Error {
   status: number;
@@ -37,7 +35,7 @@ export async function fetchDirectoryItems(path: string[]): Promise<FsItem[]> {
 export async function uploadFiles(
   path: string[],
   files: FileList,
-  callback: (items: FsItem[]) => void = () => {}
+  callback: (items: FsItem[], err?: Error) => void = () => {}
 ): Promise<FsItem[]> {
   const groups = [[]];
 
@@ -45,7 +43,7 @@ export async function uploadFiles(
   let chunks = groups[0];
   for (const file of Array.from(files)) {
     if (size + file.size >= MaximumUploadSize) {
-      size = 0;
+      size = file.size;
       chunks = [file];
       groups.push(chunks);
     } else {
@@ -59,10 +57,19 @@ export async function uploadFiles(
     .map(async chunks => {
       const form = new FormData();
       chunks.forEach(file => form.append('files', file));
-      return fetchApi<object[]>(path, { method: 'put', body: form })
-        .then(items => items.map(item => FsItem.fromJson(item, path)))
-        .then(items => {
+
+      return fetchApi<object[]>(path, {
+        method: 'put',
+        body: form,
+      })
+        .then(files => {
+          const items = files.map(item => FsItem.fromJson(item, path));
           callback(items);
+          return items;
+        })
+        .catch(err => {
+          const items = chunks.map(file => FsItem.fromFile(file, path));
+          callback(items, err);
           return items;
         });
     });

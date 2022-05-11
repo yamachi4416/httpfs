@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_API_URL: string;
-  readonly VITE_API_UPLOAD_MAX_SIZE: number;
+  readonly VITE_API_UPLOAD_MAX_SIZE: string;
 }
 
 // eslint-disable-next-line no-unused-vars
