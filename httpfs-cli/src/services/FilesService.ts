@@ -1,5 +1,8 @@
+import { AppConfig } from '../config';
+
 const nop = () => {};
-const endpoint = '/api/files';
+
+const { ApiEndpoint, MaximumUploadSize } = AppConfig;
 
 export class FsItem {
   readonly path: string;
@@ -18,7 +21,7 @@ export class FsItem {
 
   constructor(props: FsItem) {
     Object.assign(this, props);
-    this.endpoint = `${endpoint}${this.path}`;
+    this.endpoint = `${ApiEndpoint}${this.path}`;
   }
 
   static fromJson(json: any, path: string[]): FsItem {
@@ -54,7 +57,7 @@ async function fetchApi<T>(
   path: string[],
   options: RequestInit = {}
 ): Promise<T> {
-  const endPoint = `${endpoint}/${path.join('/')}`;
+  const endPoint = `${ApiEndpoint}/${path.join('/')}`;
   const response = await fetch(endPoint, options);
   if (response.status >= 400) {
     throw new HttpException(response.status, response.statusText);
@@ -77,13 +80,12 @@ export async function uploadFiles(
   files: FileList,
   callback: (items: FsItem[]) => void = nop
 ): Promise<FsItem[]> {
-  const maxSize = 1048576; // TODO
   const groups = [[]];
 
   let size = 0;
   let chunks = groups[0];
   for (const file of Array.from(files)) {
-    if (size + file.size >= maxSize) {
+    if (size + file.size >= MaximumUploadSize) {
       size = 0;
       chunks = [file];
       groups.push(chunks);

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Files from './components/Files.vue';
+import Files from '../components/Files.vue';
 
 export default createRouter({
   history: createWebHistory(),

@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Node",
     "target": "ES5",
     "lib": ["ES2021", "DOM"],
     "types": ["@intlify/vite-plugin-vue-i18n/client"],
-    "jsx": "preserve"
+    "jsx": "preserve",
   }
 }
