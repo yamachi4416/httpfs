@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { createDirectory, HttpException } from '../../../services/FilesService';
+import { createDirectory } from '../../../services/FilesService';
 import Modal from '../../util/Modal.vue';
 import { vAutoFocus } from '../../../directives/vAutoFocus';
 import { useI18n } from 'vue-i18n';
 import { FsItem } from '../../../services/FsItem';
+import { HttpException } from '../../../services/HttpException';
 
 const props = defineProps<{
   path: string[];

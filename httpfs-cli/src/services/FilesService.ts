@@ -1,14 +1,6 @@
 import { ApiEndpoint, MaximumUploadSize } from '../config';
 import { FsItem } from './FsItem';
-
-export class HttpException extends Error {
-  status: number;
-
-  constructor(status: number, message: string = null) {
-    super(message);
-    this.status = status;
-  }
-}
+import { HttpException } from './HttpException';
 
 async function fetchApi<T>(
   path: string[],
