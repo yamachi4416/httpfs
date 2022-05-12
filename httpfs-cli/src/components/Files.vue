@@ -20,12 +20,9 @@ const { t } = useI18n();
 
 const path = ref(Array.from(route.params.path));
 const items = ref([] as FsItem[]);
-const parentPath = computed(() => {
-  if (path.value.length > 0) {
-    return `/${path.value.slice(0, path.value.length - 1).join('/')}`;
-  }
-  return '';
-});
+const parentPath = computed(() =>
+  path.value.length > 0 ? `/${path.value.slice(0, -1).join('/')}` : ''
+);
 
 const openMenu = ref(false);
 const selectAll = selectAllable({ items });
@@ -46,8 +43,14 @@ async function enterItem(item: FsItem) {
   }
 }
 
-async function onUpload(uploads: FsItem[]) {
-  const cdp = path.value.join('/');
+async function onUpload(uploads: FsItem[], err?: Error) {
+  if (err) {
+    // TODO
+    console.log(uploads, err);
+    return;
+  }
+
+  const cdp = parentPath.value || '/';
   const map = new Map<string, FsItem>();
   items.value.forEach((item: FsItem) => map.set(item.path, item));
   uploads.forEach(item => {
