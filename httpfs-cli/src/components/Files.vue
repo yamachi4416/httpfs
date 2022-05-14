@@ -155,12 +155,11 @@ const menuItems = [
       <FileUpload
         ref="fileUpload"
         :path="path"
-        @close="fetchItems"
         @done="fetchItems"
         @upload="onUpload"
       />
       <CreateDirectory ref="createDirectory" :path="path" @done="fetchItems" />
-      <MoveItems ref="moveItems" @close="fetchItems" @done="fetchItems" />
+      <MoveItems ref="moveItems" @done="fetchItems" />
       <Modal :show="openMenu" transision="scale" @close="openMenu = false">
         <ul class="card" :class="$style.menu">
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
