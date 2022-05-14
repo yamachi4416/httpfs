@@ -1,4 +1,4 @@
-import { ApiEndpoint } from '../config';
+import { ApiEndpoint } from '../../config';
 
 export class FsItem {
   readonly path: string;

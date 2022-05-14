@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeMount, onErrorCaptured, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { HttpException } from './services/HttpException';
+import { HttpException } from './services';
 
 const router = useRouter();
 

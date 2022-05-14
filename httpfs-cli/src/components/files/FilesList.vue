@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { formatSize } from '../../functions/fmt';
-import { sortable, SortableOptions } from '../util/Sortable';
-import FileIcon from './fileslist/FileIcon.vue';
 import { computed } from '@vue/reactivity';
-import { selectAllable } from '../util/SelectAllable';
-import { FsItem } from '../../services/FsItem';
+import { formatSize } from '../../functions/fmt';
+import { FsItem } from '../../services/files';
+import { selectAllable, sortable, SortableOptions } from '../../compositions';
+
+import FileIcon from './fileslist/FileIcon.vue';
 
 const props = withDefaults(
   defineProps<{

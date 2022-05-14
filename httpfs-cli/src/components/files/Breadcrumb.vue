@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { vScrollTo } from '../../directives/vScrollTo';
+import { vScrollTo } from '../../directives';
 
 const props = defineProps<{
   path: string[];

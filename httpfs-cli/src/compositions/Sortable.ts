@@ -1,5 +1,5 @@
 import { shallowReactive } from 'vue';
-import { comparatorKey } from '../../functions/util';
+import { comparatorKey } from '../functions/util';
 
 export interface SortableOptions<T> {
   idKey?: keyof T;
@@ -65,7 +65,3 @@ export function sortable<T>(options: SortableOptions<T>) {
     },
   };
 }
-
-export default {
-  sortable,
-};

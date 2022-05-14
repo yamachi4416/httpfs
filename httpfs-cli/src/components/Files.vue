@@ -3,16 +3,16 @@ import { onBeforeMount, computed, watch, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 
-import { fetchDirectoryItems, deleteItems } from '../services/FilesService';
+import { fetchDirectoryItems, deleteItems, FsItem } from '../services/files';
+import { selectAllable } from '../compositions';
 
+import Modal from './ui/Modal.vue';
 import FilesList from './files/FilesList.vue';
 import Breadcrumb from './files/Breadcrumb.vue';
-import Modal from './util/Modal.vue';
 import FileUpload from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
 import MoveItems from './files/actions/MoveItems.vue';
-import { selectAllable } from './util/SelectAllable';
-import { FsItem } from '../services/FsItem';
+
 
 const route = useRoute();
 const router = useRouter();
@@ -43,10 +43,10 @@ async function enterItem(item: FsItem) {
   }
 }
 
-async function onUpload(uploads: FsItem[], err?: Error) {
+function onUpload(uploads: FsItem[], failures: FsItem[], err?: Error) {
+  console.log(uploads, failures, err);
   if (err) {
     // TODO
-    console.log(uploads, err);
     return;
   }
 

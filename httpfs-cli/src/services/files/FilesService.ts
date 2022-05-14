@@ -1,6 +1,6 @@
-import { ApiEndpoint, MaximumUploadSize } from '../config';
+import { ApiEndpoint, MaximumUploadSize } from '../../config';
 import { FsItem } from './FsItem';
-import { HttpException } from './HttpException';
+import { HttpException } from '../HttpException';
 
 async function fetchApi<T>(
   path: string[],
@@ -95,10 +95,3 @@ export async function deleteItems(
     body: JSON.stringify(items.map(item => item.name)),
   });
 }
-
-export default {
-  fetchDirectoryItems,
-  uploadFiles,
-  createDirectory,
-  deleteItems,
-};
