@@ -92,6 +92,13 @@ public class SubFs {
     return null;
   }
 
+  public FsItem move(SubFs dest, String name) throws IOException {
+    var source = resolve(name);
+    var target = dest.safePath(name);
+    Files.move(source.getPath(), target, StandardCopyOption.ATOMIC_MOVE);
+    return new FsItem(target);
+  }
+
   private boolean isChild(Path path) {
     Path p = path.toAbsolutePath().normalize();
     return p.startsWith(this.docRoot);

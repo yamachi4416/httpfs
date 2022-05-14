@@ -78,9 +78,30 @@ export async function createDirectory(
 ): Promise<FsItem> {
   const form = new FormData();
   form.append('dirname', dirname);
-  return await fetchApi<object>(path, { method: 'post', body: form }).then(
-    item => FsItem.fromJson(item, path)
-  );
+  return await fetchApi<object>(path, {
+    method: 'post',
+    headers: {
+      'X-Method': 'MKCOL',
+    },
+    body: form,
+  }).then(item => FsItem.fromJson(item, path));
+}
+
+export async function moveItems(
+  path: string[],
+  destination: string,
+  items: FsItem[]
+): Promise<FsItem> {
+  const form = new FormData();
+  form.append('destination', destination);
+  items.forEach(item => form.append('names', item.name));
+  return await fetchApi<object>(path, {
+    method: 'post',
+    headers: {
+      'X-Method': 'MOVE',
+    },
+    body: form,
+  }).then(item => FsItem.fromJson(item, path));
 }
 
 export async function deleteItems(

@@ -13,7 +13,6 @@ import FileUpload from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
 import MoveItems from './files/actions/MoveItems.vue';
 
-
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -91,7 +90,7 @@ const menuItems = [
     get show() {
       return selectAll.any;
     },
-    click: () => moveItems.value?.open(path.value),
+    click: () => moveItems.value?.open(path.value, selectAll.items),
   },
   {
     name: 'createDirectory',
@@ -156,11 +155,12 @@ const menuItems = [
       <FileUpload
         ref="fileUpload"
         :path="path"
+        @close="fetchItems"
         @done="fetchItems"
         @upload="onUpload"
       />
       <CreateDirectory ref="createDirectory" :path="path" @done="fetchItems" />
-      <MoveItems ref="moveItems" />
+      <MoveItems ref="moveItems" @close="fetchItems" @done="fetchItems" />
       <Modal :show="openMenu" transision="scale" @close="openMenu = false">
         <ul class="card" :class="$style.menu">
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">

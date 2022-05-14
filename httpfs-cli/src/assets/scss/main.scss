@@ -34,6 +34,7 @@ $enable-responsive-typography: false;
 // Utilities
 @import '@picocss/pico/scss/utilities/accessibility'; // -ms-touch-action, aria-*
 @import '@picocss/pico/scss/utilities/reduce-motion'; // prefers-reduced-motion
+@import '@picocss/pico/scss/utilities/loading';
 
 // Custom Styles
 // --------------------

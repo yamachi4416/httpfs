@@ -2,21 +2,46 @@
 import { computed } from '@vue/reactivity';
 import { reactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { fetchDirectoryItems, FsItem } from '../../../services/files';
+import {
+  fetchDirectoryItems,
+  moveItems,
+  FsItem,
+} from '../../../services/files';
 
-import FilesList from '../FilesList.vue';
+import FilesList, { FileListBindItems } from '../FilesList.vue';
 import Breadcrumb from '../Breadcrumb.vue';
 import Modal from '../../ui/Modal.vue';
 
 const { t } = useI18n();
 
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'done'): void;
+}>();
+
 const state = reactive({
   show: false,
+  loading: true,
+  start: null as string[],
   paths: null as string[],
   items: [] as FsItem[],
+  targets: [] as FsItem[],
 });
 
 const current = computed(() => state.paths?.join('/'));
+const canMove = computed(
+  () =>
+    state.start?.join('/') !== current.value &&
+    !isTargetChild(`/${current.value}`)
+);
+
+function clear() {
+  state.start = null;
+  state.paths = null;
+  state.loading = true;
+  state.items = [];
+  state.targets = [];
+}
 
 function back() {
   if (state.paths.length > 0) {
@@ -32,13 +57,43 @@ function movePath(path: string) {
 
 function close() {
   state.show = false;
+  clear();
+  emit('close');
+}
+
+function isTargetChild(path: string): boolean {
+  return state.targets
+    .filter(target => target.directory)
+    .some(dir => `${path}/`.startsWith(`${dir.path}/`));
 }
 
 function enterItem(item: FsItem) {
-  if (item.directory) {
+  if (item.directory && !isTargetChild(item.path)) {
     state.paths = [...item.paths];
   }
 }
+
+async function move() {
+  if (state.loading || isTargetChild(current.value)) {
+    return;
+  }
+  state.loading = true;
+  await moveItems(state.start, current.value, state.targets).finally(() => {
+    state.loading = false;
+  });
+  state.show = false;
+  clear();
+  emit('done');
+}
+
+const bindItems: FileListBindItems = item => {
+  if (!item.directory) {
+    return { class: 'disabled' };
+  }
+  if (isTargetChild(item.path)) {
+    return { class: 'disabled' };
+  }
+};
 
 watch(
   () => current.value,
@@ -46,15 +101,21 @@ watch(
     if (value !== oldValue) {
       state.items = [];
       if (value != null) {
-        state.items = await fetchDirectoryItems(state.paths);
+        state.loading = true;
+        state.items = await fetchDirectoryItems(state.paths).finally(() => {
+          state.loading = false;
+        });
       }
     }
   }
 );
 
 defineExpose({
-  open(path: string[]) {
+  open(path: string[], targets: FsItem[]) {
+    clear();
     state.show = true;
+    state.targets = [...(targets || [])];
+    state.start = [...path];
     state.paths = [...path];
   },
   close,
@@ -83,10 +144,11 @@ defineExpose({
           @click="movePath"
         />
       </div>
-      <div class="move-items-panel-body">
+      <div class="move-items-panel-body" :aria-busy="state.loading">
         <FilesList
           :items="state.items"
           :sort-options="{ key: 'directory', direction: 'desc' }"
+          :bind-item="bindItems"
           @click="enterItem"
         />
       </div>
@@ -95,7 +157,9 @@ defineExpose({
           {{ t('actions.cancel') }}
         </a>
         <span class="devider"></span>
-        <a href="#" @click.prevent="">決定</a>
+        <a href="#" :class="{ secondary: !canMove }" @click.prevent="move">
+          決定
+        </a>
       </nav>
     </article>
   </Modal>
@@ -111,6 +175,7 @@ defineExpose({
     height: 100%;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
 
     &-header {
       display: flex;
@@ -131,6 +196,14 @@ defineExpose({
       flex: 1;
       overflow: auto;
       display: block;
+      &[aria-busy='true'] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        * {
+          display: none;
+        }
+      }
     }
 
     &-footer {

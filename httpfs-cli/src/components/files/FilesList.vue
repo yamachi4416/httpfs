@@ -13,11 +13,13 @@ const props = withDefaults(
     items: FsItem[];
     sortOptions?: SortableOptions<FsItem>;
     headers?: (keyof FsItem)[];
+    bindItem?: (item: FsItem) => BindeItemResult;
   }>(),
   {
     items: () => [],
     sortOptions: () => ({ key: 'directory', direction: 'desc' }),
     headers: () => ['name', 'lastModified', 'mimeType', 'size'],
+    bindItem: () => undefined,
   }
 );
 
@@ -39,10 +41,19 @@ function format(item: FsItem, key: keyof FsItem) {
     return d(value, 'long');
   }
   if (key === 'size') {
-    return formatSize(value as number);
+    return item.directory ? '' : formatSize(value as number);
   }
   return value;
 }
+</script>
+
+<script lang="ts">
+type BindeItemResult =
+  | {
+      class?: 'disabled';
+    }
+  | undefined;
+export type FileListBindItems = (item: FsItem) => BindeItemResult;
 </script>
 
 <template>
@@ -74,6 +85,7 @@ function format(item: FsItem, key: keyof FsItem) {
         :key="item.path"
         @click="emit('click', item)"
         @dblclick="emit('dblclick', item)"
+        v-bind="props.bindItem(item)"
       >
         <span v-for="col in headers" :class="col.key" :key="col.key">
           <span v-if="col.key === 'selected'" @click.stop @dblclick.stop>
@@ -125,6 +137,9 @@ function format(item: FsItem, key: keyof FsItem) {
   .tbody {
     .size > * {
       justify-content: flex-end;
+    }
+    .disabled {
+      opacity: 0.5;
     }
   }
 }

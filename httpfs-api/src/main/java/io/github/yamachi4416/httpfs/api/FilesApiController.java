@@ -111,7 +111,7 @@ public class FilesApiController {
     return ResponseEntity.ok().body(uploads);
   }
 
-  @PostMapping(params = { "dirname" })
+  @PostMapping(headers = { "x-method=MKCOL" })
   public ResponseEntity<?> createDirectory(
       FsItem fsItem,
       @RequestParam(name = "dirname", required = true) String dirname)
@@ -122,6 +122,23 @@ public class FilesApiController {
     } catch (InvalidPathException e) {
       return ResponseEntity.badRequest().build();
     }
+  }
+
+  @PostMapping(headers = { "x-method=MOVE" })
+  public ResponseEntity<?> move(
+      FsItem fsItem,
+      @RequestParam(name = "destination", required = true) String destination,
+      @RequestParam(name = "names", required = true) String[] names)
+      throws IOException {
+    var sub = fs.wSub(fsItem.getPath());
+    var dest = fs.wSub(fs.resolve(destination.split("/")).getPath());
+    return ResponseEntity.ok().body(Stream.of(names).map(name -> {
+      try {
+        return sub.move(dest, name);
+      } catch (IOException e) {
+        return null;
+      }
+    }).filter(path -> path != null));
   }
 
   @DeleteMapping
