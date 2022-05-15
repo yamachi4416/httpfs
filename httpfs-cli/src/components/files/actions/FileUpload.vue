@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { FsItem, uploadFiles, MultiStatus } from '../../../services/files';
+import { injectSharedState } from '../../../compositions';
+import { FsItem, MultiStatus, uploadFiles } from '../../../services/files';
 
 const props = defineProps<{
   path: string[];
@@ -12,24 +13,28 @@ const emit = defineEmits<{
   (e: 'upload', uploads: FsItem, err?: Error): void;
 }>();
 
+const shared = injectSharedState();
+
 const file = ref<HTMLInputElement>();
 
 const fileUpload = async () => {
   const { files } = file.value;
-  if (files.length > 0) {
+
+  if (files.length === 0) {
+    emit('close');
+    return;
+  }
+
+  await shared.withLoading(async () => {
     const items = await uploadFiles({
       path: props.path,
       files,
-      callback: (item, err) => {
-        emit('upload', item, err);
-      },
+      callback: (item, err) => emit('upload', item, err),
     }).finally(() => {
       file.value.value = null;
     });
     emit('done', items);
-  } else {
-    emit('close');
-  }
+  });
 };
 
 defineExpose({

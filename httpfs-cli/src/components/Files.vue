@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { onBeforeMount, computed, watch, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-
-import { fetchDirectoryItems, deleteItems, FsItem } from '../services/files';
-import { selectAllable } from '../compositions';
-
-import Modal from './ui/Modal.vue';
-import FilesList from './files/FilesList.vue';
-import Breadcrumb from './files/Breadcrumb.vue';
-import FileUpload, { OnFileUpload } from './files/actions/FileUpload.vue';
+import { useRoute, useRouter } from 'vue-router';
+import { injectSharedState, selectAllable } from '../compositions';
+import { deleteItems, fetchDirectoryItems, FsItem } from '../services/files';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
+import FileUpload, { OnFileUpload } from './files/actions/FileUpload.vue';
 import MoveItems from './files/actions/MoveItems.vue';
+import Breadcrumb from './files/Breadcrumb.vue';
+import FilesList from './files/FilesList.vue';
+import Modal from './ui/Modal.vue';
 
+const shared = injectSharedState();
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
@@ -36,7 +35,9 @@ const moveItems = ref<InstanceType<typeof MoveItems>>();
 
 async function fetchItems() {
   openMenu.value = false;
-  items.value = await fetchDirectoryItems(path.value);
+  await shared.withLoading(async () => {
+    items.value = await fetchDirectoryItems(path.value);
+  });
 }
 
 async function enterItem(item: FsItem) {
@@ -62,8 +63,8 @@ const onFileUpload: OnFileUpload = (item, err) => {
 };
 
 async function deleteSelectedItems(deletes: FsItem[]) {
-  await deleteItems(path.value, deletes).finally(
-    async () => await fetchItems()
+  await shared.withLoading(
+    async () => await deleteItems(path.value, deletes).finally(fetchItems)
   );
 }
 

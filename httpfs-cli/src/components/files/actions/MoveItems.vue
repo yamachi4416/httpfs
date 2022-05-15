@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed } from '@vue/reactivity';
-import { reactive, watch } from 'vue';
+import { reactive, watch, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { injectSharedState } from '../../../compositions';
 import {
   fetchDirectoryItems,
-  moveItems,
   FsItem,
+  moveItems,
   MultiStatus,
 } from '../../../services/files';
-
-import FilesList, { FileListBindItems } from '../FilesList.vue';
-import Breadcrumb from '../Breadcrumb.vue';
 import Modal from '../../ui/Modal.vue';
+import Breadcrumb from '../Breadcrumb.vue';
+import FilesList, { FileListBindItems } from '../FilesList.vue';
 
 const { t } = useI18n();
 
@@ -19,6 +18,8 @@ const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'done', items: MultiStatus[]): void;
 }>();
+
+const shared = injectSharedState();
 
 const state = reactive({
   show: false,
@@ -78,16 +79,18 @@ async function move() {
   if (state.loading || isTargetChild(current.value)) {
     return;
   }
-  state.loading = true;
-  const items = await moveItems({
-    path: state.start,
-    destination: current.value,
-    items: state.targets,
-  }).finally(() => {
-    state.loading = false;
+
+  await shared.withLoading(async () => {
+    const items = await moveItems({
+      path: state.start,
+      destination: current.value,
+      items: state.targets,
+    }).finally(() => {
+      state.loading = false;
+    });
+    clear();
+    emit('done', items);
   });
-  clear();
-  emit('done', items);
 }
 
 const bindItems: FileListBindItems = item => {

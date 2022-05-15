@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { onBeforeMount, onErrorCaptured, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Loading from './components/ui/Loading.vue';
+import { injectSharedState } from './compositions';
 import { HttpException } from './services';
 
+const shared = injectSharedState();
 const router = useRouter();
 
 onBeforeMount(() => {
@@ -31,5 +34,10 @@ onErrorCaptured((err, instalce, info) => {
 </script>
 
 <template>
-  <router-view />
+  <div>
+    <router-view />
+    <teleport to="body">
+      <Loading :show="shared.loading" />
+    </teleport>
+  </div>
 </template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { vAutoFocus } from '../../../directives';
 import { useI18n } from 'vue-i18n';
-import { createDirectory, FsItem } from '../../../services/files';
+import { injectSharedState } from '../../../compositions';
+import { vAutoFocus } from '../../../directives';
 import { HttpException } from '../../../services';
-
+import { createDirectory, FsItem } from '../../../services/files';
 import Modal from '../../ui/Modal.vue';
 
 const props = defineProps<{
@@ -17,6 +17,8 @@ const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'done', item: FsItem): void;
 }>();
+
+const shared = injectSharedState();
 
 const state = reactive({
   show: false,
@@ -32,7 +34,11 @@ function close() {
 }
 
 async function mkdir() {
-  if (state.dirname) {
+  if (!state.dirname) {
+    return;
+  }
+
+  await shared.withLoading(async () => {
     try {
       const item = await createDirectory({
         path: props.path,
@@ -48,7 +54,7 @@ async function mkdir() {
         throw e;
       }
     }
-  }
+  });
 }
 
 defineExpose({
