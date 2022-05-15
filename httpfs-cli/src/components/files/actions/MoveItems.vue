@@ -6,6 +6,7 @@ import {
   fetchDirectoryItems,
   moveItems,
   FsItem,
+  MultiStatus,
 } from '../../../services/files';
 
 import FilesList, { FileListBindItems } from '../FilesList.vue';
@@ -16,7 +17,7 @@ const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'done'): void;
+  (e: 'done', items: MultiStatus[]): void;
 }>();
 
 const state = reactive({
@@ -36,6 +37,7 @@ const canMove = computed(
 );
 
 function clear() {
+  state.show = false;
   state.start = null;
   state.paths = null;
   state.loading = true;
@@ -56,7 +58,6 @@ function movePath(path: string) {
 }
 
 function close() {
-  state.show = false;
   clear();
   emit('close');
 }
@@ -78,12 +79,15 @@ async function move() {
     return;
   }
   state.loading = true;
-  await moveItems(state.start, current.value, state.targets).finally(() => {
+  const items = await moveItems({
+    path: state.start,
+    destination: current.value,
+    items: state.targets,
+  }).finally(() => {
     state.loading = false;
   });
-  state.show = false;
   clear();
-  emit('done');
+  emit('done', items);
 }
 
 const bindItems: FileListBindItems = item => {
@@ -125,7 +129,7 @@ defineExpose({
 <template>
   <Modal
     class="move-items"
-    :transision="'slide'"
+    :transision="'scale'"
     :show="state.show"
     @close="close"
   >

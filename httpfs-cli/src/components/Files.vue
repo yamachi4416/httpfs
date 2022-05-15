@@ -9,7 +9,7 @@ import { selectAllable } from '../compositions';
 import Modal from './ui/Modal.vue';
 import FilesList from './files/FilesList.vue';
 import Breadcrumb from './files/Breadcrumb.vue';
-import FileUpload from './files/actions/FileUpload.vue';
+import FileUpload, { OnFileUpload } from './files/actions/FileUpload.vue';
 import CreateDirectory from './files/actions/CreateDirectory.vue';
 import MoveItems from './files/actions/MoveItems.vue';
 
@@ -22,6 +22,11 @@ const items = ref([] as FsItem[]);
 const parentPath = computed(() =>
   path.value.length > 0 ? `/${path.value.slice(0, -1).join('/')}` : ''
 );
+const itemMap = computed(() => {
+  const map = new Map<string, FsItem>();
+  items.value.forEach(item => map.set(item.path, item));
+  return map;
+});
 
 const openMenu = ref(false);
 const selectAll = selectAllable({ items });
@@ -42,24 +47,19 @@ async function enterItem(item: FsItem) {
   }
 }
 
-function onUpload(uploads: FsItem[], failures: FsItem[], err?: Error) {
-  console.log(uploads, failures, err);
+const onFileUpload: OnFileUpload = (item, err) => {
   if (err) {
     // TODO
+    console.log(err);
     return;
   }
-
-  const cdp = parentPath.value || '/';
-  const map = new Map<string, FsItem>();
-  items.value.forEach((item: FsItem) => map.set(item.path, item));
-  uploads.forEach(item => {
-    if (item.parent === cdp) {
-      map.has(item.path)
-        ? Object.assign(map.get(item.path), item)
-        : items.value.push(item);
-    }
-  });
-}
+  const cdp = `/${path.value.join('/')}`;
+  if (item.parent === cdp) {
+    itemMap.value.has(item.path)
+      ? Object.assign(itemMap.value.get(item.path), item)
+      : items.value.push(item);
+  }
+};
 
 async function deleteSelectedItems(deletes: FsItem[]) {
   await deleteItems(path.value, deletes).finally(
@@ -156,7 +156,7 @@ const menuItems = [
         ref="fileUpload"
         :path="path"
         @done="fetchItems"
-        @upload="onUpload"
+        @upload="onFileUpload"
       />
       <CreateDirectory ref="createDirectory" :path="path" @done="fetchItems" />
       <MoveItems ref="moveItems" @done="fetchItems" />

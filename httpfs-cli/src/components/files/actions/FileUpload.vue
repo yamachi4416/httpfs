@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { FsItem, uploadFiles } from '../../../services/files';
+import { FsItem, uploadFiles, MultiStatus } from '../../../services/files';
 
 const props = defineProps<{
   path: string[];
@@ -8,32 +8,25 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (
-    e: 'done',
-    uploads: FsItem[],
-    failures: { err: Error; items: FsItem[] }[]
-  ): void;
-  (e: 'upload', uploads: FsItem[], failures: FsItem[], err?: Error): void;
+  (e: 'done', uploads: MultiStatus[]): void;
+  (e: 'upload', uploads: FsItem, err?: Error): void;
 }>();
 
 const file = ref<HTMLInputElement>();
 
 const fileUpload = async () => {
   const { files } = file.value;
-  const failures = [] as { err: Error; items: FsItem[] }[];
   if (files.length > 0) {
-    const items = await uploadFiles(
-      props.path,
+    const items = await uploadFiles({
+      path: props.path,
       files,
-      (items: FsItem[], err) => {
-        const ngs = items.filter(item => !item.creationTime);
-        const oks = items.filter(item => item.creationTime);
-        emit('upload', oks, ngs, err);
-      }
-    ).finally(() => {
+      callback: (item, err) => {
+        emit('upload', item, err);
+      },
+    }).finally(() => {
       file.value.value = null;
     });
-    emit('done', items, failures);
+    emit('done', items);
   } else {
     emit('close');
   }
@@ -44,6 +37,10 @@ defineExpose({
     file.value?.click();
   },
 });
+</script>
+
+<script lang="ts">
+export type OnFileUpload = (item: FsItem, err?: Error) => void;
 </script>
 
 <template>

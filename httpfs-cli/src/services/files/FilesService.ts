@@ -1,6 +1,7 @@
 import { ApiEndpoint, MaximumUploadSize } from '../../config';
 import { FsItem } from './FsItem';
 import { HttpException } from '../HttpException';
+import { MultiStatus } from './MultiStatus';
 
 async function fetchApi<T>(
   path: string[],
@@ -24,11 +25,15 @@ export async function fetchDirectoryItems(path: string[]): Promise<FsItem[]> {
   }).then(items => items.map(item => FsItem.fromJson(item, path)));
 }
 
-export async function uploadFiles(
-  path: string[],
-  files: FileList,
-  callback: (items: FsItem[], err?: Error) => void = () => {}
-): Promise<FsItem[]> {
+export async function uploadFiles({
+  path = [],
+  files = new FileList(),
+  callback = () => {},
+}: {
+  path: string[];
+  files: FileList;
+  callback: (item: FsItem, err?: Error) => void;
+}): Promise<MultiStatus[]> {
   const groups = [[]];
 
   let size = 0;
@@ -50,19 +55,26 @@ export async function uploadFiles(
       const form = new FormData();
       chunks.forEach(file => form.append('files', file));
 
-      return fetchApi<object[]>(path, {
+      return fetchApi<MultiStatus[]>(path, {
         method: 'put',
         body: form,
       })
-        .then(files => {
-          const items = files.map(item => FsItem.fromJson(item, path));
-          callback(items);
-          return items;
+        .then(results => {
+          return results.map((result, idx) => {
+            const msts = MultiStatus.fromJson(result, path);
+            if (msts.isError && msts.item == null) {
+              msts.item = FsItem.fromFile(chunks[idx], path);
+            }
+            callback(msts.item, msts.toException());
+            return msts;
+          });
         })
         .catch(err => {
-          const items = chunks.map(file => FsItem.fromFile(file, path));
-          callback(items, err);
-          return items;
+          return chunks.map(file => {
+            const msts = MultiStatus.fromFileWithError(file, err, path);
+            callback(msts.item, msts.toException());
+            return msts;
+          });
         });
     });
 
@@ -72,36 +84,54 @@ export async function uploadFiles(
   );
 }
 
-export async function createDirectory(
-  path: string[],
-  dirname: string
-): Promise<FsItem> {
-  const form = new FormData();
-  form.append('dirname', dirname);
+export async function createDirectory({
+  path,
+  dirname,
+}: {
+  path: string[];
+  dirname: string;
+}): Promise<FsItem> {
   return await fetchApi<object>(path, {
     method: 'post',
     headers: {
+      'Content-Type': 'application/json',
       'X-Method': 'MKCOL',
     },
-    body: form,
+    body: JSON.stringify({
+      dirname,
+    }),
   }).then(item => FsItem.fromJson(item, path));
 }
 
-export async function moveItems(
-  path: string[],
-  destination: string,
-  items: FsItem[]
-): Promise<FsItem> {
-  const form = new FormData();
-  form.append('destination', destination);
-  items.forEach(item => form.append('names', item.name));
-  return await fetchApi<object>(path, {
+export async function moveItems({
+  path = [],
+  destination,
+  items = [],
+}: {
+  path: string[];
+  destination: string;
+  items: FsItem[];
+}): Promise<MultiStatus[]> {
+  return await fetchApi<MultiStatus[]>(path, {
     method: 'post',
     headers: {
+      'Content-Type': 'application/json',
       'X-Method': 'MOVE',
     },
-    body: form,
-  }).then(item => FsItem.fromJson(item, path));
+    body: JSON.stringify({
+      destination: destination || '/',
+      names: items.map(item => item.name),
+      overwrite: true,
+    }),
+  }).then(results => {
+    return results.map((result, idx) => {
+      const msts = MultiStatus.fromJson(result, path);
+      if (msts.isError && msts.item == null) {
+        msts.item = items[idx];
+      }
+      return msts;
+    });
+  });
 }
 
 export async function deleteItems(
@@ -113,6 +143,8 @@ export async function deleteItems(
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(items.map(item => item.name)),
+    body: JSON.stringify({
+      names: items.map(item => item.name),
+    }),
   });
 }

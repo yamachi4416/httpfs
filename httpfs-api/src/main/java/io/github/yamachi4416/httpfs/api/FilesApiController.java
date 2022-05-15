@@ -6,20 +6,22 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.InvalidPathException;
-import java.util.ArrayList;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -31,6 +33,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.HandlerMapping;
 
+import io.github.yamachi4416.httpfs.api.dto.DeleteItemsParam;
+import io.github.yamachi4416.httpfs.api.dto.MkColParam;
+import io.github.yamachi4416.httpfs.api.dto.MoveItemParam;
+import io.github.yamachi4416.httpfs.api.dto.MultiStatusResult;
 import io.github.yamachi4416.httpfs.fs.FsItem;
 import io.github.yamachi4416.httpfs.fs.SubFs;
 
@@ -101,24 +107,32 @@ public class FilesApiController {
       @RequestParam(required = true) MultipartFile[] files)
       throws AccessDeniedException, FileNotFoundException {
     var sub = fs.wSub(fsItem.getPath());
-    var uploads = new ArrayList<>();
-
-    for (var file : files) {
-      uploads.add(sub.createFile(
-          file.getOriginalFilename(), () -> file.getInputStream()));
-    }
-
-    return ResponseEntity.ok().body(uploads);
+    return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+        .body(Stream.of(files).map(file -> {
+          try {
+            return MultiStatusResult.ofOverWritable(
+                sub.createFile(file.getOriginalFilename(), file::getInputStream));
+          } catch (IOException e) {
+            return MultiStatusResult.ofIOException(e);
+          }
+        }));
   }
 
   @PostMapping(headers = { "x-method=MKCOL" })
-  public ResponseEntity<?> createDirectory(
+  public ResponseEntity<?> mkcol(
       FsItem fsItem,
-      @RequestParam(name = "dirname", required = true) String dirname)
+      @RequestBody @Valid MkColParam param,
+      BindingResult binding)
       throws IOException {
+    if (binding.hasErrors()) {
+      return ResponseEntity.badRequest().build();
+    }
+
     try {
       var sub = fs.wSub(fsItem.getPath());
-      return ResponseEntity.ok().body(sub.createDirectory(dirname));
+      return ResponseEntity
+          .status(HttpStatus.CREATED)
+          .body(sub.createDirectory(param.getDirname()));
     } catch (InvalidPathException e) {
       return ResponseEntity.badRequest().build();
     }
@@ -127,27 +141,39 @@ public class FilesApiController {
   @PostMapping(headers = { "x-method=MOVE" })
   public ResponseEntity<?> move(
       FsItem fsItem,
-      @RequestParam(name = "destination", required = true) String destination,
-      @RequestParam(name = "names", required = true) String[] names)
+      @RequestBody @Valid MoveItemParam param,
+      BindingResult binding)
       throws IOException {
+    if (binding.hasErrors()) {
+      return ResponseEntity.badRequest().build();
+    }
+
     var sub = fs.wSub(fsItem.getPath());
-    var dest = fs.wSub(fs.resolve(destination.split("/")).getPath());
-    return ResponseEntity.ok().body(Stream.of(names).map(name -> {
-      try {
-        return sub.move(dest, name);
-      } catch (IOException e) {
-        return null;
-      }
-    }).filter(path -> path != null));
+    var dest = fs.wSub(fs.resolve(param.getDestination().split("/")).getPath());
+    return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+        .body(Stream.of(param.getNames()).map(name -> {
+          try {
+            return MultiStatusResult.ofOverWritable(
+                sub.move(dest, name, param.isOverwrite()));
+          } catch (IOException e) {
+            logger.error("Item Move Faild.", e);
+            return MultiStatusResult.ofIOException(e);
+          }
+        }));
   }
 
   @DeleteMapping
   public ResponseEntity<?> delete(
       FsItem fsItem,
-      @RequestBody(required = true) String[] names)
+      @RequestBody @Valid DeleteItemsParam param,
+      BindingResult binding)
       throws IOException {
+    if (binding.hasErrors()) {
+      return ResponseEntity.badRequest().build();
+    }
+
     var sub = fs.wSub(fsItem.getPath());
-    return ResponseEntity.ok().body(Stream.of(names).map(name -> {
+    return ResponseEntity.ok().body(Stream.of(param.getNames()).map(name -> {
       try {
         return sub.delete(name);
       } catch (IOException e) {

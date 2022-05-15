@@ -34,7 +34,10 @@ function close() {
 async function mkdir() {
   if (state.dirname) {
     try {
-      const item = await createDirectory(props.path, state.dirname);
+      const item = await createDirectory({
+        path: props.path,
+        dirname: state.dirname,
+      });
       state.show = false;
       state.dirname = '';
       emit('done', item);

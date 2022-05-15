@@ -4,15 +4,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.FileSystemUtils;
+
+import io.github.yamachi4416.httpfs.fs.dto.OverWritableResult;
 
 public class SubFs {
   private static final Logger logger = LoggerFactory.getLogger(SubFs.class);
@@ -68,14 +72,16 @@ public class SubFs {
         .map(FsItem::new);
   }
 
-  public FsItem createFile(String fileName, GetInputStream getInputStream) throws AccessDeniedException {
+  public OverWritableResult createFile(String fileName, GetInputStream getInputStream) throws IOException {
     var path = safePath(fileName);
+    var ret = new OverWritableResult(path);
+
     try (var in = getInputStream.get()) {
       Files.copy(in, path, StandardCopyOption.REPLACE_EXISTING);
-    } catch (IOException e) {
-      logger.error("File Save Fail.", e);
+      ret.setItem(new FsItem(path));
     }
-    return new FsItem(path);
+
+    return ret;
   }
 
   public FsItem createDirectory(String dirname) throws IOException {
@@ -86,17 +92,43 @@ public class SubFs {
 
   public FsItem delete(String name) throws IOException {
     var path = safePath(name);
-    if (FileSystemUtils.deleteRecursively(path)) {
-      return new FsItem(path);
-    }
-    return null;
+
+    Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+      @Override
+      public FileVisitResult visitFile(
+          Path file, BasicFileAttributes attrs) throws IOException {
+        Files.deleteIfExists(file);
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult postVisitDirectory(
+          Path dir, IOException exc) throws IOException {
+        Files.deleteIfExists(dir);
+        return FileVisitResult.CONTINUE;
+      }
+    });
+
+    return new FsItem(path);
   }
 
-  public FsItem move(SubFs dest, String name) throws IOException {
+  public OverWritableResult move(SubFs dest, String name, boolean overWrite) throws IOException {
     var source = resolve(name);
     var target = dest.safePath(name);
-    Files.move(source.getPath(), target, StandardCopyOption.ATOMIC_MOVE);
-    return new FsItem(target);
+    var ret = new OverWritableResult();
+
+    if (overWrite) {
+      if (Files.exists(target)) {
+        ret.setOverwrite(true);
+      }
+      Files.move(source.getPath(), target, StandardCopyOption.REPLACE_EXISTING);
+    } else {
+      Files.move(source.getPath(), target);
+    }
+
+    ret.setItem(new FsItem(target));
+
+    return ret;
   }
 
   private boolean isChild(Path path) {
