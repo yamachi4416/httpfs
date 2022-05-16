@@ -9,10 +9,10 @@ function getSharedState() {
     get loading() {
       return state.loading;
     },
-    async withLoading(func: () => any) {
+    async withLoading<T>(func: () => T): Promise<T> {
       try {
         state.loading = true;
-        await func();
+        return await func();
       } finally {
         state.loading = false;
       }

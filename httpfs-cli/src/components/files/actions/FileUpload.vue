@@ -25,16 +25,16 @@ const fileUpload = async () => {
     return;
   }
 
-  await shared.withLoading(async () => {
-    const items = await uploadFiles({
+  const items = await shared.withLoading(() =>
+    uploadFiles({
       path: props.path,
       files,
       callback: (item, err) => emit('upload', item, err),
     }).finally(() => {
       file.value.value = null;
-    });
-    emit('done', items);
-  });
+    })
+  );
+  emit('done', items);
 };
 
 defineExpose({

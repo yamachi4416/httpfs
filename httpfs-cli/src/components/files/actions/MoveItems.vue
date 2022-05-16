@@ -80,17 +80,17 @@ async function move() {
     return;
   }
 
-  await shared.withLoading(async () => {
-    const items = await moveItems({
+  const items = await shared.withLoading(() =>
+    moveItems({
       path: state.start,
       destination: current.value,
       items: state.targets,
     }).finally(() => {
       state.loading = false;
-    });
-    clear();
-    emit('done', items);
-  });
+    })
+  );
+  clear();
+  emit('done', items);
 }
 
 const bindItems: FileListBindItems = item => {

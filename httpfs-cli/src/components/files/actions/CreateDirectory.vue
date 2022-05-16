@@ -26,10 +26,14 @@ const state = reactive({
   invalid: false,
 });
 
-function close() {
+function clear() {
   state.show = false;
   state.dirname = '';
   state.invalid = false;
+}
+
+function close() {
+  clear();
   emit('close');
 }
 
@@ -38,27 +42,24 @@ async function mkdir() {
     return;
   }
 
-  await shared.withLoading(async () => {
-    try {
-      const item = await createDirectory({
-        path: props.path,
-        dirname: state.dirname,
-      });
-      state.show = false;
-      state.dirname = '';
-      emit('done', item);
-    } catch (e) {
-      if (e instanceof HttpException) {
-        state.invalid = true;
-      } else {
-        throw e;
-      }
+  try {
+    const item = await shared.withLoading(() =>
+      createDirectory({ path: props.path, dirname: state.dirname })
+    );
+    clear();
+    emit('done', item);
+  } catch (e) {
+    if (e instanceof HttpException) {
+      state.invalid = true;
+    } else {
+      throw e;
     }
-  });
+  }
 }
 
 defineExpose({
   open() {
+    clear();
     state.show = true;
   },
 });

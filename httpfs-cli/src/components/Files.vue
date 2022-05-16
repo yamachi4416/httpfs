@@ -35,9 +35,7 @@ const moveItems = ref<InstanceType<typeof MoveItems>>();
 
 async function fetchItems() {
   openMenu.value = false;
-  await shared.withLoading(async () => {
-    items.value = await fetchDirectoryItems(path.value);
-  });
+  items.value = await shared.withLoading(() => fetchDirectoryItems(path.value));
 }
 
 async function enterItem(item: FsItem) {
@@ -63,8 +61,8 @@ const onFileUpload: OnFileUpload = (item, err) => {
 };
 
 async function deleteSelectedItems(deletes: FsItem[]) {
-  await shared.withLoading(
-    async () => await deleteItems(path.value, deletes).finally(fetchItems)
+  await shared.withLoading(() =>
+    deleteItems(path.value, deletes).finally(fetchItems)
   );
 }
 
