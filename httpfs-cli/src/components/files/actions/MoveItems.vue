@@ -76,7 +76,7 @@ function enterItem(item: FsItem) {
 }
 
 async function move() {
-  if (state.loading || isTargetChild(current.value)) {
+  if (state.loading || !canMove.value) {
     return;
   }
 
