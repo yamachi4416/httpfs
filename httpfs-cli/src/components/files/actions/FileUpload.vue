@@ -9,8 +9,8 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'done', uploads: MultiStatus[]): void;
-  (e: 'upload', uploads: FsItem, err?: Error): void;
+  (e: 'progress', item: FsItem, err?: Error): void;
+  (e: 'done', mtsts: MultiStatus[]): void;
 }>();
 
 const shared = injectSharedState();
@@ -25,16 +25,16 @@ const fileUpload = async () => {
     return;
   }
 
-  const items = await shared.withLoading(() =>
+  const mtsts = await shared.withLoading(() =>
     uploadFiles({
       path: props.path,
       files,
-      callback: (item, err) => emit('upload', item, err),
+      callback: (item, err) => emit('progress', item, err),
     }).finally(() => {
       file.value.value = null;
     })
   );
-  emit('done', items);
+  emit('done', mtsts);
 };
 
 defineExpose({
@@ -45,7 +45,7 @@ defineExpose({
 </script>
 
 <script lang="ts">
-export type OnFileUpload = (item: FsItem, err?: Error) => void;
+export type OnFileUploadProgress = (item: FsItem, err?: Error) => void;
 </script>
 
 <template>

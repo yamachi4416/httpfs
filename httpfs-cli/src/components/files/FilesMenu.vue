@@ -1,0 +1,180 @@
+<script setup lang="ts">
+import { computed } from '@vue/reactivity';
+import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { injectSharedState, selectAllable } from '../../compositions';
+import { deleteItems, FsItem, MultiStatus } from '../../services/files';
+import Modal from '../ui/Modal.vue';
+import CreateDirectory from './actions/CreateDirectory.vue';
+import FileUpload from './actions/FileUpload.vue';
+import MoveItems from './actions/MoveItems.vue';
+
+const props = withDefaults(
+  defineProps<{
+    path: string[];
+    items: FsItem[];
+  }>(),
+  {
+    path: () => [],
+    items: () => [],
+  }
+);
+
+const emit = defineEmits<{
+  (e: 'cancel');
+  (e: 'done');
+  (e: 'upload-progress', item: FsItem, err?: Error);
+  (e: 'upload-done', mtsts: MultiStatus[]);
+  (e: 'move-progress', item: FsItem, err?: Error);
+  (e: 'move-done', mtsts: MultiStatus[]);
+  (e: 'delete-done', names: string[]);
+  (e: 'mkdir-done');
+}>();
+
+const { t } = useI18n();
+const items = computed(() => props.items);
+const shared = injectSharedState();
+const openMenu = ref(false);
+const selectAll = selectAllable({ items });
+const createDirectory = ref<InstanceType<typeof CreateDirectory>>();
+const fileUpload = ref<InstanceType<typeof FileUpload>>();
+const moveItems = ref<InstanceType<typeof MoveItems>>();
+
+const menuItems = [
+  {
+    name: 'deleteFiles',
+    get show() {
+      return selectAll.any;
+    },
+    click: deleteSelectedItems,
+  },
+  {
+    name: 'moveItems',
+    get show() {
+      return selectAll.any;
+    },
+    click: () => moveItems.value?.open(props.path, selectAll.items),
+  },
+  {
+    name: 'createDirectory',
+    get show() {
+      return !selectAll.any;
+    },
+    click: () => createDirectory.value?.open(),
+  },
+  {
+    name: 'uploadFiles',
+    get show() {
+      return !selectAll.any;
+    },
+    click: () => fileUpload.value?.open(),
+  },
+];
+
+async function deleteSelectedItems() {
+  const mtsts = await shared.withLoading(() =>
+    deleteItems(props.path, selectAll.items)
+  );
+  done(emit('delete-done', mtsts));
+}
+
+function done(...p: any[]) {
+  emit('done');
+  close();
+}
+
+function open() {
+  openMenu.value = true;
+}
+
+function close() {
+  openMenu.value = false;
+}
+
+function cancel() {
+  if (selectAll.any) {
+    emit('cancel');
+  }
+  close();
+}
+
+defineExpose({
+  open,
+  close,
+});
+</script>
+
+<script lang="ts">
+export type OnProgressAction = (
+  item: FsItem,
+  err?: Error
+) => void | Promise<void>;
+export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
+</script>
+
+<template>
+  <a href="#" class="icon secondary" @click.prevent="open">
+    more_vert
+    <Teleport to="body">
+      <FileUpload
+        ref="fileUpload"
+        :path="path"
+        @progress="(item, err) => emit('upload-progress', item, err)"
+        @done="mtsts => done(emit('upload-done', mtsts))"
+        @close="cancel"
+      />
+      <CreateDirectory
+        ref="createDirectory"
+        :path="path"
+        @done="() => done(emit('mkdir-done'))"
+      />
+      <MoveItems
+        ref="moveItems"
+        :targets="selectAll.items"
+        @progress="(item, err) => emit('move-progress', item, err)"
+        @done="mtsts => done(emit('move-done', mtsts))"
+        @close="cancel"
+      />
+      <Modal :show="openMenu" transision="scale" @close="close">
+        <ul class="card" :class="$style.menu">
+          <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
+            <a
+              href="#"
+              class="secondary"
+              @click.prevent="(openMenu = false), item.click()"
+            >
+              {{ t(`actions.${item.name}`) }}
+            </a>
+          </li>
+        </ul>
+      </Modal>
+    </Teleport>
+  </a>
+</template>
+
+<style module lang="scss">
+.menu {
+  --block-spacing-vertical: 1rem;
+
+  position: absolute;
+  top: var(--block-spacing-vertical);
+  right: var(--block-spacing-horizontal);
+  transform-origin: top right;
+  border-radius: calc(var(--border-radius) * 2);
+
+  li,
+  a {
+    width: 100%;
+    white-space: nowrap;
+    margin: 0;
+  }
+
+  li {
+    padding: 0;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+</style>

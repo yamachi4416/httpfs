@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { reactive, watch, computed } from 'vue';
+import { computed, reactive, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { injectSharedState } from '../../../compositions';
+import { injectSharedState, uniqueKeyMap } from '../../../compositions';
 import {
   fetchDirectoryItems,
   FsItem,
@@ -14,9 +14,17 @@ import FilesList, { FileListBindItems } from '../FilesList.vue';
 
 const { t } = useI18n();
 
+const props = withDefaults(
+  defineProps<{
+    targets: FsItem[];
+  }>(),
+  { targets: () => [] }
+);
+
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'done', items: MultiStatus[]): void;
+  (e: 'progress', item: FsItem, err?: Error);
+  (e: 'done', mtsts: MultiStatus[]): void;
 }>();
 
 const shared = injectSharedState();
@@ -27,7 +35,6 @@ const state = reactive({
   start: null as string[],
   paths: null as string[],
   items: [] as FsItem[],
-  targets: [] as FsItem[],
 });
 
 const current = computed(() => state.paths?.join('/'));
@@ -36,6 +43,7 @@ const canMove = computed(
     state.start?.join('/') !== current.value &&
     !isTargetChild(`/${current.value}`)
 );
+const targetsMap = uniqueKeyMap(toRef(props, 'targets'), 'path');
 
 function clear() {
   state.show = false;
@@ -43,7 +51,6 @@ function clear() {
   state.paths = null;
   state.loading = true;
   state.items = [];
-  state.targets = [];
 }
 
 function back() {
@@ -64,7 +71,7 @@ function close() {
 }
 
 function isTargetChild(path: string): boolean {
-  return state.targets
+  return props.targets
     .filter(target => target.directory)
     .some(dir => `${path}/`.startsWith(`${dir.path}/`));
 }
@@ -80,17 +87,29 @@ async function move() {
     return;
   }
 
-  const items = await shared.withLoading(() =>
+  const mtsts = await shared.withLoading(() =>
     moveItems({
       path: state.start,
       destination: current.value,
-      items: state.targets,
+      items: props.targets,
     }).finally(() => {
       state.loading = false;
     })
   );
-  clear();
-  emit('done', items);
+
+  if (mtsts.some(({ isError }) => isError)) {
+    const map = targetsMap.value;
+    mtsts.forEach(mtst => {
+      if (!mtst.isError && map.has(mtst.item.path)) {
+        map.get(mtst.item.path).selected = false;
+        state.items.push(mtst.item);
+      }
+      emit('progress', mtst.item, mtst.toException());
+    });
+  } else {
+    clear();
+    emit('done', mtsts);
+  }
 }
 
 const bindItems: FileListBindItems = item => {
@@ -121,7 +140,6 @@ defineExpose({
   open(path: string[], targets: FsItem[]) {
     clear();
     state.show = true;
-    state.targets = [...(targets || [])];
     state.start = [...path];
     state.paths = [...path];
   },
