@@ -2,16 +2,15 @@
 import { reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { injectSharedState } from '../../../compositions';
-import { vAutoFocus } from '../../../directives';
 import { HttpException } from '../../../services';
 import { createDirectory, FsItem } from '../../../services/files';
-import Modal from '../../ui/Modal.vue';
+import Prompt from '../../ui/Prompt.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   path: string[];
 }>();
-
-const { t } = useI18n();
 
 const emit = defineEmits<{
   (e: 'close'): void;
@@ -66,34 +65,14 @@ defineExpose({
 </script>
 
 <template>
-  <Modal :show="state.show" transision="slide" @close="close">
-    <article class="card">
-      <h3>{{ t('messages.newDirectory') }}</h3>
-      <p>
-        <input
-          type="text"
-          tabindex="1"
-          v-auto-focus="state.show"
-          v-model="state.dirname"
-          :aria-invalid="state.invalid || null"
-          @input="state.invalid = false"
-        />
-      </p>
-      <nav>
-        <a href="#" tabindex="1" role="link" @click.prevent="close">
-          {{ t('actions.cancel') }}
-        </a>
-        <span class="devider"></span>
-        <a href="#" tabindex="2" role="link" @click.prevent="mkdir">
-          {{ t('actions.create') }}
-        </a>
-      </nav>
-    </article>
-  </Modal>
+  <Prompt
+    :show="state.show"
+    :invalid="state.invalid"
+    :title="t('messages.newDirectory')"
+    :action="t('actions.create')"
+    v-model="state.dirname"
+    @cancel="close"
+    @ok="mkdir"
+    @update:invalid="(value) => (state.invalid = value)"
+  />
 </template>
-
-<style scoped lang="scss">
-.card {
-  width: 600px;
-}
-</style>
