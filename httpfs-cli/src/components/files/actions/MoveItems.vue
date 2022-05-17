@@ -183,7 +183,7 @@ defineExpose({
         </a>
         <span class="devider"></span>
         <a href="#" :class="{ secondary: !canMove }" @click.prevent="move">
-          決定
+          {{ t('actions.decision') }}
         </a>
       </nav>
     </article>

@@ -24,6 +24,9 @@
         "create": {
           "type": "string"
         },
+        "decision": {
+          "type": "string"
+        },
         "deleteFiles": {
           "type": "string"
         },
