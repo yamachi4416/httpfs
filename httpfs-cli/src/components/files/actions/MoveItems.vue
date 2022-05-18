@@ -14,13 +14,6 @@ import FilesList, { FileListBindItems } from '../FilesList.vue';
 
 const { t } = useI18n();
 
-const props = withDefaults(
-  defineProps<{
-    targets: FsItem[];
-  }>(),
-  { targets: () => [] }
-);
-
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'progress', item: FsItem, err?: Error);
@@ -35,6 +28,7 @@ const state = reactive({
   start: null as string[],
   paths: null as string[],
   items: [] as FsItem[],
+  targets: [] as FsItem[],
 });
 
 const current = computed(() => state.paths?.join('/'));
@@ -43,7 +37,7 @@ const canMove = computed(
     state.start?.join('/') !== current.value &&
     !isTargetChild(`/${current.value}`)
 );
-const targetsMap = uniqueKeyMap(toRef(props, 'targets'), 'path');
+const targetsMap = uniqueKeyMap(toRef(state, 'targets'), 'path');
 
 function clear() {
   state.show = false;
@@ -71,7 +65,7 @@ function close() {
 }
 
 function isTargetChild(path: string): boolean {
-  return props.targets
+  return state.targets
     .filter(target => target.directory)
     .some(dir => `${path}/`.startsWith(`${dir.path}/`));
 }
@@ -91,7 +85,7 @@ async function move() {
     moveItems({
       path: state.start,
       destination: current.value,
-      items: props.targets,
+      items: state.targets,
     }).finally(() => {
       state.loading = false;
     })
@@ -142,6 +136,7 @@ defineExpose({
     state.show = true;
     state.start = [...path];
     state.paths = [...path];
+    state.targets = [...targets]
   },
   close,
 });

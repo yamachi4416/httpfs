@@ -1,15 +1,12 @@
 @import '../variables';
 
-.transision-modal-slide {
+.transision-modal-slide,
+.transision-modal-slidedown {
   background-color: rgb(0 0 0 / 30%);
 
   > * {
     align-self: flex-start;
     transform: translateY(0);
-
-    @include media-less-sm {
-      align-self: flex-end;
-    }
   }
 
   &-enter-active,
@@ -27,7 +24,20 @@
 
     > * {
       transform: translateY(-150%);
+    }
+  }
+}
 
+.transision-modal-slide {
+  > * {
+    @include media-less-sm {
+      align-self: flex-end;
+    }
+  }
+
+  &-enter-from,
+  &-leave-to {
+    > * {
       @include media-less-sm {
         transform: translateY(150%);
       }

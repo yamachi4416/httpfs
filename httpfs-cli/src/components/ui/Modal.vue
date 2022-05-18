@@ -5,7 +5,7 @@ import { defineModal } from '../../plugins/modals';
 
 const props = defineProps<{
   show: boolean;
-  transision?: 'slide' | 'fade' | 'scale';
+  transision?: 'slide' | 'slidedown' | 'fade' | 'scale';
 }>();
 
 const transisionName = computed(() => {

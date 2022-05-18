@@ -2,10 +2,11 @@
 import { computed } from '@vue/reactivity';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { injectSharedState, selectAllable } from '../../compositions';
-import { deleteItems, FsItem, MultiStatus } from '../../services/files';
+import { selectAllable } from '../../compositions';
+import { FsItem, MultiStatus } from '../../services/files';
 import Modal from '../ui/Modal.vue';
 import CreateDirectory from './actions/CreateDirectory.vue';
+import FileDelete from './actions/FileDelete.vue';
 import FileUpload from './actions/FileUpload.vue';
 import MoveItems from './actions/MoveItems.vue';
 
@@ -33,12 +34,12 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const items = computed(() => props.items);
-const shared = injectSharedState();
 const openMenu = ref(false);
 const selectAll = selectAllable({ items });
 const createDirectory = ref<InstanceType<typeof CreateDirectory>>();
 const fileUpload = ref<InstanceType<typeof FileUpload>>();
 const moveItems = ref<InstanceType<typeof MoveItems>>();
+const fileDelete = ref<InstanceType<typeof FileDelete>>();
 
 const menuItems = [
   {
@@ -46,7 +47,7 @@ const menuItems = [
     get show() {
       return selectAll.any;
     },
-    click: deleteSelectedItems,
+    click: () => fileDelete.value?.open(props.path, selectAll.items),
   },
   {
     name: 'moveItems',
@@ -70,13 +71,6 @@ const menuItems = [
     click: () => fileUpload.value?.open(),
   },
 ];
-
-async function deleteSelectedItems() {
-  const mtsts = await shared.withLoading(() =>
-    deleteItems(props.path, selectAll.items)
-  );
-  done(emit('delete-done', mtsts));
-}
 
 function done(...p: any[]) {
   emit('done');
@@ -130,10 +124,13 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
       />
       <MoveItems
         ref="moveItems"
-        :targets="selectAll.items"
         @progress="(item, err) => emit('move-progress', item, err)"
         @done="mtsts => done(emit('move-done', mtsts))"
         @close="cancel"
+      />
+      <FileDelete
+        ref="fileDelete"
+        @done="() => done(emit('delete-done', []))"
       />
       <Modal :show="openMenu" transision="scale" @close="close">
         <ul class="card" :class="$style.menu">

@@ -2,9 +2,11 @@
   "$schema": "../schema.json",
   "messages": {
     "newDirectory": "新しいフォルダ",
-    "selectedCount": "{0} 件選択"
+    "selectedCount": "{0} 件選択",
+    "deleteFileConfirm": "選択したファイルを削除しますか？"
   },
   "actions": {
+    "ok": "OK",
     "cancel": "キャンセル",
     "create": "作成",
     "decision": "決定",
