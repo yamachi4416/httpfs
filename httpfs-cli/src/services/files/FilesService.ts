@@ -137,8 +137,8 @@ export async function moveItems({
 export async function deleteItems(
   path: string[],
   items: FsItem[]
-): Promise<string[]> {
-  return await fetchApi<string[]>(path, {
+): Promise<MultiStatus[]> {
+  return await fetchApi<MultiStatus[]>(path, {
     method: 'delete',
     headers: {
       'Content-Type': 'application/json',
@@ -146,5 +146,13 @@ export async function deleteItems(
     body: JSON.stringify({
       names: items.map(item => item.name),
     }),
+  }).then(results => {
+    return results.map((result, idx) => {
+      const msts = MultiStatus.fromJson(result, path);
+      if (msts.isError && msts.item == null) {
+        msts.item = items[idx];
+      }
+      return msts;
+    });
   });
 }

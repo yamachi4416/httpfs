@@ -2,7 +2,7 @@
 import { reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { injectSharedState } from '../../../compositions';
-import { deleteItems, FsItem } from '../../../services/files';
+import { deleteItems, FsItem, MultiStatus } from '../../../services/files';
 import Confirm from '../../ui/Confirm.vue';
 
 const { t } = useI18n();
@@ -17,7 +17,7 @@ const state = reactive({
 
 const emit = defineEmits<{
   (e: 'close'): void;
-  (e: 'done', mtsts: string[]): void;
+  (e: 'done', mtsts: MultiStatus[]): void;
 }>();
 
 function clear() {
@@ -35,7 +35,6 @@ async function deleteSelectedItems() {
   const mtsts = await shared.withLoading(() =>
     deleteItems(state.path, state.targets)
   );
-  // TODO
   clear();
   emit('done', mtsts);
 }

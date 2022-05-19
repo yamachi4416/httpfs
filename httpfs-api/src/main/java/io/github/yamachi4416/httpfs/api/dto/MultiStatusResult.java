@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileSystemException;
 
 import org.springframework.http.HttpStatus;
 
@@ -40,6 +41,8 @@ public class MultiStatusResult<T> {
   public static MultiStatusResult<?> ofIOException(IOException e) {
     if (e instanceof FileNotFoundException) {
       return new MultiStatusResult<>(HttpStatus.NOT_FOUND, null);
+    } else if (e instanceof FileSystemException) {
+      return new MultiStatusResult<>(HttpStatus.CONFLICT, null);
     } else if (e instanceof FileAlreadyExistsException) {
       return new MultiStatusResult<>(HttpStatus.CONFLICT, null);
     } else if (e instanceof DirectoryNotEmptyException) {

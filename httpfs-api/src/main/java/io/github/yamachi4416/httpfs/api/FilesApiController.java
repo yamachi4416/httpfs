@@ -173,12 +173,15 @@ public class FilesApiController {
     }
 
     var sub = fs.wSub(fsItem.getPath());
-    return ResponseEntity.ok().body(Stream.of(param.getNames()).map(name -> {
-      try {
-        return sub.delete(name);
-      } catch (IOException e) {
-        return null;
-      }
-    }).filter(path -> path != null));
+    return ResponseEntity.status(HttpStatus.MULTI_STATUS)
+        .body(Stream.of(param.getNames()).map(name -> {
+          try {
+            return new MultiStatusResult<>(
+                HttpStatus.NO_CONTENT, sub.delete(name));
+          } catch (IOException e) {
+            logger.error("Item Delete Faild.", e);
+            return MultiStatusResult.ofIOException(e);
+          }
+        }).filter(path -> path != null));
   }
 }
