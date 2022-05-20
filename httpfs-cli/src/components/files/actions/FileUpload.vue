@@ -1,7 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { shallowRef } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { injectSharedState } from '../../../compositions';
 import { FsItem, MultiStatus, uploadFiles } from '../../../services/files';
+import ShowErrors from './ShowErrors.vue';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   path: string[];
@@ -15,7 +19,8 @@ const emit = defineEmits<{
 
 const shared = injectSharedState();
 
-const file = ref<HTMLInputElement>();
+const file = shallowRef<HTMLInputElement>();
+const showErrors = shallowRef<InstanceType<typeof ShowErrors>>();
 
 const fileUpload = async () => {
   const { files } = file.value;
@@ -34,6 +39,9 @@ const fileUpload = async () => {
       file.value.value = null;
     })
   );
+
+  console.log(mtsts);
+  await showErrors.value.open(mtsts);
   emit('done', mtsts);
 };
 
@@ -49,11 +57,14 @@ export type OnFileUploadProgress = (item: FsItem, err?: Error) => void;
 </script>
 
 <template>
-  <input
-    style="display: none"
-    ref="file"
-    type="file"
-    multiple="true"
-    @change="fileUpload"
-  />
+  <teleport to="body">
+    <input
+      style="display: none"
+      ref="file"
+      type="file"
+      multiple="true"
+      @change="fileUpload"
+    />
+    <ShowErrors ref="showErrors" :title="t('messages.hasErrorsUploadFiles')" />
+  </teleport>
 </template>

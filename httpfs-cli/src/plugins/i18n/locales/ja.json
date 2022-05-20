@@ -3,7 +3,8 @@
   "messages": {
     "newDirectory": "新しいフォルダ",
     "selectedCount": "{0} 件選択",
-    "deleteFileConfirm": "選択したファイルを削除しますか？"
+    "deleteFileConfirm": "選択したファイルを削除しますか？",
+    "hasErrorsUploadFiles": "以下のファイルはアップロードできませんでした"
   },
   "actions": {
     "ok": "OK",
