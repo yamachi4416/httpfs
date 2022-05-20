@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { injectSharedState } from '../../../compositions';
 import { deleteItems, FsItem, MultiStatus } from '../../../services/files';
 import Confirm from '../../ui/Confirm.vue';
+import ShowErrors from './ShowErrors.vue';
 
 const { t } = useI18n();
 
@@ -14,6 +15,8 @@ const state = reactive({
   path: null as string[],
   targets: [] as FsItem[],
 });
+
+const showErrors = shallowRef<InstanceType<typeof ShowErrors>>();
 
 const emit = defineEmits<{
   (e: 'close'): void;
@@ -35,7 +38,9 @@ async function deleteSelectedItems() {
   const mtsts = await shared.withLoading(() =>
     deleteItems(state.path, state.targets)
   );
+
   clear();
+  await showErrors.value.open(mtsts.filter(st => st.statusCode !== 404));
   emit('done', mtsts);
 }
 
@@ -51,10 +56,13 @@ defineExpose({
 </script>
 
 <template>
-  <Confirm
-    :show="state.show"
-    :title="t('messages.deleteFileConfirm')"
-    @cancel="close"
-    @ok="deleteSelectedItems"
-  />
+  <teleport to="body">
+    <Confirm
+      :show="state.show"
+      :title="t('messages.deleteFileConfirm')"
+      @cancel="close"
+      @ok="deleteSelectedItems"
+    />
+    <ShowErrors ref="showErrors" :title="t('messages.hasErrorsFileDelete')" />
+  </teleport>
 </template>

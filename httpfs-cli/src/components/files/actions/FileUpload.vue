@@ -40,7 +40,6 @@ const fileUpload = async () => {
     })
   );
 
-  console.log(mtsts);
   await showErrors.value.open(mtsts);
   emit('done', mtsts);
 };

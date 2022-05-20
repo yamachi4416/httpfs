@@ -17,6 +17,9 @@
         },
         "hasErrorsUploadFiles": {
           "type":"string"
+        },
+        "hasErrorsFileDelete": {
+          "type": "string"
         }
       }
     },
