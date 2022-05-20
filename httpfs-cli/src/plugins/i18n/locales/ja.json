@@ -4,8 +4,8 @@
     "newDirectory": "新しいフォルダ",
     "selectedCount": "{0} 件選択",
     "deleteFileConfirm": "選択したファイルを削除しますか？",
-    "hasErrorsUploadFiles": "以下のファイルはアップロードできませんでした",
-    "hasErrorsFileDelete": "以下のファイルは削除できませんでした"
+    "hasErrorsUploadFiles": "以下はアップロードできませんでした",
+    "hasErrorsFileDelete": "以下は削除できませんでした"
   },
   "actions": {
     "ok": "OK",
