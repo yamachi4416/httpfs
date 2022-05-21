@@ -1,7 +1,9 @@
-const apiEndpoint = import.meta.env.VITE_API_URL;
+const baseUrl = document.getElementsByTagName('base')[0]?.getAttribute('href');
+const apiEndpoint = `${baseUrl?.replace(/\/$/, '')}/api`;
 
 const config = {
   sync: false,
+  baseUrl,
   apiEndpoint,
   configApiEndpont: `${apiEndpoint}/config`,
   filesApiEndpoint: `${apiEndpoint}/files`,
