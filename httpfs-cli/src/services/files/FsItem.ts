@@ -1,4 +1,4 @@
-import { ApiEndpoint } from '../../config';
+import { getConfig } from './ConfigService';
 
 export class FsItem {
   readonly path: string;
@@ -17,7 +17,8 @@ export class FsItem {
 
   constructor(props: FsItem) {
     Object.assign(this, props);
-    this.endpoint = `${ApiEndpoint}${this.path}`;
+    const { filesApiEndpoint } = getConfig();
+    this.endpoint = `${filesApiEndpoint}${this.path}`;
   }
 
   static fromJson(json: any, path: string[]): FsItem {

@@ -1,4 +1,4 @@
-import { ApiEndpoint, MaximumUploadSize } from '../../config';
+import { configAsync, getConfig } from './ConfigService';
 import { FsItem } from './FsItem';
 import { HttpException } from '../HttpException';
 import { MultiStatus } from './MultiStatus';
@@ -7,7 +7,8 @@ async function fetchApi<T>(
   path: string[],
   options: RequestInit = {}
 ): Promise<T> {
-  const endPoint = `${ApiEndpoint}/${path.join('/')}`;
+  const { filesApiEndpoint } = await configAsync();
+  const endPoint = `${filesApiEndpoint}/${path.join('/')}`;
   const response = await fetch(endPoint, options);
   if (response.status >= 400) {
     throw new HttpException(
@@ -38,12 +39,13 @@ export async function uploadFiles({
   files: FileList;
   callback: (item: FsItem, err?: Error) => void;
 }): Promise<MultiStatus[]> {
+  const { maxFileSize } = getConfig();
   const groups = [[]];
 
   let size = 0;
   let chunks = groups[0];
   for (const file of Array.from(files)) {
-    if (size + file.size >= MaximumUploadSize) {
+    if (size + file.size >= maxFileSize) {
       size = file.size;
       chunks = [file];
       groups.push(chunks);
