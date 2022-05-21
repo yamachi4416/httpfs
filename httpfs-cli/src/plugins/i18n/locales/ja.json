@@ -18,6 +18,12 @@
     "uploadFiles": "ファイル追加",
     "moveItems": "移動する"
   },
+  "errors": {
+    "Not Found": "見つかりませんでした",
+    "Directory Not Empty": "フォルダが空ではありませんでした",
+    "Forbidden": "許可されませんでした",
+    "Payload Too Large": "ファイルサイズが大きすぎます"
+  },
   "fsItem": {
     "name": "名前",
     "lastModified": "更新日時",

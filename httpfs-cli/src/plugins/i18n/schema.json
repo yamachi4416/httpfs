@@ -26,6 +26,24 @@
         }
       }
     },
+    "errors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "Not Found": {
+          "type": "string"
+        },
+        "Forbidden": {
+          "type": "string"
+        },
+        "Directory Not Empty": {
+          "type": "string"
+        },
+        "Payload Too Large": {
+          "type": "string"
+        }
+      }
+    },
     "actions": {
       "type": "object",
       "additionalProperties": false,

@@ -3,6 +3,7 @@ import { shallowReactive, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { MultiStatus } from '../../../services/files';
 import Modal from '../../ui/Modal.vue';
+import FileIcon from '../fileslist/FileIcon.vue';
 
 const { t } = useI18n();
 
@@ -60,8 +61,11 @@ defineExpose({
       <h3>{{ props.title }}</h3>
       <div class="errors">
         <dl v-for="st in state.errors" :key="st.item.path">
-          <dt>{{ st.item.name }}</dt>
-          <dd>({{ st.statusCode }}) {{ st.detail }}</dd>
+          <dt>
+            <FileIcon :item="st.item" />
+            <span>{{ st.item.name }}</span>
+          </dt>
+          <dd>{{ t(`errors.${st.detail}`) }}</dd>
         </dl>
       </div>
       <nav>
@@ -87,6 +91,12 @@ defineExpose({
     dl {
       width: 100%;
       margin-bottom: 0;
+
+      dt {
+        display: flex;
+        align-items: center;
+        column-gap: 0.5em;
+      }
     }
   }
 }
