@@ -103,6 +103,7 @@ async function move() {
       }
       emit('progress', mtst.item, mtst.toException());
     });
+    state.targets = state.targets.filter(item => item.selected);
     await showErrors.value.open(mtsts);
   } else {
     clear();

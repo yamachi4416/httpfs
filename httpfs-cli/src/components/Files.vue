@@ -30,7 +30,14 @@ const itemMap = uniqueKeyMap(items, 'path');
 const selectAll = selectAllable({ items });
 
 async function fetchItems() {
-  items.value = await shared.withLoading(() => fetchDirectoryItems(path.value));
+  const selected = new Set<string>(selectAll.items.map(item => item.path));
+  const newItems = await shared.withLoading(() =>
+    fetchDirectoryItems(path.value)
+  );
+  newItems.forEach(item => {
+    item.selected = selected.has(item.path);
+  });
+  items.value = newItems;
 }
 
 async function enterItem(item: FsItem) {
@@ -46,12 +53,6 @@ const onActionDone: OnActionDone = async mtsts => {
 };
 
 const onUploadProgress: OnProgressAction = (item, err?) => {
-  if (err) {
-    // TODO
-    console.log(err);
-    return;
-  }
-
   const cdp = `/${path.value.join('/')}`;
   if (item.parent === cdp) {
     itemMap.value.has(item.path)
@@ -61,12 +62,6 @@ const onUploadProgress: OnProgressAction = (item, err?) => {
 };
 
 const onMoveProgress: OnProgressAction = (item, err?) => {
-  if (err) {
-    // TODO
-    console.log(err);
-    return;
-  }
-
   const map = itemMap.value;
   if (map.has(item.path)) {
     const selected = map.get(item.path);
