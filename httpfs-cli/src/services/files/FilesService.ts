@@ -10,7 +10,11 @@ async function fetchApi<T>(
   const endPoint = `${ApiEndpoint}/${path.join('/')}`;
   const response = await fetch(endPoint, options);
   if (response.status >= 400) {
-    throw new HttpException(response.status, response.statusText);
+    throw new HttpException(
+      response.status,
+      response.statusText,
+      await response.text()
+    );
   }
   return await response.json();
 }

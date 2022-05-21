@@ -2,7 +2,6 @@ package io.github.yamachi4416.httpfs.api;
 
 import java.io.FileNotFoundException;
 import java.nio.file.AccessDeniedException;
-import java.nio.file.FileAlreadyExistsException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +26,6 @@ public class ExceptionHandlers {
   public ResponseEntity<?> fileNotFound(
       FileNotFoundException e) {
     return ResponseEntity.notFound().build();
-  }
-
-  @ExceptionHandler(FileAlreadyExistsException.class)
-  public ResponseEntity<?> confilict(
-      FileAlreadyExistsException e) {
-    return ResponseEntity.status(HttpStatus.CONFLICT.value()).build();
   }
 
   @ExceptionHandler(MaxUploadSizeExceededException.class)

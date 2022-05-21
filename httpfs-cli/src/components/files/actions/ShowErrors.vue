@@ -61,7 +61,7 @@ defineExpose({
       <div class="errors">
         <dl v-for="st in state.errors" :key="st.item.path">
           <dt>{{ st.item.name }}</dt>
-          <dd>({{ st.statusCode }}) {{ st.status }}</dd>
+          <dd>({{ st.statusCode }}) {{ st.detail }}</dd>
         </dl>
       </div>
       <nav>

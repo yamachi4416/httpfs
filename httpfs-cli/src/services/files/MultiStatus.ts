@@ -4,6 +4,7 @@ import { FsItem } from './FsItem';
 export class MultiStatus {
   status: string;
   statusCode: number;
+  detail: string;
   item?: FsItem;
 
   get isError() {
@@ -20,6 +21,7 @@ export class MultiStatus {
     const ret = new MultiStatus();
     ret.status = json.status;
     ret.statusCode = json.statusCode;
+    ret.detail = json.detail;
     if (json.item) {
       ret.item = FsItem.fromJson(json.item, path);
     }
@@ -31,8 +33,10 @@ export class MultiStatus {
     ret.status = err.message;
     if (err instanceof HttpException) {
       ret.statusCode = err.status;
+      ret.detail = err.detail || err.message;
     } else {
       ret.statusCode = 500;
+      ret.detail = err.message;
     }
     return ret;
   }

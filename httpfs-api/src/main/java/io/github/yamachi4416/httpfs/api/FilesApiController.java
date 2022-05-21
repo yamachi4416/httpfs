@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.util.stream.Stream;
 
@@ -109,12 +110,10 @@ public class FilesApiController {
     var sub = fs.wSub(fsItem.getPath());
     return ResponseEntity.status(HttpStatus.MULTI_STATUS)
         .body(Stream.of(files).map(file -> {
-          try {
+          return MultiStatusResult.withIOException(() -> {
             return MultiStatusResult.ofOverWritable(
                 sub.createFile(file.getOriginalFilename(), file::getInputStream));
-          } catch (IOException e) {
-            return MultiStatusResult.ofIOException(e);
-          }
+          });
         }));
   }
 
@@ -133,6 +132,8 @@ public class FilesApiController {
       return ResponseEntity
           .status(HttpStatus.CREATED)
           .body(sub.createDirectory(param.getDirname()));
+    } catch (FileAlreadyExistsException e) {
+      return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).build();
     } catch (InvalidPathException e) {
       return ResponseEntity.badRequest().build();
     }
@@ -152,13 +153,10 @@ public class FilesApiController {
     var dest = fs.wSub(fs.resolve(param.getDestination().split("/")).getPath());
     return ResponseEntity.status(HttpStatus.MULTI_STATUS)
         .body(Stream.of(param.getNames()).map(name -> {
-          try {
+          return MultiStatusResult.withIOException(() -> {
             return MultiStatusResult.ofOverWritable(
                 sub.move(dest, name, param.isOverwrite()));
-          } catch (IOException e) {
-            logger.error("Item Move Faild.", e);
-            return MultiStatusResult.ofIOException(e);
-          }
+          });
         }));
   }
 
@@ -175,13 +173,10 @@ public class FilesApiController {
     var sub = fs.wSub(fsItem.getPath());
     return ResponseEntity.status(HttpStatus.MULTI_STATUS)
         .body(Stream.of(param.getNames()).map(name -> {
-          try {
+          return MultiStatusResult.withIOException(() -> {
             return new MultiStatusResult<>(
                 HttpStatus.NO_CONTENT, sub.delete(name));
-          } catch (IOException e) {
-            logger.error("Item Delete Faild.", e);
-            return MultiStatusResult.ofIOException(e);
-          }
+          });
         }).filter(path -> path != null));
   }
 }
