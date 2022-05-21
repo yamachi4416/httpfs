@@ -5,7 +5,8 @@
     "selectedCount": "{0} 件選択",
     "deleteFileConfirm": "選択したファイルを削除しますか？",
     "hasErrorsUploadFiles": "以下はアップロードできませんでした",
-    "hasErrorsFileDelete": "以下は削除できませんでした"
+    "hasErrorsFileDelete": "以下は削除できませんでした",
+    "hasErrorsMoveItems": "以下は移動できませんでした"
   },
   "actions": {
     "ok": "OK",

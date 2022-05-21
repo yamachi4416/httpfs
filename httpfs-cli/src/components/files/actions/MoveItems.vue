@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, toRef, watch } from 'vue';
+import { computed, reactive, shallowRef, toRef, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { injectSharedState, uniqueKeyMap } from '../../../compositions';
 import {
@@ -11,6 +11,7 @@ import {
 import Modal from '../../ui/Modal.vue';
 import Breadcrumb from '../Breadcrumb.vue';
 import FilesList, { FileListBindItems } from '../FilesList.vue';
+import ShowErrors from './ShowErrors.vue';
 
 const { t } = useI18n();
 
@@ -38,6 +39,8 @@ const canMove = computed(
     !isTargetChild(`/${current.value}`)
 );
 const targetsMap = uniqueKeyMap(toRef(state, 'targets'), 'path');
+
+const showErrors = shallowRef<InstanceType<typeof ShowErrors>>();
 
 function clear() {
   state.show = false;
@@ -100,6 +103,7 @@ async function move() {
       }
       emit('progress', mtst.item, mtst.toException());
     });
+    await showErrors.value.open(mtsts);
   } else {
     clear();
     emit('done', mtsts);
@@ -136,53 +140,56 @@ defineExpose({
     state.show = true;
     state.start = [...path];
     state.paths = [...path];
-    state.targets = [...targets]
+    state.targets = [...targets];
   },
   close,
 });
 </script>
 
 <template>
-  <Modal
-    class="move-items"
-    :transision="'scale'"
-    :show="state.show"
-    @close="close"
-  >
-    <article class="move-items-panel card">
-      <div class="move-items-panel-header">
-        <a
-          href="#"
-          class="move-items-panel-header-back secondary"
-          @click.prevent="back"
-        >
-          <span class="icon">arrow_back_ios_new</span>
-        </a>
-        <Breadcrumb
-          class="move-items-panel-header-title"
-          :path="state.paths"
-          @click="movePath"
-        />
-      </div>
-      <div class="move-items-panel-body" :aria-busy="state.loading">
-        <FilesList
-          :items="state.items"
-          :sort-options="{ key: 'directory', direction: 'desc' }"
-          :bind-item="bindItems"
-          @click="enterItem"
-        />
-      </div>
-      <nav class="move-items-panel-footer">
-        <a href="#" tabindex="1" role="link" @click.prevent="close">
-          {{ t('actions.cancel') }}
-        </a>
-        <span class="devider"></span>
-        <a href="#" :class="{ secondary: !canMove }" @click.prevent="move">
-          {{ t('actions.decision') }}
-        </a>
-      </nav>
-    </article>
-  </Modal>
+  <teleport to="body">
+    <Modal
+      class="move-items"
+      :transision="'scale'"
+      :show="state.show"
+      @close="close"
+    >
+      <article class="move-items-panel card">
+        <div class="move-items-panel-header">
+          <a
+            href="#"
+            class="move-items-panel-header-back secondary"
+            @click.prevent="back"
+          >
+            <span class="icon">arrow_back_ios_new</span>
+          </a>
+          <Breadcrumb
+            class="move-items-panel-header-title"
+            :path="state.paths"
+            @click="movePath"
+          />
+        </div>
+        <div class="move-items-panel-body" :aria-busy="state.loading">
+          <FilesList
+            :items="state.items"
+            :sort-options="{ key: 'directory', direction: 'desc' }"
+            :bind-item="bindItems"
+            @click="enterItem"
+          />
+        </div>
+        <nav class="move-items-panel-footer">
+          <a href="#" tabindex="1" role="link" @click.prevent="close">
+            {{ t('actions.cancel') }}
+          </a>
+          <span class="devider"></span>
+          <a href="#" :class="{ secondary: !canMove }" @click.prevent="move">
+            {{ t('actions.decision') }}
+          </a>
+        </nav>
+      </article>
+    </Modal>
+    <ShowErrors ref="showErrors" :title="t('messages.hasErrorsMoveItems')" />
+  </teleport>
 </template>
 
 <style scoped lang="scss">

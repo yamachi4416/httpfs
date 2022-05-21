@@ -16,9 +16,12 @@
           "type": "string"
         },
         "hasErrorsUploadFiles": {
-          "type":"string"
+          "type": "string"
         },
         "hasErrorsFileDelete": {
+          "type": "string"
+        },
+        "hasErrorsMoveItems": {
           "type": "string"
         }
       }
