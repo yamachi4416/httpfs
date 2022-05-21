@@ -53,6 +53,7 @@ const onActionDone: OnActionDone = async mtsts => {
 };
 
 const onUploadProgress: OnProgressAction = (item, err?) => {
+  if (err) return;
   const cdp = `/${path.value.join('/')}`;
   if (item.parent === cdp) {
     itemMap.value.has(item.path)
@@ -62,6 +63,7 @@ const onUploadProgress: OnProgressAction = (item, err?) => {
 };
 
 const onMoveProgress: OnProgressAction = (item, err?) => {
+  if (err) return;
   const map = itemMap.value;
   if (map.has(item.path)) {
     const selected = map.get(item.path);
