@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --outDir ../httpfs-api/src/main/resources/public",
+    "build": "vite build --emptyOutDir --outDir ../httpfs-api/src/main/resources/public",
     "preview": "vite preview",
     "eslint:fix": "eslint --ext .js,.ts,.vue --ignore-path .gitignore . --fix",
     "stylelint:fix": "stylelint ./src/**/*.{scss,vue} --fix"
