@@ -124,6 +124,7 @@ export type FileListBindItems = (item: FsItem) => BindeItemResult;
     .selected {
       width: 1px;
       padding: 0;
+
       input[type='checkbox'] {
         margin: 0;
       }
@@ -138,6 +139,7 @@ export type FileListBindItems = (item: FsItem) => BindeItemResult;
     .size > * {
       justify-content: flex-end;
     }
+
     .disabled {
       opacity: 0.5;
     }

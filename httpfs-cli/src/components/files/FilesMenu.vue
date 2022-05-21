@@ -156,14 +156,14 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
   position: absolute;
   top: var(--block-spacing-vertical);
   right: var(--block-spacing-horizontal);
-  transform-origin: top right;
   border-radius: calc(var(--border-radius) * 2);
+  transform-origin: top right;
 
   li,
   a {
     width: 100%;
-    white-space: nowrap;
     margin: 0;
+    white-space: nowrap;
   }
 
   li {

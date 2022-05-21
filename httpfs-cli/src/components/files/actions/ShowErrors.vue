@@ -83,19 +83,20 @@ defineExpose({
 
   .errors {
     display: flex;
+    display: block;
+    flex: 1;
     flex-direction: column;
     column-gap: 0.5em;
-    flex: 1;
     overflow: auto;
-    display: block;
+
     dl {
       width: 100%;
       margin-bottom: 0;
 
       dt {
         display: flex;
-        align-items: center;
         column-gap: 0.5em;
+        align-items: center;
       }
     }
   }

@@ -198,12 +198,12 @@ defineExpose({
   padding: var(--spacing);
 
   &-panel {
-    margin: 0;
-    width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    margin: 0;
 
     &-header {
       display: flex;
@@ -221,20 +221,19 @@ defineExpose({
     }
 
     &-body {
+      display: block;
       flex: 1;
       overflow: auto;
-      display: block;
+
       &[aria-busy='true'] {
         display: flex;
         align-items: center;
         justify-content: center;
+
         * {
           display: none;
         }
       }
-    }
-
-    &-footer {
     }
   }
 }

@@ -20,25 +20,24 @@ const props = withDefaults(
 <style scoped lang="scss">
 .loading {
   position: fixed;
+  z-index: 99;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100vw;
   height: var(--vh);
-  z-index: 99;
 
   .spinner {
     display: flex;
     column-gap: 1em;
 
     .bounce {
+      display: inline-block;
       width: 1em;
       height: 1em;
       background-color: var(--progress-color);
-      opacity: 0.2;
-
       border-radius: 100%;
-      display: inline-block;
+      opacity: 0.2;
       animation: bouncedelay 1.4s infinite ease-in-out both;
 
       @keyframes bouncedelay {
@@ -47,6 +46,7 @@ const props = withDefaults(
         100% {
           transform: scale(0);
         }
+
         40% {
           transform: scale(1);
         }
