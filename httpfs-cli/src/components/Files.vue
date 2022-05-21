@@ -44,7 +44,10 @@ async function enterItem(item: FsItem) {
   if (item.directory) {
     await router.push(item.path);
   } else {
-    window.open(item.endpoint, '_blank');
+    const a = document.createElement('a');
+    a.setAttribute('href', item.endpoint);
+    a.setAttribute('download', item.name);
+    a.click();
   }
 }
 
