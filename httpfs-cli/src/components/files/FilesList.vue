@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
 import { computed } from '@vue/reactivity';
+import { useI18n } from 'vue-i18n';
+import { selectAllable, sortable, SortableOptions } from '../../compositions';
+import { vDragSelectDirective } from '../../directives';
 import { formatSize } from '../../functions/fmt';
 import { FsItem } from '../../services/files';
-import {
-  selectAllable,
-  sortable,
-  SortableOptions,
-  dragSelectable,
-} from '../../compositions';
-
 import FileIcon from './fileslist/FileIcon.vue';
 
 const props = withDefaults(
@@ -40,7 +35,7 @@ const sort = sortable(props.sortOptions);
 const headers = computed(() => props.headers.map(key => ({ key })));
 const items = computed(() => sort.sorted(props.items));
 const selectAll = selectAllable({ items });
-const dragSelect = dragSelectable({ items, nop: !props.dragSelect });
+const vDragSelect = vDragSelectDirective({ items, nop: !props.dragSelect });
 
 function format(item: FsItem, key: keyof FsItem) {
   const value = item[key];
@@ -91,10 +86,9 @@ export type FileListBindItems = (item: FsItem) => BindeItemResult;
         v-for="item in items"
         :key="item.path"
         v-bind="props.bindItem(item)"
+        v-drag-select="item"
         @click="emit('click', item)"
         @dblclick="emit('dblclick', item)"
-        @mousedown="dragSelect.mousedown($event, item)"
-        @mousemove="dragSelect.mouseover($event, item)"
       >
         <span v-for="col in headers" :class="col.key" :key="col.key">
           <span

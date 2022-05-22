@@ -4,7 +4,7 @@ interface Selectable {
   selected: boolean;
 }
 
-interface DragSelectableOptions {
+export interface DragSelectableOptions {
   items: Ref<Selectable[]>;
   nop?: boolean;
 }
@@ -12,6 +12,7 @@ interface DragSelectableOptions {
 interface DragSelectable {
   mousedown(event: MouseEvent, item: Selectable): void;
   mouseover(event: MouseEvent, item: Selectable): void;
+  get working(): boolean;
 }
 
 export function dragSelectable(options: DragSelectableOptions): DragSelectable {
@@ -19,6 +20,9 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
     return {
       mousedown: () => {},
       mouseover: () => {},
+      get working() {
+        return working();
+      },
     };
   }
 
@@ -31,6 +35,10 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
     start: null,
     end: null,
   });
+
+  function working() {
+    return state.start != null;
+  }
 
   function clearState() {
     state.start = null;
@@ -48,20 +56,20 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   }
 
   function mousedown(event: MouseEvent, item: Selectable) {
-    if (!item.selected) {
+    if (item && !item.selected) {
       state.start = item;
       state.end = item;
       selectItems();
       const mouseup = (event: MouseEvent) => {
         selectItems();
-        clearState();
+        setTimeout(clearState);
       };
       window.addEventListener('mouseup', mouseup, { once: true });
     }
   }
 
   function mouseover(event: MouseEvent, item: Selectable) {
-    if (state.start != null) {
+    if (item && state.start != null) {
       state.end = item;
       selectItems();
     }
@@ -70,5 +78,8 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   return {
     mousedown,
     mouseover,
+    get working() {
+      return working();
+    },
   };
 }
