@@ -44,6 +44,7 @@ const fileDelete = ref<InstanceType<typeof FileDelete>>();
 const menuItems = [
   {
     name: 'deleteFiles',
+    icon: 'delete',
     get show() {
       return selectAll.any;
     },
@@ -51,6 +52,7 @@ const menuItems = [
   },
   {
     name: 'moveItems',
+    icon: 'drive_file_move',
     get show() {
       return selectAll.any;
     },
@@ -58,6 +60,7 @@ const menuItems = [
   },
   {
     name: 'createDirectory',
+    icon: 'create_new_folder',
     get show() {
       return !selectAll.any;
     },
@@ -65,6 +68,7 @@ const menuItems = [
   },
   {
     name: 'uploadFiles',
+    icon: 'upload_file',
     get show() {
       return !selectAll.any;
     },
@@ -140,7 +144,8 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
               class="secondary"
               @click.prevent="(openMenu = false), item.click()"
             >
-              {{ t(`actions.${item.name}`) }}
+              <span class="icon">{{ item.icon }}</span>
+              <span>{{ t(`actions.${item.name}`) }}</span>
             </a>
           </li>
         </ul>
@@ -171,6 +176,9 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
   }
 
   a {
+    display: inline-flex;
+    column-gap: 0.5em;
+    align-items: center;
     text-decoration: none;
   }
 }
