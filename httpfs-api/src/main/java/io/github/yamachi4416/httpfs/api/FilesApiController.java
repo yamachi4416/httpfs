@@ -177,6 +177,6 @@ public class FilesApiController {
             return new MultiStatusResult<>(
                 HttpStatus.NO_CONTENT, sub.delete(name));
           });
-        }).filter(path -> path != null));
+        }));
   }
 }
