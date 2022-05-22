@@ -132,7 +132,7 @@ onBeforeMount(async () => await fetchItems());
         :items="items"
         :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
         :drag-select="true"
-        @click="item => item.directory && enterItem(item)"
+        @click="enterItem"
       />
     </main>
   </div>
