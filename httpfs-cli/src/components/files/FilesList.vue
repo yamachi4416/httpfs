@@ -93,8 +93,8 @@ export type FileListBindItems = (item: FsItem) => BindeItemResult;
         v-bind="props.bindItem(item)"
         @click="emit('click', item)"
         @dblclick="emit('dblclick', item)"
-        @mousedown="dragSelect.mousedown(item)"
-        @mousemove="dragSelect.mouseover(item)"
+        @mousedown="dragSelect.mousedown($event, item)"
+        @mousemove="dragSelect.mouseover($event, item)"
       >
         <span v-for="col in headers" :class="col.key" :key="col.key">
           <span

@@ -10,15 +10,15 @@ interface DragSelectableOptions {
 }
 
 interface DragSelectable {
-  mousedown(item: Selectable): void;
-  mouseover(item: Selectable): void;
+  mousedown(event: MouseEvent, item: Selectable): void;
+  mouseover(event: MouseEvent, item: Selectable): void;
 }
 
 export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   if (options.nop) {
     return {
-      mousedown: item => {},
-      mouseover: item => {},
+      mousedown: () => {},
+      mouseover: () => {},
     };
   }
 
@@ -47,22 +47,20 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
     });
   }
 
-  function mousedown(item: Selectable) {
+  function mousedown(event: MouseEvent, item: Selectable) {
     if (!item.selected) {
       state.start = item;
       state.end = item;
       selectItems();
       const mouseup = (event: MouseEvent) => {
-        event.preventDefault();
         selectItems();
         clearState();
-        window.removeEventListener('mouseup', mouseup);
       };
-      window.addEventListener('mouseup', mouseup);
+      window.addEventListener('mouseup', mouseup, { once: true });
     }
   }
 
-  function mouseover(item: Selectable) {
+  function mouseover(event: MouseEvent, item: Selectable) {
     if (state.start != null) {
       state.end = item;
       selectItems();
