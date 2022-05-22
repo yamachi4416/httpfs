@@ -30,6 +30,40 @@ export async function fetchDirectoryItems(path: string[]): Promise<FsItem[]> {
   }).then(items => items.map(item => FsItem.fromJson(item, path)));
 }
 
+function toFilesChunks(files: File[], maxSize: number) {
+  const chunks: File[][] = [[]];
+
+  let size = 0;
+  for (const file of Array.from(files)) {
+    if (size + file.size >= maxSize) {
+      size = file.size;
+      chunks.unshift([file]);
+    } else {
+      size += file.size;
+      chunks[0].push(file);
+    }
+  }
+
+  return chunks.filter(chunk => chunk.length > 0).reverse();
+}
+
+function toFileUplaodForm(files: File[], maxSize: number) {
+  const uploads: File[] = [];
+  const ignores: File[] = [];
+  const form = new FormData();
+
+  for (const file of files) {
+    if (file.size >= maxSize) {
+      ignores.push(file);
+    } else {
+      uploads.push(file);
+      form.append('files', file);
+    }
+  }
+
+  return { form, uploads, ignores };
+}
+
 export async function uploadFiles({
   path = [],
   files = new FileList(),
@@ -40,26 +74,22 @@ export async function uploadFiles({
   callback: (item: FsItem, err?: Error) => void;
 }): Promise<MultiStatus[]> {
   const { maxFileSize } = getConfig();
-  const groups = [[]];
+  const chunks = toFilesChunks(Array.from(files), maxFileSize);
 
-  let size = 0;
-  let chunks = groups[0];
-  for (const file of Array.from(files)) {
-    if (size + file.size >= maxFileSize) {
-      size = file.size;
-      chunks = [file];
-      groups.push(chunks);
-    } else {
-      size += file.size;
-      chunks.push(file);
-    }
-  }
+  const onErrorHandler = (files: File[], err: Error) => {
+    return files.map(file => {
+      const msts = MultiStatus.fromFileWithError(file, err, path);
+      callback(msts.item, msts.toException());
+      return msts;
+    });
+  };
 
-  const uploads = groups
-    .filter(chunks => chunks.length > 0)
-    .map(async chunks => {
-      const form = new FormData();
-      chunks.forEach(file => form.append('files', file));
+  const uploads = chunks
+    .map(files => toFileUplaodForm(files, maxFileSize))
+    .map(async ({ form, uploads, ignores }) => {
+      if (ignores.length) {
+        return onErrorHandler(ignores, HttpException.payloadTooLarge());
+      }
 
       return fetchApi<MultiStatus[]>(path, {
         method: 'put',
@@ -69,19 +99,13 @@ export async function uploadFiles({
           return results.map((result, idx) => {
             const msts = MultiStatus.fromJson(result, path);
             if (msts.isError && msts.item == null) {
-              msts.item = FsItem.fromFile(chunks[idx], path);
+              msts.item = FsItem.fromFile(uploads[idx], path);
             }
             callback(msts.item, msts.toException());
             return msts;
           });
         })
-        .catch(err => {
-          return chunks.map(file => {
-            const msts = MultiStatus.fromFileWithError(file, err, path);
-            callback(msts.item, msts.toException());
-            return msts;
-          });
-        });
+        .catch(err => onErrorHandler(uploads, err));
     });
 
   return (await Promise.all(uploads)).reduce(

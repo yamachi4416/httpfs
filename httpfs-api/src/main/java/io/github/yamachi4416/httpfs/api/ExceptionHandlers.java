@@ -3,6 +3,8 @@ package io.github.yamachi4416.httpfs.api;
 import java.io.FileNotFoundException;
 import java.nio.file.AccessDeniedException;
 
+import javax.naming.SizeLimitExceededException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,9 +30,11 @@ public class ExceptionHandlers {
     return ResponseEntity.notFound().build();
   }
 
-  @ExceptionHandler(MaxUploadSizeExceededException.class)
-  public ResponseEntity<?> payloadTooLarge(
-      MaxUploadSizeExceededException e) {
+  @ExceptionHandler({
+      SizeLimitExceededException.class,
+      MaxUploadSizeExceededException.class
+  })
+  public ResponseEntity<?> payloadTooLarge(Exception e) {
     logger.error(e.getMessage(), e);
     return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE.value()).build();
   }

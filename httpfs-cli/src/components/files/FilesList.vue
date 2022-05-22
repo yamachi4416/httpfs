@@ -17,7 +17,7 @@ const props = withDefaults(
   }>(),
   {
     items: () => [],
-    sortOptions: () => ({ key: 'directory', direction: 'desc' }),
+    sortOptions: () => ({ idKey: 'path', key: 'directory', direction: 'desc' }),
     headers: () => ['name', 'lastModified', 'mimeType', 'size'],
     bindItem: () => undefined,
   }
