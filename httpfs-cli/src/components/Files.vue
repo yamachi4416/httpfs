@@ -131,6 +131,7 @@ onBeforeMount(async () => await fetchItems());
       <FilesList
         :items="items"
         :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
+        :drag-select="true"
         @click="item => item.directory && enterItem(item)"
         @dblclick="item => enterItem(item)"
       />

@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { computed } from '@vue/reactivity';
 import { formatSize } from '../../functions/fmt';
 import { FsItem } from '../../services/files';
-import { selectAllable, sortable, SortableOptions } from '../../compositions';
+import {
+  selectAllable,
+  sortable,
+  SortableOptions,
+  dragSelectable,
+} from '../../compositions';
 
 import FileIcon from './fileslist/FileIcon.vue';
 
@@ -14,12 +18,14 @@ const props = withDefaults(
     sortOptions?: SortableOptions<FsItem>;
     headers?: (keyof FsItem)[];
     bindItem?: (item: FsItem) => BindeItemResult;
+    dragSelect?: boolean;
   }>(),
   {
     items: () => [],
     sortOptions: () => ({ idKey: 'path', key: 'directory', direction: 'desc' }),
     headers: () => ['name', 'lastModified', 'mimeType', 'size'],
     bindItem: () => undefined,
+    dragSelect: false,
   }
 );
 
@@ -30,10 +36,11 @@ const emit = defineEmits<{
 
 const { d, t } = useI18n();
 
-const selectAll = selectAllable({ items: toRef(props, 'items') });
 const sort = sortable(props.sortOptions);
 const headers = computed(() => props.headers.map(key => ({ key })));
 const items = computed(() => sort.sorted(props.items));
+const selectAll = selectAllable({ items });
+const dragSelect = dragSelectable({ items, nop: !props.dragSelect });
 
 function format(item: FsItem, key: keyof FsItem) {
   const value = item[key];
@@ -83,12 +90,19 @@ export type FileListBindItems = (item: FsItem) => BindeItemResult;
       <li
         v-for="item in items"
         :key="item.path"
+        v-bind="props.bindItem(item)"
         @click="emit('click', item)"
         @dblclick="emit('dblclick', item)"
-        v-bind="props.bindItem(item)"
+        @mousedown="dragSelect.mousedown(item)"
+        @mousemove="dragSelect.mouseover(item)"
       >
         <span v-for="col in headers" :class="col.key" :key="col.key">
-          <span v-if="col.key === 'selected'" @click.stop @dblclick.stop>
+          <span
+            v-if="col.key === 'selected'"
+            @click.stop
+            @dblclick.stop
+            @mousedown.stop
+          >
             <input type="checkbox" v-model="item.selected" />
           </span>
           <span v-else-if="col.key === 'name'">
