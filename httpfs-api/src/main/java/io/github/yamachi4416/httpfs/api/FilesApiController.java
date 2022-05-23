@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -89,15 +90,19 @@ public class FilesApiController {
     }
 
     var resource = new FileSystemResource(fsItem.getPath());
+    var mediaType = Optional
+        .ofNullable(MediaType.parseMediaType(fsItem.getMimeType()))
+        .orElse(MediaType.APPLICATION_OCTET_STREAM);
+
     return ResponseEntity.ok()
         .contentLength(resource.contentLength())
-        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+        .contentType(mediaType)
         .header(
             HttpHeaders.CONTENT_DISPOSITION,
-            ContentDisposition.attachment()
-                .filename(
-                    resource.getFilename(),
-                    StandardCharsets.UTF_8)
+            (mediaType == MediaType.APPLICATION_OCTET_STREAM
+                ? ContentDisposition.attachment()
+                : ContentDisposition.inline())
+                .filename(resource.getFilename(), StandardCharsets.UTF_8)
                 .build().toString())
         .body(resource);
   }
