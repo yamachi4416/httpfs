@@ -21,6 +21,13 @@ export class FsItem {
     this.endpoint = `${filesApiEndpoint}${this.path}`;
   }
 
+  download() {
+    const a = document.createElement('a');
+    a.setAttribute('href', this.endpoint);
+    a.setAttribute('download', this.name);
+    a.click();
+  }
+
   static fromJson(json: any, path: string[]): FsItem {
     const { lastModified, creationTime, ...props } = json;
     const item = props as FsItem;

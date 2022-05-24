@@ -9,6 +9,7 @@ import {
 } from '../compositions';
 import { fetchDirectoryItems, FsItem } from '../services/files';
 import Breadcrumb from './files/Breadcrumb.vue';
+import FilePreview from './files/FilePreview.vue';
 import FilesList from './files/FilesList.vue';
 import FilesMenu, {
   OnActionDone,
@@ -29,6 +30,8 @@ const parentPath = computed(() =>
 const itemMap = uniqueKeyMap(items, 'path');
 const selectAll = selectAllable({ items });
 
+const filePreview = ref<InstanceType<typeof FilePreview>>();
+
 async function fetchItems() {
   const selected = new Set<string>(selectAll.items.map(item => item.path));
   const newItems = await shared.withLoading(() =>
@@ -40,14 +43,11 @@ async function fetchItems() {
   items.value = newItems;
 }
 
-async function enterItem(item: FsItem) {
+async function previewItem(item: FsItem) {
   if (item.directory) {
     await router.push(item.path);
   } else {
-    const a = document.createElement('a');
-    a.setAttribute('href', item.endpoint);
-    a.setAttribute('download', item.name);
-    a.click();
+    filePreview.value?.open(item);
   }
 }
 
@@ -132,9 +132,10 @@ onBeforeMount(async () => await fetchItems());
         :items="items"
         :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
         :drag-select="true"
-        @click="enterItem"
+        @click="previewItem"
       />
     </main>
+    <FilePreview ref="filePreview" />
   </div>
 </template>
 
