@@ -12,6 +12,7 @@ import Modal from '../../ui/Modal.vue';
 import Breadcrumb from '../Breadcrumb.vue';
 import FilesList, { FileListBindItems } from '../FilesList.vue';
 import ShowErrors from './ShowErrors.vue';
+import Waiting from '../../ui/Waiting.vue';
 
 const { t } = useI18n();
 
@@ -170,14 +171,18 @@ defineExpose({
             @click="movePath"
           />
         </div>
-        <div class="move-items-panel-body" :aria-busy="state.loading">
+        <Waiting class="move-items-panel-body" :waiting="state.loading">
           <FilesList
             :items="state.items"
-            :sort-options="{ idKey: 'path', key: 'directory', direction: 'desc' }"
+            :sort-options="{
+              idKey: 'path',
+              key: 'directory',
+              direction: 'desc',
+            }"
             :bind-item="bindItems"
             @click="enterItem"
           />
-        </div>
+        </Waiting>
         <nav class="move-items-panel-footer">
           <a href="#" tabindex="1" role="link" @click.prevent="close">
             {{ t('actions.cancel') }}
@@ -224,16 +229,6 @@ defineExpose({
       display: block;
       flex: 1;
       overflow: auto;
-
-      &[aria-busy='true'] {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        * {
-          display: none;
-        }
-      }
     }
   }
 }
