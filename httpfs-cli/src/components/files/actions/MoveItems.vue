@@ -173,7 +173,7 @@ defineExpose({
         <div class="move-items-panel-body" :aria-busy="state.loading">
           <FilesList
             :items="state.items"
-            :sort-options="{ key: 'directory', direction: 'desc' }"
+            :sort-options="{ idKey: 'path', key: 'directory', direction: 'desc' }"
             :bind-item="bindItems"
             @click="enterItem"
           />
