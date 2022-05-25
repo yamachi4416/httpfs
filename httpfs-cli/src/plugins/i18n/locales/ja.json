@@ -6,7 +6,8 @@
     "deleteFileConfirm": "選択したファイルを削除しますか？",
     "hasErrorsUploadFiles": "以下はアップロードできませんでした",
     "hasErrorsFileDelete": "以下は削除できませんでした",
-    "hasErrorsMoveItems": "以下は移動できませんでした"
+    "hasErrorsMoveItems": "以下は移動できませんでした",
+    "notSupportFilePreview": "このファイルには、表示できるプレビューがありません"
   },
   "actions": {
     "ok": "OK",
@@ -16,7 +17,8 @@
     "createDirectory": "フォルダ作成",
     "deleteFiles": "削除する",
     "uploadFiles": "ファイル追加",
-    "moveItems": "移動する"
+    "moveItems": "移動する",
+    "download": "ダウンロード"
   },
   "errors": {
     "Not Found": "見つかりませんでした",

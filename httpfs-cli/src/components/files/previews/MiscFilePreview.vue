@@ -2,7 +2,9 @@
 import { FsItem } from '../../../services/files';
 import FileIcon from '../fileslist/FileIcon.vue';
 import Waiting from '../../ui/Waiting.vue';
+import { useI18n } from 'vue-i18n';
 
+const { t } = useI18n();
 const props = defineProps<{
   item: FsItem;
 }>();
@@ -12,8 +14,10 @@ const props = defineProps<{
   <div class="misc-file-preview">
     <Waiting class="misc-file-preview-content" :waiting="!props.item">
       <FileIcon class="misc-file-preview-icon" :item="props.item" />
-      <p>このファイルには、表示できるプレビューがありません。</p>
-      <a href="#" @click.prevent="props.item?.download()">ダウンロード</a>
+      <p>{{ t('messages.notSupportFilePreview') }}</p>
+      <a href="#" @click.prevent="props.item?.download()">
+        {{ t('actions.download') }}
+      </a>
     </Waiting>
   </div>
 </template>

@@ -23,6 +23,9 @@
         },
         "hasErrorsMoveItems": {
           "type": "string"
+        },
+        "notSupportFilePreview": {
+          "type": "string"
         }
       }
     },
@@ -70,6 +73,9 @@
           "type": "string"
         },
         "moveItems": {
+          "type": "string"
+        },
+        "download": {
           "type": "string"
         }
       }
