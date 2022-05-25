@@ -143,6 +143,16 @@ defineExpose({
 
     &-title {
       flex: 1;
+      padding-right: 0;
+      padding-left: 0;
+      overflow: hidden;
+
+      > * {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
   }
 
