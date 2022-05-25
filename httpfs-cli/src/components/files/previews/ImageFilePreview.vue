@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, shallowReactive } from 'vue';
+import { reactive, watch } from 'vue';
 import { FsItem } from '../../../services/files';
 import Waiting from '../../ui/Waiting.vue';
 
@@ -7,13 +7,13 @@ const props = defineProps<{
   item: FsItem;
 }>();
 
-const state = shallowReactive({
+const state = reactive({
   waiting: true,
   width: null as number,
   height: null as number,
 });
 
-function loadImage() {
+function loadImage(item: FsItem) {
   const img = new Image();
   img.onload = () => {
     state.waiting = false;
@@ -28,7 +28,20 @@ function loadImage() {
   img.src = props.item.endpoint;
 }
 
-onBeforeMount(loadImage);
+watch(
+  () => props.item,
+  item => {
+    state.waiting = true;
+    state.width = null;
+    state.height = null;
+    if (item) {
+      loadImage(item);
+    }
+  },
+  {
+    immediate: true,
+  }
+);
 </script>
 
 <template>

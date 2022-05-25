@@ -30,6 +30,7 @@ const parentPath = computed(() =>
 const itemMap = uniqueKeyMap(items, 'path');
 const selectAll = selectAllable({ items });
 
+const filesList = ref<InstanceType<typeof FilesList>>();
 const filePreview = ref<InstanceType<typeof FilePreview>>();
 
 async function fetchItems() {
@@ -47,7 +48,9 @@ async function previewItem(item: FsItem) {
   if (item.directory) {
     await router.push(item.path);
   } else {
-    filePreview.value?.open(item);
+    const files = filesList.value.items.filter(item => !item.directory)
+    const index = files.indexOf(item)
+    filePreview.value.open(files, index);
   }
 }
 
@@ -129,6 +132,7 @@ onBeforeMount(async () => await fetchItems());
 
     <main>
       <FilesList
+        ref="filesList"
         :items="items"
         :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
         :drag-select="true"

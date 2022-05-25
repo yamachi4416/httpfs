@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { FsItem } from '../../../services/files';
 import FileIcon from '../fileslist/FileIcon.vue';
+import Waiting from '../../ui/Waiting.vue';
 
 const props = defineProps<{
   item: FsItem;
@@ -9,11 +10,11 @@ const props = defineProps<{
 
 <template>
   <div class="misc-file-preview">
-    <div class="misc-file-preview-content">
+    <Waiting class="misc-file-preview-content" :waiting="!props.item">
       <FileIcon class="misc-file-preview-icon" :item="props.item" />
       <p>このファイルには、表示できるプレビューがありません。</p>
       <a href="#" @click.prevent="props.item?.download()">ダウンロード</a>
-    </div>
+    </Waiting>
   </div>
 </template>
 

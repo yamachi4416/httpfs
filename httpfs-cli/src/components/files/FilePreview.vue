@@ -3,32 +3,51 @@ import { computed } from '@vue/reactivity';
 import { shallowReactive } from 'vue';
 import { FsItem } from '../../services/files';
 import Modal from '../ui/Modal.vue';
+import VerticalScroll from '../ui/VerticalScroll.vue';
 import ImageFilePreview from './previews/ImageFilePreview.vue';
 import MiscFilePreview from './previews/MiscFilePreview.vue';
 
 const state = shallowReactive({
   show: false,
-  item: null as FsItem,
+  index: -1,
+  items: [] as {
+    item: FsItem;
+    shown: boolean;
+    preview: ReturnType<typeof previewComponent>;
+  }[],
 });
 
-const previewComponent = computed(() => {
-  if (state.show) {
-    if (state.item?.mimeType?.startsWith('image/')) {
-      return ImageFilePreview;
-    }
-    return MiscFilePreview;
+const currentItem = computed(() => state.items[state.index]?.item);
+
+function previewComponent(item: FsItem) {
+  if (item?.mimeType?.startsWith('image/')) {
+    return ImageFilePreview;
   }
-  return null;
-});
+  return MiscFilePreview;
+}
 
 function close() {
+  state.index = -1;
   state.show = false;
-  state.item = null;
+  state.items = [];
+}
+
+function shownItem(idx: number) {
+  const item = state.items[idx];
+  if (item) {
+    item.shown = true;
+  }
+  state.index = idx;
 }
 
 defineExpose({
-  async open(item: FsItem) {
-    state.item = item;
+  async open(items: FsItem[], index: number) {
+    state.index = index;
+    state.items = items.map((item, idx) => ({
+      item,
+      shown: idx === index,
+      preview: previewComponent(item),
+    }));
     state.show = true;
   },
 });
@@ -49,17 +68,31 @@ defineExpose({
               <a class="secondary icon" @click="close">close</a>
             </span>
             <span class="file-preview-header-title">
-              <span>{{ state.item.name }}</span>
+              <span>{{ currentItem?.name }}</span>
             </span>
             <span class="file-preview-header-menu">
-              <a class="secondary icon" @click.prevent="state.item.download()">
+              <a
+                v-show="!currentItem?.directory"
+                class="secondary icon"
+                @click.prevent="currentItem?.download()"
+              >
                 download
               </a>
             </span>
           </div>
-          <p class="file-preview-body">
-            <Component :is="previewComponent" :item="state.item" />
-          </p>
+          <div class="file-preview-body">
+            <VerticalScroll
+              :items="state.items"
+              :index="state.index"
+              v-slot="{ item }"
+              @shown="shownItem"
+            >
+              <Component
+                :is="item.preview"
+                :item="item.shown ? item.item : null"
+              />
+            </VerticalScroll>
+          </div>
         </article>
       </div>
     </Modal>
@@ -77,7 +110,6 @@ defineExpose({
     height: 100%;
   }
 
-  scroll-snap-align: start;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -117,6 +149,9 @@ defineExpose({
   &-body {
     flex: 1;
     width: 100%;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
     overflow: hidden;
   }
 }

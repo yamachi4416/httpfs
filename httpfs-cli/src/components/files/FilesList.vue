@@ -47,6 +47,10 @@ function format(item: FsItem, key: keyof FsItem) {
   }
   return value;
 }
+
+defineExpose({
+  items
+})
 </script>
 
 <script lang="ts">
