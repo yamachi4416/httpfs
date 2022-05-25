@@ -64,7 +64,6 @@ onMounted(() => {
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  scroll-snap-stop: always;
 
   &-item {
     width: 100%;
@@ -72,6 +71,7 @@ onMounted(() => {
     height: 100%;
     min-height: 100%;
     scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 }
 </style>
