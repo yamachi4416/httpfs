@@ -37,17 +37,15 @@ const value = computed({
 
 <template>
   <Modal :show="show" transision="slide" @close="emit('cancel')">
-    <article class="card">
+    <article class="card prompt">
       <h3>{{ title }}</h3>
-      <p>
-        <input
-          type="text"
-          tabindex="1"
-          v-auto-focus="show"
-          v-model="value"
-          :aria-invalid="invalid || null"
-        />
-      </p>
+      <input
+        type="text"
+        tabindex="1"
+        v-auto-focus="show"
+        v-model="value"
+        :aria-invalid="invalid || null"
+      />
       <nav>
         <a href="#" tabindex="1" role="link" @click.prevent="emit('cancel')">
           {{ t('actions.cancel') }}
@@ -62,7 +60,11 @@ const value = computed({
 </template>
 
 <style scoped lang="scss">
-.card {
+.prompt {
   width: 600px;
+
+  input[type='text'] {
+    margin: 0;
+  }
 }
 </style>

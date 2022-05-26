@@ -137,7 +137,7 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
         @done="() => done(emit('delete-done', []))"
       />
       <Modal :show="openMenu" transision="scale" @close="close">
-        <ul class="card" :class="$style.menu">
+        <ul class="card files-menu">
           <li v-for="item in menuItems.filter(i => i.show)" :key="item.name">
             <a
               href="#"
@@ -154,8 +154,8 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
   </a>
 </template>
 
-<style module lang="scss">
-.menu {
+<style scoped lang="scss">
+.files-menu {
   --block-spacing-vertical: 1rem;
 
   position: absolute;
@@ -169,6 +169,7 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
     width: 100%;
     margin: 0;
     white-space: nowrap;
+    list-style: none;
   }
 
   li {

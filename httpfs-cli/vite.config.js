@@ -12,6 +12,13 @@ export default defineConfig({
       include: path.resolve(__dirname, './src/plugins/i18n/locales/**'),
     }),
   ],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `@import "./src/assets/scss/variables";`
+      }
+    }
+  },
   server: {
     proxy: {
       '/api': {

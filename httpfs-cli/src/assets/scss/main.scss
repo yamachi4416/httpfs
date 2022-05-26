@@ -15,7 +15,7 @@ $enable-responsive-typography: false;
 // --------------------
 
 // Config
-@import '@picocss/pico/scss/variables';
+@import './variables';
 
 // Theming
 @import '@picocss/pico/scss/themes/default';
@@ -38,16 +38,16 @@ $enable-responsive-typography: false;
 
 // Custom Styles
 // --------------------
-@import './layout/document';
 @import './layout/filllayout';
-@import './components/modal';
-@import './components/breadcrumb';
 @import './components/table';
 @import './components/card';
 @import './utilities/icons';
-@import './utilities/transition';
 
 :root {
   --border-radius: 0.5rem;
   --font-size: 105%;
+}
+
+:where(body) {
+  margin: 0;
 }

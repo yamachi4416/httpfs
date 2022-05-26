@@ -25,9 +25,9 @@ const emit = defineEmits<{
 
 <template>
   <Modal :show="props.show" transision="slidedown" @close="emit('cancel')">
-    <article class="card">
-      <h3>{{ title }}</h3>
-      <p>{{ message }}</p>
+    <article class="card confirm">
+      <h3>{{ props.title }}</h3>
+      <p>{{ props.message }}</p>
       <nav>
         <a href="#" tabindex="1" role="link" @click.prevent="emit('cancel')">
           {{ t('actions.cancel') }}
@@ -42,7 +42,11 @@ const emit = defineEmits<{
 </template>
 
 <style scoped lang="scss">
-.card {
+.confirm {
   width: 400px;
+
+  p {
+    margin: 0;
+  }
 }
 </style>

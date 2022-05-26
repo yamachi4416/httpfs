@@ -57,9 +57,9 @@ defineExpose({
 
 <template>
   <Modal :show="state.show" transision="scale" @close="close">
-    <article class="card">
+    <article class="card show-errors">
       <h3>{{ props.title }}</h3>
-      <div class="errors">
+      <div class="show-errors-detail">
         <dl v-for="st in state.errors" :key="st.item.path">
           <dt>
             <FileIcon :item="st.item" />
@@ -78,10 +78,10 @@ defineExpose({
 </template>
 
 <style scoped lang="scss">
-.card {
+.show-errors {
   width: 600px;
 
-  .errors {
+  &-detail {
     display: flex;
     display: block;
     flex: 1;

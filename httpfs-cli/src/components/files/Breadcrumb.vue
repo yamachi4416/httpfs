@@ -33,3 +33,59 @@ const items = computed(() => {
     </ul>
   </nav>
 </template>
+
+<style scoped lang="scss">
+.breadcrumb {
+  --scrollbar-width: 8px;
+  --scrollbar-height: 5px;
+
+  &::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+    height: var(--scrollbar-height);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: var(--scrollbar-height);
+  }
+
+  &:hover,
+  &:focus {
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--muted-border-color);
+    }
+  }
+
+  padding: calc(var(--nav-element-spacing-vertical) / 2)
+    var(--nav-element-spacing-horizontal)
+    calc(var(--nav-element-spacing-vertical) / 2 - var(--scrollbar-height))
+    var(--nav-element-spacing-horizontal);
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+
+  > ul {
+    li {
+      display: flex;
+      padding: 0;
+
+      &:not(:last-of-type)::after {
+        color: var(--muted-color);
+        content: 'play_arrow';
+      }
+
+      a {
+        display: flex;
+
+        &[aria-current='page'] {
+          color: var(--secondary) !important;
+        }
+
+        &:focus {
+          background-color: inherit;
+        }
+      }
+    }
+  }
+}
+</style>
