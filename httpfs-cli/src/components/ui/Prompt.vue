@@ -37,7 +37,7 @@ const value = computed({
 
 <template>
   <Modal :show="show" transision="slide" @close="emit('cancel')">
-    <article class="card prompt">
+    <article class="prompt">
       <h3>{{ title }}</h3>
       <input
         type="text"
@@ -61,6 +61,8 @@ const value = computed({
 
 <style scoped lang="scss">
 .prompt {
+  @include card;
+
   width: 600px;
 
   input[type='text'] {

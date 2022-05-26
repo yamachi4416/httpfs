@@ -20,12 +20,11 @@ const emit = defineEmits<{
   (e: 'ok');
   (e: 'cancel');
 }>();
-
 </script>
 
 <template>
   <Modal :show="props.show" transision="slidedown" @close="emit('cancel')">
-    <article class="card confirm">
+    <article class="confirm">
       <h3>{{ props.title }}</h3>
       <p>{{ props.message }}</p>
       <nav>
@@ -43,6 +42,8 @@ const emit = defineEmits<{
 
 <style scoped lang="scss">
 .confirm {
+  @include card;
+
   width: 400px;
 
   p {

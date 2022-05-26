@@ -118,6 +118,8 @@ export type FileListBindItems = (item: FsItem) => BindeItemResult;
 
 <style scoped lang="scss">
 .files-list {
+  @include table;
+  
   .thead,
   .tbody {
     white-space: nowrap;

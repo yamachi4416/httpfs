@@ -1,7 +1,0 @@
-:where(.card) {
-  padding: calc(var(--spacing) * 1.5);
-  margin: var(--block-spacing-vertical) 0;
-  background: var(--card-background-color);
-  border-radius: calc(var(--border-radius) * 2);
-  box-shadow: var(--card-box-shadow);
-}

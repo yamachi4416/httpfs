@@ -38,10 +38,6 @@ $enable-responsive-typography: false;
 
 // Custom Styles
 // --------------------
-@import './layout/filllayout';
-@import './components/table';
-@import './components/card';
-@import './utilities/icons';
 
 :root {
   --border-radius: 0.5rem;
@@ -50,4 +46,29 @@ $enable-responsive-typography: false;
 
 :where(body) {
   margin: 0;
+}
+
+.icon,
+.icons::before,
+.icons::after {
+  display: inline-flex;
+  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
+  font-family: 'Material Icons Round';
+  font-size: 1.5em;
+  font-style: normal;
+  font-weight: normal;
+  font-feature-settings: 'liga';
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  user-select: none;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
 }

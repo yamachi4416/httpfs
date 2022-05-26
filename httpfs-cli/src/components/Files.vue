@@ -95,7 +95,7 @@ onBeforeMount(async () => await fetchItems());
 </script>
 
 <template>
-  <div class="files fill-height">
+  <div class="files">
     <header>
       <nav>
         <ul>
@@ -148,6 +148,8 @@ onBeforeMount(async () => await fetchItems());
 
 <style scoped lang="scss">
 .files {
+  @include fill-height;
+
   display: flex;
   flex-direction: column;
 

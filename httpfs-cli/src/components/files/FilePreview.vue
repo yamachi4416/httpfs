@@ -61,7 +61,7 @@ defineExpose({
       :show="state.show"
       transision="scale"
       @close="close"
-      class="file-preview-modal fill-height"
+      class="file-preview-modal"
     >
       <div class="file-preview-wrapper">
         <article class="file-preview">
@@ -100,6 +100,8 @@ defineExpose({
 
 <style scoped lang="scss">
 .file-preview {
+  @include fill-height;
+
   &-wrapper {
     width: 100%;
     height: 100%;

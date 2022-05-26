@@ -10,7 +10,7 @@ const props = withDefaults(
 </script>
 
 <template>
-  <div v-if="props.show" class="loading fill-content">
+  <div v-if="props.show" class="loading">
     <div class="spinner">
       <div v-for="i in 3" :key="i" class="bounce"></div>
     </div>
@@ -19,6 +19,8 @@ const props = withDefaults(
 
 <style scoped lang="scss">
 .loading {
+  @include fill-content;
+
   position: fixed;
   z-index: 99;
   display: flex;

@@ -57,7 +57,7 @@ defineExpose({
 
 <template>
   <Modal :show="state.show" transision="scale" @close="close">
-    <article class="card show-errors">
+    <article class="show-errors">
       <h3>{{ props.title }}</h3>
       <div class="show-errors-detail">
         <dl v-for="st in state.errors" :key="st.item.path">
@@ -79,6 +79,8 @@ defineExpose({
 
 <style scoped lang="scss">
 .show-errors {
+  @include card;
+
   width: 600px;
 
   &-detail {

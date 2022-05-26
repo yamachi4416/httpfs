@@ -156,7 +156,7 @@ defineExpose({
       :show="state.show"
       @close="close"
     >
-      <article class="move-items-panel card">
+      <article class="move-items-panel">
         <div class="move-items-panel-header">
           <a
             href="#"
@@ -203,6 +203,8 @@ defineExpose({
   padding: var(--spacing);
 
   &-panel {
+    @include card;
+
     display: flex;
     flex-direction: column;
     justify-content: space-between;
