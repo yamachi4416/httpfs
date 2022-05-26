@@ -43,12 +43,20 @@ const fileDelete = ref<InstanceType<typeof FileDelete>>();
 
 const menuItems = [
   {
-    name: 'deleteFiles',
-    icon: 'delete',
+    name: 'createDirectory',
+    icon: 'create_new_folder',
     get show() {
-      return selectAll.any;
+      return true;
     },
-    click: () => fileDelete.value?.open(props.path, selectAll.items),
+    click: () => createDirectory.value?.open(),
+  },
+  {
+    name: 'uploadFiles',
+    icon: 'upload_file',
+    get show() {
+      return true;
+    },
+    click: () => fileUpload.value?.open(),
   },
   {
     name: 'moveItems',
@@ -59,20 +67,12 @@ const menuItems = [
     click: () => moveItems.value?.open(props.path, selectAll.items),
   },
   {
-    name: 'createDirectory',
-    icon: 'create_new_folder',
+    name: 'deleteFiles',
+    icon: 'delete',
     get show() {
-      return !selectAll.any;
+      return selectAll.any;
     },
-    click: () => createDirectory.value?.open(),
-  },
-  {
-    name: 'uploadFiles',
-    icon: 'upload_file',
-    get show() {
-      return !selectAll.any;
-    },
-    click: () => fileUpload.value?.open(),
+    click: () => fileDelete.value?.open(props.path, selectAll.items),
   },
 ];
 
