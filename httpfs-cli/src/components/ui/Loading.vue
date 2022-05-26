@@ -10,7 +10,7 @@ const props = withDefaults(
 </script>
 
 <template>
-  <div v-if="props.show" class="loading">
+  <div v-if="props.show" class="loading fill-content">
     <div class="spinner">
       <div v-for="i in 3" :key="i" class="bounce"></div>
     </div>
@@ -24,8 +24,6 @@ const props = withDefaults(
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100vw;
-  height: var(--vh);
 
   .spinner {
     display: flex;

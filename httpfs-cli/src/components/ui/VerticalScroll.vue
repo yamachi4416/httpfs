@@ -65,6 +65,10 @@ onMounted(() => {
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
 
+  &::-webkit-scrollbar {
+    height: 0;
+  }
+
   &-item {
     width: 100%;
     min-width: 100%;

@@ -44,7 +44,9 @@ defineExpose({
   async open(items: FsItem[], index: number) {
     state.index = index;
     state.items = items.map((item, idx) => ({
-      item,
+      get item() {
+        return this.shown ? item : null;
+      },
       shown: idx === index,
       preview: previewComponent(item),
     }));
@@ -59,7 +61,7 @@ defineExpose({
       :show="state.show"
       transision="scale"
       @close="close"
-      class="file-preview-modal"
+      class="file-preview-modal fill-height"
     >
       <div class="file-preview-wrapper">
         <article class="file-preview">
@@ -87,10 +89,7 @@ defineExpose({
               v-slot="{ item }"
               @shown="shownItem"
             >
-              <Component
-                :is="item.preview"
-                :item="item.shown ? item.item : null"
-              />
+              <Component :is="item.preview" :item="item.item" />
             </VerticalScroll>
           </div>
         </article>
@@ -101,10 +100,6 @@ defineExpose({
 
 <style scoped lang="scss">
 .file-preview {
-  &-modal {
-    max-height: var(--vh);
-  }
-
   &-wrapper {
     width: 100%;
     height: 100%;
