@@ -48,8 +48,8 @@ async function previewItem(item: FsItem) {
   if (item.directory) {
     await router.push(item.path);
   } else {
-    const files = filesList.value.items.filter(item => !item.directory)
-    const index = files.indexOf(item)
+    const files = filesList.value.items.filter(item => !item.directory);
+    const index = files.indexOf(item);
     filePreview.value.open(files, index);
   }
 }
@@ -62,9 +62,12 @@ const onUploadProgress: OnProgressAction = (item, err?) => {
   if (err) return;
   const cdp = `/${path.value.join('/')}`;
   if (item.parent === cdp) {
-    itemMap.value.has(item.path)
-      ? Object.assign(itemMap.value.get(item.path), item)
-      : items.value.push(item);
+    if (itemMap.value.has(item.path)) {
+      const old = itemMap.value.get(item.path);
+      Object.assign(old, item, { selected: old.selected })
+    } else {
+      items.value.push(item);
+    }
   }
 };
 
