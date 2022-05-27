@@ -21,6 +21,13 @@ onBeforeMount(() => {
   onUnmounted(() => {
     window.removeEventListener('resize', setVH);
   });
+
+  router.isReady().then(() => {
+    router.push({
+      ...router.currentRoute.value,
+      hash: '#',
+    });
+  });
 });
 
 onErrorCaptured((err, instalce, info) => {
