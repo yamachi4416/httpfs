@@ -8,7 +8,9 @@ async function fetchApi<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const { filesApiEndpoint } = await configAsync();
-  const endPoint = `${filesApiEndpoint}/${path.join('/')}`;
+  const endPoint = `${filesApiEndpoint}/${path
+    .map(p => encodeURIComponent(p))
+    .join('/')}`;
   const response = await fetch(endPoint, options);
   if (response.status >= 400) {
     throw new HttpException(

@@ -36,9 +36,11 @@ export class FsItem {
       ...item,
       lastModified: lastModified && new Date(lastModified),
       creationTime: creationTime && new Date(creationTime),
-      path: `/${[...paths, item.name].join('/')}`,
+      path: `/${[...paths, item.name]
+        .map(p => encodeURIComponent(p))
+        .join('/')}`,
       paths: [...paths, item.name],
-      parent: `/${paths.join('/')}`,
+      parent: `/${paths.map(p => encodeURIComponent(p)).join('/')}`,
     } as FsItem);
   }
 
