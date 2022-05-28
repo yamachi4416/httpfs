@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from '@vue/reactivity';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps<{
@@ -7,7 +8,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'shown', idx: number): void;
+  (e: 'update:index', idx: number): void;
 }>();
 
 const scrollContainer = ref(null as HTMLElement);
@@ -19,7 +20,7 @@ function observe() {
       entities.forEach(entity => {
         if (entity.isIntersecting) {
           const idx = scrollItems.value.indexOf(entity.target);
-          emit('shown', idx);
+          emit('update:index', idx);
         }
       });
     },
@@ -29,16 +30,56 @@ function observe() {
     }
   );
 
-  onBeforeUnmount(() => {
-    observer.disconnect();
-  });
-
   scrollItems.value?.forEach(element => observer.observe(element));
+
+  return observer;
+}
+
+function addKeyboardHandler() {
+  const handlers = new Map([
+    ['ArrowLeft', prev],
+    ['ArrowRight', next],
+  ]);
+
+  const handler = (evt: KeyboardEvent) => {
+    if (handlers.has(evt.key)) {
+      evt.preventDefault();
+      handlers.get(evt.key)();
+    }
+  };
+
+  window.addEventListener('keydown', handler);
+
+  return {
+    disconnect() {
+      window.removeEventListener('keydown', handler);
+    },
+  };
+}
+
+const hasPrev = computed(() => props.index > 0);
+const hasNext = computed(() => props.index + 1 < props.items.length);
+
+function prev() {
+  if (hasPrev.value) {
+    scrollItems.value[props.index - 1].scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function next() {
+  if (hasNext.value) {
+    scrollItems.value[props.index + 1].scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 onMounted(() => {
-  observe();
   scrollItems.value[props.index]?.scrollIntoView();
+
+  const disposables = [observe(), addKeyboardHandler()];
+
+  onBeforeUnmount(() => {
+    disposables.forEach(dispose => dispose.disconnect());
+  });
 });
 </script>
 
@@ -52,6 +93,28 @@ onMounted(() => {
     >
       <slot :item="item" :idx="idx"></slot>
     </div>
+    <nav class="vertical-scroll-navigation">
+      <span>
+        <a
+          v-show="hasPrev"
+          class="icon secondary"
+          href="#"
+          @click.prevent="prev()"
+        >
+          arrow_back_ios
+        </a>
+      </span>
+      <span>
+        <a
+          v-show="hasNext"
+          class="icon secondary"
+          href="#"
+          @click.prevent="next()"
+        >
+          arrow_forward_ios
+        </a>
+      </span>
+    </nav>
   </div>
 </template>
 
@@ -76,6 +139,28 @@ onMounted(() => {
     min-height: 100%;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+  }
+
+  &-navigation {
+    position: absolute;
+    right: 0;
+    left: 0;
+    align-items: center;
+    height: 100%;
+    padding: var(--spacing);
+    pointer-events: none;
+
+    & > * {
+      a {
+        padding: var(--spacing);
+        font-size: 2em;
+        pointer-events: fill;
+      }
+    }
+
+    @include media-less-sm {
+      display: none;
+    }
   }
 }
 </style>

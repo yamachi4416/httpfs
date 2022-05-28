@@ -32,7 +32,7 @@ function close() {
   state.items = [];
 }
 
-function shownItem(idx: number) {
+function updateIndex(idx: number) {
   const item = state.items[idx];
   if (item) {
     item.shown = true;
@@ -87,7 +87,7 @@ defineExpose({
               :items="state.items"
               :index="state.index"
               v-slot="{ item }"
-              @shown="shownItem"
+              @update:index="updateIndex"
             >
               <Component :is="item.preview" :item="item.item" />
             </VerticalScroll>
