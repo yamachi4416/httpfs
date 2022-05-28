@@ -4,8 +4,9 @@ import { shallowReactive } from 'vue';
 import { FsItem } from '../../services/files';
 import Modal from '../ui/Modal.vue';
 import VerticalScroll from '../ui/VerticalScroll.vue';
-import ImageFilePreview from './previews/ImageFilePreview.vue';
-import MiscFilePreview from './previews/MiscFilePreview.vue';
+import ImageFilePreviewVue from './previews/ImageFilePreview.vue';
+import MiscFilePreviewVue from './previews/MiscFilePreview.vue';
+import PdfFilePreviewVue from './previews/PdfFilePreview.vue';
 
 const state = shallowReactive({
   show: false,
@@ -21,9 +22,12 @@ const currentItem = computed(() => state.items[state.index]?.item);
 
 function previewComponent(item: FsItem) {
   if (item?.mimeType?.startsWith('image/')) {
-    return ImageFilePreview;
+    return ImageFilePreviewVue;
   }
-  return MiscFilePreview;
+  if (item?.mimeType === 'application/pdf') {
+    return PdfFilePreviewVue;
+  }
+  return MiscFilePreviewVue;
 }
 
 function close() {

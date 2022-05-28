@@ -4,9 +4,11 @@ import { useAttrs } from 'vue';
 const props = withDefaults(
   defineProps<{
     waiting?: boolean;
+    noif?: boolean;
   }>(),
   {
     waiting: true,
+    noif: false,
   }
 );
 
@@ -15,12 +17,16 @@ const attrs = useAttrs();
 
 <script lang="ts">
 export default {
-  inheritAttrs: false
-}
+  inheritAttrs: false,
+};
 </script>
 
 <template>
-  <div v-if="props.waiting" class="waiting">
+  <div v-if="noif" :class="{ waiting: props.waiting }" v-bind="attrs">
+    <div v-if="props.waiting" class="loader"></div>
+    <slot />
+  </div>
+  <div v-else-if="props.waiting" class="waiting">
     <div class="loader"></div>
   </div>
   <div v-else v-bind="attrs">
