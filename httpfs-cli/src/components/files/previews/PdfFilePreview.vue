@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker?url';
-import { nextTick, reactive, ref, watch } from 'vue';
+import { nextTick, onBeforeUnmount, ref, shallowReactive, watch } from 'vue';
 import { FsItem } from '../../../services/files';
 import Waiting from '../../ui/Waiting.vue';
 
@@ -11,14 +11,13 @@ const props = defineProps<{
   item: FsItem;
 }>();
 
-const state = reactive({
+const state = shallowReactive({
   waiting: true,
-  totalPages: 0,
+  ovserver: null as IntersectionObserver,
 });
 
-const canvas = ref<HTMLCanvasElement[]>();
+const container = ref<HTMLElement>();
 
-// TODO: スクロールでページを読み込むようにする
 async function loadPdf(item: FsItem) {
   const pdf = await getDocument({
     url: item.endpoint,
@@ -26,36 +25,74 @@ async function loadPdf(item: FsItem) {
     cMapPacked: true,
   }).promise;
 
-  state.totalPages = pdf.numPages;
-  await nextTick();
+  const renderers = [...Array(pdf.numPages)].map((_, i) => {
+    const baseWidth = screen.width;
+    return {
+      async page() {
+        const page = await pdf.getPage(i + 1);
+        const sizes = page.getViewport({ scale: 1 });
+        const scale = (baseWidth / sizes.width) * 2;
+        const viewport = page.getViewport({ scale });
 
-  const tasks = canvas.value.map(async (canvas, i) => {
-    const page = await pdf.getPage(i + 1);
-    const sizes = page.getViewport({ scale: 1 });
-    const scale = (screen.width / sizes.width) * 2;
-    const viewport = page.getViewport({ scale });
-    const canvasContext = canvas.getContext('2d');
+        const canvas = document.createElement('canvas');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        canvas.dataset.pageNumber = `${i}`;
+        canvas.style.maxWidth = '100%';
 
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+        container.value.appendChild(canvas);
 
-    await page.render({ canvasContext, viewport }).promise;
-    page.cleanup();
+        return {
+          rendered: false,
+          async render() {
+            if (this.rendered) return;
+            this.rendered = true;
+            await page.render({
+              canvasContext: canvas.getContext('2d'),
+              viewport,
+            }).promise;
+          },
+        };
+      },
+    };
   });
 
-  await tasks[0];
+  const tasks = await Promise.all(renderers.map(r => r.page()));
+  const observer = new IntersectionObserver(
+    entities =>
+      entities.forEach(entity => {
+        if (entity.isIntersecting) {
+          const target = entity.target as HTMLElement;
+          observer.unobserve(target);
+          tasks[Number(target.dataset.pageNumber)]?.render();
+        }
+      }),
+    { root: container.value }
+  );
+
   state.waiting = false;
+  await nextTick();
 
-  await Promise.all(tasks);
+  if (tasks.length) {
+    await tasks[0].render();
+    await nextTick();
 
-  pdf.cleanup();
+    container.value.childNodes.forEach(node =>
+      observer.observe(node as HTMLElement)
+    );
+    state.ovserver = observer;
+  }
 }
+
+onBeforeUnmount(() => {
+  state.ovserver?.disconnect();
+  container.value?.childNodes.forEach(node => node.remove());
+});
 
 watch(
   () => props.item,
   async item => {
     state.waiting = true;
-    state.totalPages = 0;
 
     if (item) {
       await loadPdf(item);
@@ -69,9 +106,11 @@ watch(
 
 <template>
   <Waiting class="pdf-file-preview" :waiting="state.waiting" :noif="true">
-    <div v-show="!state.waiting" class="pdf-file-preview-inner">
-      <canvas v-for="i in state.totalPages" :key="i" ref="canvas" />
-    </div>
+    <div
+      ref="container"
+      v-show="!state.waiting"
+      class="pdf-file-preview-inner"
+    ></div>
   </Waiting>
 </template>
 
@@ -102,10 +141,6 @@ watch(
     }
 
     @include media-less-md {
-      max-width: 100%;
-    }
-
-    canvas {
       max-width: 100%;
     }
   }
