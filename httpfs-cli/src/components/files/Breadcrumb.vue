@@ -15,7 +15,10 @@ const items = computed(() => {
   return [{ name: '', path: '/' }].concat(
     paths.map((p, i) => ({
       name: p,
-      path: `/${paths.slice(0, i + 1).join('/')}`,
+      path: `/${paths
+        .slice(0, i + 1)
+        .map(p => encodeURIComponent(p))
+        .join('/')}`,
     }))
   );
 });
