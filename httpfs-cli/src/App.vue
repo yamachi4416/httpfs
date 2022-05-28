@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { onBeforeMount, onErrorCaptured, onUnmounted } from 'vue';
+import { onBeforeMount, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Loading from './components/ui/Loading.vue';
 import { injectSharedState } from './compositions';
-import { HttpException } from './services';
 
 const shared = injectSharedState();
 const router = useRouter();
@@ -31,15 +30,6 @@ router.afterEach((to, from, failure) => {
         ...router.currentRoute.value,
         hash: '#',
       });
-    }
-  }
-});
-
-onErrorCaptured((err, instalce, info) => {
-  console.log(err, instalce, info);
-  if (err instanceof HttpException) {
-    if (err.status === 404) {
-      router.back();
     }
   }
 });

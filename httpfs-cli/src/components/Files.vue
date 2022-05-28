@@ -19,13 +19,14 @@ import FilesMenu, {
 const shared = injectSharedState();
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+const { t, te } = useI18n();
 
 const path = ref(Array.from(route.params.path));
 const items = ref([] as FsItem[]);
 const parentPath = computed(() =>
   path.value.length > 0 ? `/${path.value.slice(0, -1).join('/')}` : ''
 );
+const error = ref(null as Error);
 
 const itemMap = uniqueKeyMap(items, 'path');
 const selectAll = selectAllable({ items });
@@ -34,14 +35,21 @@ const filesList = ref<InstanceType<typeof FilesList>>();
 const filePreview = ref<InstanceType<typeof FilePreview>>();
 
 async function fetchItems() {
-  const selected = new Set<string>(selectAll.items.map(item => item.path));
-  const newItems = await shared.withLoading(() =>
-    fetchDirectoryItems(path.value)
-  );
-  newItems.forEach(item => {
-    item.selected = selected.has(item.path);
-  });
-  items.value = newItems;
+  const selected = new Set(selectAll.items.map(item => item.path));
+  try {
+    error.value = null;
+    items.value = await shared.withLoading(() =>
+      fetchDirectoryItems(path.value).then(items => {
+        items.forEach(item => {
+          item.selected = selected.has(item.path);
+        });
+        return items;
+      })
+    );
+  } catch (err) {
+    items.value = [];
+    error.value = err;
+  }
 }
 
 async function previewItem(item: FsItem) {
@@ -64,7 +72,7 @@ const onUploadProgress: OnProgressAction = (item, err?) => {
   if (item.parent === cdp) {
     if (itemMap.value.has(item.path)) {
       const old = itemMap.value.get(item.path);
-      Object.assign(old, item, { selected: old.selected })
+      Object.assign(old, item, { selected: old.selected });
     } else {
       items.value.push(item);
     }
@@ -119,6 +127,7 @@ onBeforeMount(async () => await fetchItems());
         <ul>
           <li>
             <FilesMenu
+              v-if="!error"
               ref="filesMenu"
               :path="path"
               :items="items"
@@ -135,12 +144,22 @@ onBeforeMount(async () => await fetchItems());
 
     <main>
       <FilesList
+        v-if="!error"
         ref="filesList"
         :items="items"
         :headers="['selected', 'name', 'lastModified', 'mimeType', 'size']"
         :drag-select="true"
         @click="previewItem"
       />
+      <div v-else class="error">
+        <h3>
+          {{
+            te(`errors.${error.message}`)
+              ? t(`errors.${error.message}`)
+              : error.message
+          }}
+        </h3>
+      </div>
     </main>
     <FilePreview ref="filePreview" />
   </div>
@@ -153,15 +172,15 @@ onBeforeMount(async () => await fetchItems());
   display: flex;
   flex-direction: column;
 
-  > header {
+  & > header {
     z-index: 9;
     padding-right: var(--spacing);
     padding-left: calc(var(--spacing) / 2);
     background-color: var(--background-color);
     box-shadow: 0 1px 0 var(--muted-border-color);
 
-    > nav {
-      > ul {
+    & > nav {
+      & > ul {
         .back {
           display: flex;
         }
@@ -169,9 +188,17 @@ onBeforeMount(async () => await fetchItems());
     }
   }
 
-  > main {
+  & > main {
     flex: 1;
     overflow: auto;
+
+    .error {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: var(--spacing);
+    }
   }
 }
 </style>
