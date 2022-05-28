@@ -21,13 +21,18 @@ onBeforeMount(() => {
   onUnmounted(() => {
     window.removeEventListener('resize', setVH);
   });
+});
 
-  router.isReady().then(() => {
-    router.push({
-      ...router.currentRoute.value,
-      hash: '#',
-    });
-  });
+router.afterEach((to, from, failure) => {
+  if (!failure) {
+    const state = history.state;
+    if (state?.back == null) {
+      router.push({
+        ...router.currentRoute.value,
+        hash: '#',
+      });
+    }
+  }
 });
 
 onErrorCaptured((err, instalce, info) => {
