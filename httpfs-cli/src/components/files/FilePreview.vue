@@ -7,6 +7,7 @@ import VerticalScroll from '../ui/VerticalScroll.vue';
 import ImageFilePreviewVue from './previews/ImageFilePreview.vue';
 import MiscFilePreviewVue from './previews/MiscFilePreview.vue';
 import PdfFilePreviewVue from './previews/PdfFilePreview.vue';
+import VideoFilePreviewVue from './previews/VideoFilePreview.vue';
 
 const state = shallowReactive({
   show: false,
@@ -18,6 +19,7 @@ const state = shallowReactive({
   }[],
 });
 
+const video = document.createElement('video');
 const currentItem = computed(() => state.items[state.index]?.item);
 
 function previewComponent(item: FsItem) {
@@ -26,6 +28,9 @@ function previewComponent(item: FsItem) {
   }
   if (item?.mimeType === 'application/pdf') {
     return PdfFilePreviewVue;
+  }
+  if (video.canPlayType(item?.mimeType)) {
+    return VideoFilePreviewVue;
   }
   return MiscFilePreviewVue;
 }
@@ -90,10 +95,14 @@ defineExpose({
             <VerticalScroll
               :items="state.items"
               :index="state.index"
-              v-slot="{ item }"
+              v-slot="{ item, idx }"
               @update:index="updateIndex"
             >
-              <Component :is="item.preview" :item="item.item" />
+              <Component
+                :is="item.preview"
+                :item="item.item"
+                :current="state.index === idx"
+              />
             </VerticalScroll>
           </div>
         </article>
