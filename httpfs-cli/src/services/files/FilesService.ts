@@ -166,6 +166,25 @@ export async function moveItems({
   });
 }
 
+export async function renameItem({
+  path = null,
+  name = null,
+  newName = null,
+}: {
+  path: string[];
+  name: string;
+  newName: string;
+}): Promise<FsItem> {
+  return await fetchApi<FsItem>(path, {
+    method: 'post',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Method': 'RENAME',
+    },
+    body: JSON.stringify({ name, newName }),
+  }).then(item => FsItem.fromJson(item, path));
+}
+
 export async function deleteItems(
   path: string[],
   items: FsItem[]

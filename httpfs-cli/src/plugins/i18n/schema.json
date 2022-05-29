@@ -9,6 +9,12 @@
         "newDirectory": {
           "type": "string"
         },
+        "renameDirectory": {
+          "type": "string"
+        },
+        "renameFile": {
+          "type": "string"
+        },
         "selectedCount": {
           "type": "string"
         },
@@ -73,6 +79,9 @@
           "type": "string"
         },
         "moveItems": {
+          "type": "string"
+        },
+        "renameItem": {
           "type": "string"
         },
         "download": {

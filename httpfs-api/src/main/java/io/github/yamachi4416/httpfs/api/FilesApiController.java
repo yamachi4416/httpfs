@@ -39,6 +39,7 @@ import io.github.yamachi4416.httpfs.api.dto.DeleteItemsParam;
 import io.github.yamachi4416.httpfs.api.dto.MkColParam;
 import io.github.yamachi4416.httpfs.api.dto.MoveItemParam;
 import io.github.yamachi4416.httpfs.api.dto.MultiStatusResult;
+import io.github.yamachi4416.httpfs.api.dto.RenameItemParam;
 import io.github.yamachi4416.httpfs.fs.FsItem;
 import io.github.yamachi4416.httpfs.fs.SubFs;
 
@@ -163,6 +164,21 @@ public class FilesApiController {
                 sub.move(dest, name, param.isOverwrite()));
           });
         }));
+  }
+
+  @PostMapping(headers = { "x-method=RENAME" })
+  public ResponseEntity<?> rename(
+      FsItem fsItem,
+      @RequestBody @Valid RenameItemParam param,
+      BindingResult binding)
+      throws IOException {
+    if (binding.hasErrors()) {
+      return ResponseEntity.badRequest().build();
+    }
+
+    var sub = fs.wSub(fsItem.getPath());
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(sub.rename(param.getName(), param.getNewName()));
   }
 
   @DeleteMapping

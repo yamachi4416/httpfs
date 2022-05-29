@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue';
+import { reactive, shallowRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { injectSharedState } from '../../../compositions';
 import { FsItem, MultiStatus, uploadFiles } from '../../../services/files';
@@ -7,22 +7,24 @@ import ShowErrors from './ShowErrors.vue';
 
 const { t } = useI18n();
 
-const props = defineProps<{
-  path: string[];
-}>();
-
 const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'progress', item: FsItem, err?: Error): void;
   (e: 'done', mtsts: MultiStatus[]): void;
 }>();
 
+const state = reactive({
+  path: null as string[],
+});
 const shared = injectSharedState();
-
 const file = shallowRef<HTMLInputElement>();
 const showErrors = shallowRef<InstanceType<typeof ShowErrors>>();
 
-const fileUpload = async () => {
+function clear() {
+  state.path = null;
+}
+
+const action = async () => {
   const { files } = file.value;
 
   if (files.length === 0) {
@@ -32,7 +34,7 @@ const fileUpload = async () => {
 
   const mtsts = await shared.withLoading(() =>
     uploadFiles({
-      path: props.path,
+      path: state.path,
       files,
       callback: (item, err) => emit('progress', item, err),
     }).finally(() => {
@@ -45,7 +47,9 @@ const fileUpload = async () => {
 };
 
 defineExpose({
-  open() {
+  open(path: string[]) {
+    clear();
+    state.path = path;
     file.value?.click();
   },
 });
@@ -62,7 +66,7 @@ export type OnFileUploadProgress = (item: FsItem, err?: Error) => void;
       ref="file"
       type="file"
       multiple="true"
-      @change="fileUpload"
+      @change="action"
     />
     <ShowErrors ref="showErrors" :title="t('messages.hasErrorsUploadFiles')" />
   </teleport>

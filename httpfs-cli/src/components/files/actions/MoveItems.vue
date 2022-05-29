@@ -80,7 +80,7 @@ function enterItem(item: FsItem) {
   }
 }
 
-async function move() {
+async function action() {
   if (state.loading || !canMove.value) {
     return;
   }
@@ -188,7 +188,7 @@ defineExpose({
             {{ t('actions.cancel') }}
           </a>
           <span class="devider"></span>
-          <a href="#" :class="{ secondary: !canMove }" @click.prevent="move">
+          <a href="#" :class="{ secondary: !canMove }" @click.prevent="action">
             {{ t('actions.decision') }}
           </a>
         </nav>

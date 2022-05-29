@@ -9,6 +9,7 @@ import CreateDirectory from './actions/CreateDirectory.vue';
 import FileDelete from './actions/FileDelete.vue';
 import FileUpload from './actions/FileUpload.vue';
 import MoveItems from './actions/MoveItems.vue';
+import RenameItem from './actions/RenameItem.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -29,7 +30,8 @@ const emit = defineEmits<{
   (e: 'move-progress', item: FsItem, err?: Error);
   (e: 'move-done', mtsts: MultiStatus[]);
   (e: 'delete-done', names: string[]);
-  (e: 'mkdir-done');
+  (e: 'mkdir-done', item: FsItem);
+  (e: 'rename-done', item: FsItem);
 }>();
 
 const { t } = useI18n();
@@ -39,6 +41,7 @@ const selectAll = selectAllable({ items });
 const createDirectory = ref<InstanceType<typeof CreateDirectory>>();
 const fileUpload = ref<InstanceType<typeof FileUpload>>();
 const moveItems = ref<InstanceType<typeof MoveItems>>();
+const renameItem = ref<InstanceType<typeof RenameItem>>();
 const fileDelete = ref<InstanceType<typeof FileDelete>>();
 
 const menuItems = [
@@ -48,7 +51,7 @@ const menuItems = [
     get show() {
       return true;
     },
-    click: () => createDirectory.value?.open(),
+    click: () => createDirectory.value?.open(props.path),
   },
   {
     name: 'uploadFiles',
@@ -56,7 +59,15 @@ const menuItems = [
     get show() {
       return true;
     },
-    click: () => fileUpload.value?.open(),
+    click: () => fileUpload.value?.open(props.path),
+  },
+  {
+    name: 'renameItem',
+    icon: 'drive_file_rename_outline',
+    get show() {
+      return selectAll.count === 1;
+    },
+    click: () => renameItem.value?.open(props.path, selectAll.items[0]),
   },
   {
     name: 'moveItems',
@@ -116,21 +127,23 @@ export type OnActionDone = (mtsts: MultiStatus[]) => void | Promise<void>;
     <Teleport to="body">
       <FileUpload
         ref="fileUpload"
-        :path="path"
         @progress="(item, err) => emit('upload-progress', item, err)"
         @done="mtsts => done(emit('upload-done', mtsts))"
         @close="cancel"
       />
       <CreateDirectory
         ref="createDirectory"
-        :path="path"
-        @done="() => done(emit('mkdir-done'))"
+        @done="item => done(emit('mkdir-done', item))"
       />
       <MoveItems
         ref="moveItems"
         @progress="(item, err) => emit('move-progress', item, err)"
         @done="mtsts => done(emit('move-done', mtsts))"
         @close="cancel"
+      />
+      <RenameItem
+        ref="renameItem"
+        @done="item => done(emit('rename-done', item))"
       />
       <FileDelete
         ref="fileDelete"

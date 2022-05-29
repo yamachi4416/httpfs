@@ -34,7 +34,7 @@ function close() {
   emit('close');
 }
 
-async function deleteSelectedItems() {
+async function action() {
   const mtsts = await shared.withLoading(() =>
     deleteItems(state.path, state.targets)
   );
@@ -61,7 +61,7 @@ defineExpose({
       :show="state.show"
       :title="t('messages.deleteFileConfirm')"
       @cancel="close"
-      @ok="deleteSelectedItems"
+      @ok="action"
     />
     <ShowErrors ref="showErrors" :title="t('messages.hasErrorsFileDelete')" />
   </teleport>

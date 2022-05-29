@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.AccessDeniedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -129,6 +130,16 @@ public class SubFs {
     ret.setItem(new FsItem(target));
 
     return ret;
+  }
+
+  public FsItem rename(String target, String newName)
+      throws IOException {
+    var source = resolve(target);
+    var dist = safePath(newName);
+    if (Files.exists(dist)) {
+      throw new FileAlreadyExistsException(dist.toString());
+    }
+    return new FsItem(Files.move(source.getPath(), dist));
   }
 
   private boolean isChild(Path path) {

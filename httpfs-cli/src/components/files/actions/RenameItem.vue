@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { injectSharedState } from '../../../compositions';
+import { renameItem, FsItem } from '../../../services/files';
 import { HttpException } from '../../../services';
-import { createDirectory, FsItem } from '../../../services/files';
 import Prompt from '../../ui/Prompt.vue';
 
 const { t } = useI18n();
@@ -18,14 +18,24 @@ const shared = injectSharedState();
 const state = reactive({
   path: null as string[],
   show: false,
-  dirname: '',
+  item: null as FsItem,
+  newName: '',
   invalid: false,
+});
+
+const title = computed(() => {
+  if (state.item) {
+    return t(`messages.rename${state.item.directory ? 'Directory' : 'File'}`);
+  } else {
+    return '';
+  }
 });
 
 function clear() {
   state.path = null;
   state.show = false;
-  state.dirname = '';
+  state.item = null;
+  state.newName = '';
   state.invalid = false;
 }
 
@@ -35,13 +45,17 @@ function close() {
 }
 
 async function action() {
-  if (!state.dirname) {
+  if (!state.newName || state.item.name === state.newName) {
     return;
   }
 
   try {
     const item = await shared.withLoading(() =>
-      createDirectory({ path: state.path, dirname: state.dirname })
+      renameItem({
+        path: state.path,
+        name: state.item.name,
+        newName: state.newName,
+      })
     );
     clear();
     emit('done', item);
@@ -55,9 +69,11 @@ async function action() {
 }
 
 defineExpose({
-  open(path: string[]) {
+  open(path: string[], item: FsItem) {
     clear();
     state.path = path;
+    state.item = item;
+    state.newName = item.name;
     state.show = true;
   },
 });
@@ -67,11 +83,11 @@ defineExpose({
   <Prompt
     :show="state.show"
     :invalid="state.invalid"
-    :title="t('messages.newDirectory')"
-    :action="t('actions.create')"
-    v-model="state.dirname"
+    :title="title"
+    :action="t('actions.renameItem')"
+    v-model="state.newName"
     @cancel="close"
     @ok="action"
-    @update:invalid="(value) => (state.invalid = value)"
+    @update:invalid="value => (state.invalid = value)"
   />
 </template>
