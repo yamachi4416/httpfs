@@ -1,5 +1,5 @@
 app:
-  document-root: "E:\\tmp"
+  document-root: .
 spring:
   servlet:
     multipart:

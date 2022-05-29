@@ -1,7 +1,6 @@
 package io.github.yamachi4416.httpfs.fs;
 
 import java.io.IOException;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -32,7 +31,7 @@ public class FsItem {
       this.size = 0L;
     } else {
       this.size = file.length();
-      this.mimeType = URLConnection.guessContentTypeFromName(this.name);
+      this.mimeType = MimeTypeHelper.getMimeType(path);
     }
 
     try {
