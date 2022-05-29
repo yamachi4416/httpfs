@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import {
+  getDocument,
+  GlobalWorkerOptions,
+  version as pdfjsVersion,
+} from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker?url';
 import { nextTick, onBeforeUnmount, ref, shallowReactive, watch } from 'vue';
 import { FsItem } from '../../../services/files';
 import Waiting from '../../ui/Waiting.vue';
+
+const cdnBaseUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsVersion}`;
 
 GlobalWorkerOptions.workerSrc = workerSrc;
 
@@ -21,8 +27,9 @@ const container = ref<HTMLElement>();
 async function loadPdf(item: FsItem) {
   const pdf = await getDocument({
     url: item.endpoint,
-    cMapUrl: '/node_modules/pdfjs-dist/cmaps/',
+    cMapUrl: `${cdnBaseUrl}/cmaps/`,
     cMapPacked: true,
+    standardFontDataUrl: `${cdnBaseUrl}/standard_fonts`,
   }).promise;
 
   const renderers = [...Array(pdf.numPages)].map((_, i) => {
