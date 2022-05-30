@@ -51,12 +51,6 @@ function clear() {
   state.items = [];
 }
 
-function back() {
-  if (state.paths.length > 0) {
-    state.paths.pop();
-  }
-}
-
 function movePath(path: string) {
   if (path !== current.value) {
     state.paths = path.split('/').filter(p => p);
@@ -158,13 +152,6 @@ defineExpose({
     >
       <article class="move-items-panel">
         <div class="move-items-panel-header">
-          <a
-            href="#"
-            class="move-items-panel-header-back secondary"
-            @click.prevent="back"
-          >
-            <span class="icon">arrow_back_ios_new</span>
-          </a>
           <Breadcrumb
             class="move-items-panel-header-title"
             :path="state.paths"
