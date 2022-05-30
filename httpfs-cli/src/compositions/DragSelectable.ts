@@ -14,7 +14,7 @@ interface DragSelectable {
   get working(): boolean;
 }
 
-type Events = MouseEvent | PointerEvent;
+type Events = MouseEvent;
 
 export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   if (options.nop) {
@@ -66,7 +66,7 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
       const up = () => {
         setTimeout(clearState);
       };
-      window.addEventListener('pointerup', up, { once: true });
+      window.addEventListener('mouseup', up, { once: true });
     } else if (!item.selected) {
       state.working = true;
       state.start = item;
@@ -76,7 +76,7 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
         selectItems();
         setTimeout(clearState);
       };
-      window.addEventListener('pointerup', up, { once: true });
+      window.addEventListener('mouseup', up, { once: true });
     }
   }
 
@@ -89,8 +89,8 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
 
   return {
     addEvents(el: HTMLElement, item: Selectable) {
-      el.addEventListener('pointerdown', e => down(e, item));
-      el.addEventListener('pointerover', e => over(e, item));
+      el.addEventListener('mousedown', e => down(e, item));
+      el.addEventListener('mouseover', e => over(e, item));
     },
     get working() {
       return working();
