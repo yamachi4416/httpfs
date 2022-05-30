@@ -7,28 +7,30 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'click', path: string): void;
+  (e: 'click', item: ReturnType<typeof toItems>[0]): void;
 }>();
 
-const items = computed(() => {
-  const paths = Array.from(props.path);
-  return [{ name: '', path: '/' }].concat(
-    paths.map((p, i) => ({
-      name: p,
-      path: `/${paths
-        .slice(0, i + 1)
-        .map(p => encodeURIComponent(p))
-        .join('/')}`,
-    }))
+function toItems(paths: string[]) {
+  return [{ name: '', path: '/', encodedPath: '/' }].concat(
+    paths.map((p, i) => {
+      const cpath = paths.slice(0, i + 1);
+      return {
+        name: p,
+        path: `/${cpath.join('/')}`,
+        encodedPath: `/${cpath.map(encodeURIComponent).join('/')}`,
+      };
+    })
   );
-});
+}
+
+const items = computed(() => toItems(Array.from(props.path)));
 </script>
 
 <template>
   <nav v-scroll-to="'right'" class="breadcrumb">
     <ul>
       <li v-for="item in items" :key="item.path" class="icons">
-        <a href="#" class="secondary" @click.prevent="emit('click', item.path)">
+        <a href="#" class="secondary" @click.prevent="emit('click', item)">
           <span v-if="item.path === '/'" class="icon">home</span>
           <span v-else>{{ item.name }}</span>
         </a>

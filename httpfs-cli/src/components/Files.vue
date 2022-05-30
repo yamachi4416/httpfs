@@ -139,7 +139,7 @@ onBeforeMount(async () => await fetchItems());
           </li>
         </ul>
       </nav>
-      <Breadcrumb :path="path" @click="p => router.push(p)" />
+      <Breadcrumb :path="path" @click="p => router.push(p.encodedPath)" />
     </header>
 
     <main>

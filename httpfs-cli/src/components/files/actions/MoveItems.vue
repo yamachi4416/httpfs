@@ -9,10 +9,10 @@ import {
   MultiStatus,
 } from '../../../services/files';
 import Modal from '../../ui/Modal.vue';
+import Waiting from '../../ui/Waiting.vue';
 import Breadcrumb from '../Breadcrumb.vue';
 import FilesList, { FileListBindItems } from '../FilesList.vue';
 import ShowErrors from './ShowErrors.vue';
-import Waiting from '../../ui/Waiting.vue';
 
 const { t } = useI18n();
 
@@ -51,9 +51,9 @@ function clear() {
   state.items = [];
 }
 
-function movePath(path: string) {
-  if (path !== current.value) {
-    state.paths = path.split('/').filter(p => p);
+function movePath(item: { path: string }) {
+  if (item.path !== current.value) {
+    state.paths = item.path.split('/').filter(p => p);
   }
 }
 
