@@ -41,23 +41,53 @@ async function loadPdf(item: FsItem) {
         const scale = (baseWidth / sizes.width) * 2;
         const viewport = page.getViewport({ scale });
 
-        const canvas = document.createElement('canvas');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-        canvas.dataset.pageNumber = `${i}`;
-        canvas.style.maxWidth = '100%';
+        const img = document.createElement('img');
+        img.width = viewport.width;
+        img.height = viewport.height;
+        img.style.height = 'auto';
+        img.style.width = '100%';
+        img.style.maxWidth = '100%';
+        img.style.border = 'none';
+        img.style.backgroundColor = '#fff';
+        img.dataset.pageNumber = `${i}`;
+        container.value.appendChild(img);
 
-        container.value.appendChild(canvas);
+        const status = {
+          rendered: false,
+          requested: false,
+        };
 
         return {
-          rendered: false,
-          async render() {
-            if (this.rendered) return;
-            this.rendered = true;
-            await page.render({
-              canvasContext: canvas.getContext('2d'),
-              viewport,
-            }).promise;
+          render(beforeRender?: () => void) {
+            if (status.rendered || status.requested) return;
+            status.requested = true;
+            return new Promise(resolve =>
+              requestAnimationFrame(() => {
+                if (!status.requested) return;
+
+                status.rendered = true;
+                beforeRender?.();
+
+                const canvas = document.createElement('canvas');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                page
+                  .render({
+                    canvasContext: canvas.getContext('2d'),
+                    viewport,
+                  })
+                  .promise.then(() => {
+                    img.src = canvas.toDataURL('image/svg+xml');
+                    page.cleanup();
+                    resolve(null);
+                  });
+              })
+            );
+          },
+          cancel() {
+            if (status.rendered) return;
+            status.requested = false;
           },
         };
       },
@@ -68,10 +98,12 @@ async function loadPdf(item: FsItem) {
   const observer = new IntersectionObserver(
     entities =>
       entities.forEach(entity => {
+        const target = entity.target as HTMLElement;
+        const task = tasks[Number(target.dataset.pageNumber)];
         if (entity.isIntersecting) {
-          const target = entity.target as HTMLElement;
-          observer.unobserve(target);
-          tasks[Number(target.dataset.pageNumber)]?.render();
+          task?.render(() => observer.unobserve(target));
+        } else {
+          task?.cancel();
         }
       }),
     { root: container.value }
@@ -82,11 +114,9 @@ async function loadPdf(item: FsItem) {
 
   if (tasks.length) {
     await tasks[0].render();
-    await nextTick();
-
-    container.value.childNodes.forEach(node =>
-      observer.observe(node as HTMLElement)
-    );
+    Array.prototype.slice
+      .call(container.value.childNodes, 1)
+      .forEach((node: HTMLElement) => observer.observe(node));
     state.ovserver = observer;
   }
 }
