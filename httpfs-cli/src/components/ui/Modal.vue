@@ -80,7 +80,7 @@ watch(
     height: fit-content;
     max-height: 100%;
 
-    & > * {
+    & > :where(*) {
       display: flex;
       align-items: center;
       margin: 0;
@@ -94,16 +94,16 @@ watch(
     & > :where(nav) {
       justify-content: flex-end;
 
+      :where(a) {
+        text-decoration: none;
+      }
+
       :where(.devider) {
         width: 1px;
         height: 1.5em;
         margin-right: 1em;
         margin-left: 1em;
         background-color: var(--muted-border-color);
-      }
-
-      a {
-        text-decoration: none;
       }
     }
   }
