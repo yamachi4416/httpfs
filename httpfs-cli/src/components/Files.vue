@@ -107,7 +107,13 @@ onBeforeMount(async () => await fetchItems());
     <header>
       <nav>
         <ul>
-          <li v-if="!selectAll.any">
+          <li v-if="selectAll.any">
+            <label>
+              <input type="checkbox" v-model="selectAll.value" />
+              {{ t('messages.selectedCount', [selectAll.count]) }}
+            </label>
+          </li>
+          <li v-else>
             <router-link
               class="back secondary"
               v-if="parentPath"
@@ -115,12 +121,6 @@ onBeforeMount(async () => await fetchItems());
             >
               <span class="icon">arrow_back_ios_new</span>
             </router-link>
-          </li>
-          <li>
-            <label v-show="selectAll.any">
-              <input type="checkbox" v-model="selectAll.value" />
-              {{ t('messages.selectedCount', [selectAll.count]) }}
-            </label>
           </li>
         </ul>
         <ul></ul>
@@ -174,16 +174,29 @@ onBeforeMount(async () => await fetchItems());
 
   & > header {
     z-index: 9;
-    padding-right: var(--spacing);
-    padding-left: calc(var(--spacing) / 2);
+    padding: var(--spacing) var(--spacing) 0 calc(var(--spacing) / 2);
     background-color: var(--background-color);
     box-shadow: 0 1px 0 var(--muted-border-color);
 
     & > nav {
+      display: flex;
+      justify-content: space-between;
+
       & > ul {
+        padding: 0;
+        margin: 0;
+
+        li {
+          list-style: none;
+        }
+
         .back {
           display: flex;
         }
+      }
+
+      a {
+        text-decoration: none;
       }
     }
   }

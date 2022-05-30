@@ -59,18 +59,21 @@ const items = computed(() => {
     }
   }
 
-  padding: calc(var(--nav-element-spacing-vertical) / 2)
-    var(--nav-element-spacing-horizontal)
-    calc(var(--nav-element-spacing-vertical) / 2 - var(--scrollbar-height))
-    var(--nav-element-spacing-horizontal);
+  display: flex;
+  padding: calc(var(--spacing) / 2) 0;
   overflow-x: scroll;
   overflow-y: hidden;
   white-space: nowrap;
 
-  > ul {
+  & > ul {
+    display: flex;
+    padding: 0;
+    margin: 0;
+
     li {
       display: flex;
       padding: 0;
+      margin: 0;
 
       &:not(:last-of-type)::after {
         color: var(--muted-color);
@@ -79,6 +82,7 @@ const items = computed(() => {
 
       a {
         display: flex;
+        text-decoration: none;
 
         &[aria-current='page'] {
           color: var(--secondary) !important;

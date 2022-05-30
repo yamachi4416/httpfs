@@ -145,15 +145,18 @@ onMounted(() => {
     position: absolute;
     right: 0;
     left: 0;
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     height: 100%;
-    padding: var(--spacing);
+    padding: 0 var(--spacing);
     pointer-events: none;
 
     & > * {
       a {
         padding: var(--spacing);
         font-size: 2em;
+        text-decoration: none;
         pointer-events: fill;
       }
     }
