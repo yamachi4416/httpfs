@@ -10,16 +10,16 @@ export interface DragSelectableOptions {
 }
 
 interface DragSelectable {
-  mousedown(event: MouseEvent, item: Selectable): void;
-  mouseover(event: MouseEvent, item: Selectable): void;
+  addEvents(el: HTMLElement, item: Selectable): void;
   get working(): boolean;
 }
+
+type Events = MouseEvent | PointerEvent;
 
 export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   if (options.nop) {
     return {
-      mousedown: () => {},
-      mouseover: () => {},
+      addEvents() {},
       get working() {
         return working();
       },
@@ -31,18 +31,21 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   const state = shallowReactive<{
     start: Selectable;
     end: Selectable;
+    working: boolean;
   }>({
     start: null,
     end: null,
+    working: false,
   });
 
   function working() {
-    return state.start != null;
+    return state.working;
   }
 
   function clearState() {
     state.start = null;
     state.end = null;
+    state.working = false;
   }
 
   function selectItems() {
@@ -55,20 +58,29 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
     });
   }
 
-  function mousedown(event: MouseEvent, item: Selectable) {
-    if (item && !item.selected) {
+  function down(event: Events, item: Selectable) {
+    if (!item) return;
+    if (event.ctrlKey) {
+      state.working = true;
+      item.selected = !item.selected;
+      const up = () => {
+        setTimeout(clearState);
+      };
+      window.addEventListener('pointerup', up, { once: true });
+    } else if (!item.selected) {
+      state.working = true;
       state.start = item;
       state.end = item;
       selectItems();
-      const mouseup = (event: MouseEvent) => {
+      const up = () => {
         selectItems();
         setTimeout(clearState);
       };
-      window.addEventListener('mouseup', mouseup, { once: true });
+      window.addEventListener('pointerup', up, { once: true });
     }
   }
 
-  function mouseover(event: MouseEvent, item: Selectable) {
+  function over(event: Events, item: Selectable) {
     if (item && state.start != null) {
       state.end = item;
       selectItems();
@@ -76,8 +88,10 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   }
 
   return {
-    mousedown,
-    mouseover,
+    addEvents(el: HTMLElement, item: Selectable) {
+      el.addEventListener('pointerdown', e => down(e, item));
+      el.addEventListener('pointerover', e => over(e, item));
+    },
     get working() {
       return working();
     },

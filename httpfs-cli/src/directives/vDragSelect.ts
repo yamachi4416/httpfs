@@ -37,8 +37,7 @@ export function vDragSelectDirective(options: DragSelectableOptions) {
   return {
     beforeMount(el, { value }) {
       el._dsh = { item: value };
-      el.addEventListener('mousedown', e => dst.mousedown(e, el._dsh.item));
-      el.addEventListener('mouseover', e => dst.mouseover(e, el._dsh.item));
+      dst.addEvents(el, value);
     },
     mounted(el, { value }) {
       patch(el, value);
