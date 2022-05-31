@@ -2,7 +2,6 @@ package io.github.yamachi4416.httpfs.api;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
@@ -10,7 +9,6 @@ import java.nio.file.InvalidPathException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import org.slf4j.Logger;
@@ -22,18 +20,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.HandlerMapping;
 
 import io.github.yamachi4416.httpfs.api.dto.DeleteItemsParam;
 import io.github.yamachi4416.httpfs.api.dto.MkColParam;
@@ -44,7 +41,7 @@ import io.github.yamachi4416.httpfs.fs.FsItem;
 import io.github.yamachi4416.httpfs.fs.SubFs;
 
 @Controller
-@RequestMapping(path = "api/files/**")
+@RequestMapping(path = "api/files/{*paths}")
 public class FilesApiController {
 
   private static final Logger logger = LoggerFactory.getLogger(FilesApiController.class);
@@ -56,20 +53,11 @@ public class FilesApiController {
   }
 
   @ModelAttribute
-  public FsItem fsItem(HttpServletRequest request) throws FileNotFoundException {
-    var paths = URLDecoder.decode(
-        new AntPathMatcher().extractPathWithinPattern(
-            (String) request.getAttribute(
-                HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE),
-            (String) request.getAttribute(
-                HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE)),
-        StandardCharsets.UTF_8).split("/");
+  public FsItem fsItem(@PathVariable("paths") String paths) throws FileNotFoundException {
     try {
-      return fs.resolve(paths);
+      return fs.resolve(paths.split("/"));
     } catch (FileNotFoundException e) {
-      logger.info("Not Found. request=[{}] resolve=[{}]",
-          String.join("/", paths),
-          e.getMessage());
+      logger.info("Not Found. request=[{}] resolve=[{}]", paths, e.getMessage());
       throw e;
     }
   }
