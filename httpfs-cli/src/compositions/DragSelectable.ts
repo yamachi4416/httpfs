@@ -10,7 +10,7 @@ export interface DragSelectableOptions {
 }
 
 interface DragSelectable {
-  addEvents(el: HTMLElement, item: Selectable): void;
+  addEvents(el: HTMLElement, getItem: () => Selectable): void;
   get working(): boolean;
 }
 
@@ -88,9 +88,14 @@ export function dragSelectable(options: DragSelectableOptions): DragSelectable {
   }
 
   return {
-    addEvents(el: HTMLElement, item: Selectable) {
-      el.addEventListener('mousedown', e => down(e, item));
-      el.addEventListener('mouseover', e => over(e, item));
+    addEvents(el, getItem) {
+      const handlers = {
+        mousedown: (e: MouseEvent) => down(e, getItem()),
+        mouseover: (e: MouseEvent) => over(e, getItem()),
+      };
+      Object.entries(handlers).forEach(([key, handler]) => {
+        el.addEventListener(key, handler);
+      });
     },
     get working() {
       return working();

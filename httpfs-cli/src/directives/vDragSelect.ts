@@ -19,8 +19,7 @@ export function vDragSelectDirective(options: DragSelectableOptions) {
 
   const dst = dragSelectable(options);
 
-  function patch(el: VDragSelectElement, item: Selectable) {
-    el._dsh.item = item;
+  function patch(el: VDragSelectElement) {
     const invokers = el._vei;
     if (invokers?.onClick?.value) {
       const handlers = Array.isArray(invokers.onClick.value)
@@ -37,13 +36,15 @@ export function vDragSelectDirective(options: DragSelectableOptions) {
   return {
     beforeMount(el, { value }) {
       el._dsh = { item: value };
-      dst.addEvents(el, value);
+      dst.addEvents(el, () => el._dsh?.item);
     },
     mounted(el, { value }) {
-      patch(el, value);
+      el._dsh.item = value;
+      patch(el);
     },
     updated(el, { value }) {
-      patch(el, value);
+      el._dsh.item = value;
+      patch(el);
     },
   } as ObjectDirective<VDragSelectElement>;
 }
