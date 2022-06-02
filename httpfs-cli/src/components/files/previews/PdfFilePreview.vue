@@ -38,7 +38,7 @@ async function loadPdf(item: FsItem) {
       async page() {
         const page = await pdf.getPage(i + 1);
         const sizes = page.getViewport({ scale: 1 });
-        const scale = (baseWidth / sizes.width) * 2;
+        const scale = (Math.max(baseWidth, sizes.width) / sizes.width) * 2;
         const viewport = page.getViewport({ scale });
 
         const img = document.createElement('img');
