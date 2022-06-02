@@ -78,9 +78,13 @@ async function loadPdf(item: FsItem) {
                     viewport,
                   })
                   .promise.then(() => {
-                    img.src = canvas.toDataURL('image/svg+xml');
                     page.cleanup();
-                    resolve(null);
+                    canvas.toBlob(blob => {
+                      img.addEventListener('load', () => resolve(null), {
+                        once: true,
+                      });
+                      img.src = URL.createObjectURL(blob);
+                    }, 'image/png');
                   });
               })
             );
@@ -109,11 +113,10 @@ async function loadPdf(item: FsItem) {
     { root: container.value }
   );
 
-  state.waiting = false;
-  await nextTick();
-
   if (tasks.length) {
     await tasks[0].render();
+    state.waiting = false;
+    await nextTick();
     Array.prototype.slice
       .call(container.value.childNodes, 1)
       .forEach((node: HTMLElement) => observer.observe(node));
