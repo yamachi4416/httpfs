@@ -62,7 +62,7 @@ async function loadPdf(item: FsItem) {
             if (status.rendered || status.requested) return;
             status.requested = true;
             return new Promise(resolve =>
-              requestAnimationFrame(() => {
+              setTimeout(() => {
                 if (!status.requested) return;
 
                 status.rendered = true;
@@ -86,7 +86,7 @@ async function loadPdf(item: FsItem) {
                       img.src = URL.createObjectURL(blob);
                     }, 'image/png');
                   });
-              })
+              }, 10)
             );
           },
           cancel() {
