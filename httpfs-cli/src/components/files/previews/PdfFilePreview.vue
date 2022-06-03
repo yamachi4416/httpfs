@@ -5,13 +5,22 @@ import {
   version as pdfjsVersion,
 } from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker?url';
-import { nextTick, onBeforeUnmount, ref, shallowReactive, watch } from 'vue';
+import {
+  nextTick,
+  onBeforeUnmount,
+  ref,
+  shallowReactive,
+  useCssModule,
+  watch,
+} from 'vue';
 import { FsItem } from '../../../services/files';
 import Waiting from '../../ui/Waiting.vue';
 
 const cdnBaseUrl = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsVersion}`;
 
 GlobalWorkerOptions.workerSrc = workerSrc;
+
+const cssModule = useCssModule();
 
 const props = defineProps<{
   item: FsItem;
@@ -41,16 +50,15 @@ async function loadPdf(item: FsItem) {
         const scale = (Math.max(baseWidth, sizes.width) / sizes.width) * 2;
         const viewport = page.getViewport({ scale });
 
+        const wrp = document.createElement('div');
+        wrp.dataset.pageNumber = `${i}`;
+        wrp.classList.add(cssModule['pdf-page']);
+        container.value.appendChild(wrp);
+
         const img = document.createElement('img');
         img.width = viewport.width;
         img.height = viewport.height;
-        img.style.height = 'auto';
-        img.style.width = '100%';
-        img.style.maxWidth = '100%';
-        img.style.border = 'none';
-        img.style.backgroundColor = '#fff';
-        img.dataset.pageNumber = `${i}`;
-        container.value.appendChild(img);
+        wrp.appendChild(img);
 
         const status = {
           rendered: false,
@@ -60,6 +68,7 @@ async function loadPdf(item: FsItem) {
         return {
           render(beforeRender?: () => void) {
             if (status.rendered || status.requested) return;
+
             status.requested = true;
             return new Promise(resolve =>
               setTimeout(() => {
@@ -72,6 +81,12 @@ async function loadPdf(item: FsItem) {
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
+                const resolved = () => {
+                  canvas.width = 0;
+                  canvas.height = 0;
+                  resolve(null);
+                };
+
                 page
                   .render({
                     canvasContext: canvas.getContext('2d'),
@@ -80,9 +95,7 @@ async function loadPdf(item: FsItem) {
                   .promise.then(() => {
                     page.cleanup();
                     canvas.toBlob(blob => {
-                      img.addEventListener('load', () => resolve(null), {
-                        once: true,
-                      });
+                      img.addEventListener('load', resolved, { once: true });
                       img.src = URL.createObjectURL(blob);
                     }, 'image/png');
                   });
@@ -172,6 +185,9 @@ watch(
   }
 
   &-inner {
+    display: flex;
+    flex-direction: column;
+    row-gap: calc(var(--spacing) / 2);
     max-width: 80%;
     overflow: auto;
     text-align: center;
@@ -183,6 +199,21 @@ watch(
     @include media-less-md {
       max-width: 100%;
     }
+  }
+}
+</style>
+
+<style module lang="scss">
+.pdf-page {
+  display: block;
+  background-color: #fff;
+
+  & > img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border: none;
   }
 }
 </style>
