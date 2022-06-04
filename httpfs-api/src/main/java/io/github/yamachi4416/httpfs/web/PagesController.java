@@ -1,8 +1,10 @@
 package io.github.yamachi4416.httpfs.web;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,14 @@ public class PagesController {
   }
 
   private Resource rewriteIndexHtml(String contextPath, Resource original) {
-    try {
-      var content = Files.readString(original.getFile().toPath())
+    try (var br = new BufferedReader(new InputStreamReader(original.getInputStream()))) {
+      var content = br.lines().collect(Collectors.joining("\n"))
           .replaceFirst(
-              "<base href=\"/\"\\s*/>",
-              String.format("<base href=\"%s/\" />", contextPath));
+              "<base href=\"/\".*?>",
+              String.format("<base href=\"%s/\" />", contextPath))
+          .replaceFirst(
+              "<link rel=\"start\".*?>",
+              String.format("<link rel=\"start\" href=\"%s\" />", "/x/"));
       return new ByteArrayResource(content.getBytes(StandardCharsets.UTF_8));
     } catch (IOException e) {
       logger.error(e.getMessage(), e);

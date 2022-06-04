@@ -1,10 +1,9 @@
 package io.github.yamachi4416.httpfs.fs;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -32,22 +31,21 @@ public class MimeTypeHelper {
 
     private static Map<String, String> readMimeTypes() {
         var map = new HashMap<String, String>();
-        var mimeTypes = MimeTypeHelper.class.getClassLoader().getResource("mime.type");
+        var loader = MimeTypeHelper.class.getClassLoader();
 
-        try {
-            Files.readAllLines(Paths.get(mimeTypes.toURI()))
-                    .stream()
+        try (var mimeTypes = loader.getResourceAsStream("mime.type");
+                var br = new BufferedReader(new InputStreamReader(mimeTypes))) {
+            br.lines()
                     .filter(line -> !line.isBlank())
                     .filter(line -> !line.startsWith("#"))
                     .map(line -> line.split("\\t+"))
                     .filter(cols -> cols.length > 1)
                     .forEach(cols -> {
                         var mimeType = cols[0].trim();
-                        Stream.of(cols[1].split("\\s+")).forEach(
-                                ext -> map.putIfAbsent(ext, mimeType));
+                        Stream.of(cols[1].split("\\s+"))
+                                .forEach(ext -> map.putIfAbsent(ext, mimeType));
                     });
-            ;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new IllegalStateException(e.getMessage());
         }
 
