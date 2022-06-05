@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.web.reactive.WebFluxProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.http.codec.multipart.DefaultPartHttpMessageReader;
@@ -40,5 +41,11 @@ public class Application implements WebFluxConfigurer {
 				reader.setMaxParts(config.getMaxUploadParts());
 			}
 		});
+	}
+
+	@Autowired
+	public WebFluxProperties webFluxProperties(WebFluxProperties prop) {
+		prop.setBasePath(config.getBasePath());
+		return prop;
 	}
 }

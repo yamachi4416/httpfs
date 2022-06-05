@@ -10,9 +10,18 @@ import org.springframework.util.unit.DataSize;
 @ConfigurationProperties(prefix = "app")
 public class AppConfig {
 
+  private String basePath = "";
   private String documentRoot = ".";
   private DataSize maxUploadSize = DataSize.parse("1MB");
   private int maxUploadParts = 5;
+
+  public String getBasePath() {
+    return basePath;
+  }
+
+  public void setBasePath(String basePath) {
+    this.basePath = basePath;
+  }
 
   public Path getDocumentRootPath() {
     var root = Path.of(documentRoot).normalize();

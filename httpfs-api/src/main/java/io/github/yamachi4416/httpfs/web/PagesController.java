@@ -18,6 +18,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.github.yamachi4416.httpfs.AppConfig;
+
 @Controller
 @RequestMapping
 public class PagesController {
@@ -25,18 +27,20 @@ public class PagesController {
   private static final Logger logger = LoggerFactory.getLogger(PagesController.class);
 
   private final Resource indexHtml;
+  private final URI indexUri;
 
   public PagesController(
-      @Value("${server.servlet.context-path:}") String contextPath,
+      AppConfig appConfig,
       @Value("classpath:public/index.html") Resource original) {
-    this.indexHtml = rewriteIndexHtml(contextPath, original);
+    this.indexHtml = rewriteIndexHtml(appConfig.getBasePath(), original);
+    this.indexUri = URI.create(appConfig.getBasePath() + "/x/");
   }
 
   @GetMapping(path = { "/", "/index.html" })
   public ResponseEntity<?> top() {
     return ResponseEntity
         .status(HttpStatus.MOVED_PERMANENTLY)
-        .location(URI.create("/x/"))
+        .location(indexUri)
         .build();
   }
 
