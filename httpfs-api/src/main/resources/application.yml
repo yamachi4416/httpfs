@@ -1,4 +1,4 @@
 app:
   document-root: .
   max-upload-size: 5MB
-  max-request-size: 20MB
+  max-upload-parts: 10

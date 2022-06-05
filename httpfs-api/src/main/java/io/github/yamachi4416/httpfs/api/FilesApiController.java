@@ -7,7 +7,6 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
@@ -19,8 +18,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -29,8 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestPart;
 
 import io.github.yamachi4416.httpfs.api.dto.DeleteItemsParam;
 import io.github.yamachi4416.httpfs.api.dto.MkColParam;
@@ -39,6 +37,8 @@ import io.github.yamachi4416.httpfs.api.dto.MultiStatusResult;
 import io.github.yamachi4416.httpfs.api.dto.RenameItemParam;
 import io.github.yamachi4416.httpfs.fs.FsItem;
 import io.github.yamachi4416.httpfs.fs.SubFs;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Controller
 @RequestMapping(path = "api/files/{*paths}")
@@ -97,95 +97,91 @@ public class FilesApiController {
   }
 
   @PutMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-  public ResponseEntity<?> upload(
+  public Mono<ResponseEntity<?>> upload(
       FsItem fsItem,
-      @RequestParam(required = true) MultipartFile[] files)
+      @RequestPart(name = "files") Flux<FilePart> files)
       throws AccessDeniedException, FileNotFoundException {
     var sub = fs.wSub(fsItem.getPath());
-    return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-        .body(Stream.of(files).map(file -> {
-          return MultiStatusResult.withIOException(() -> {
-            return MultiStatusResult.ofOverWritable(
-                sub.createFile(file.getOriginalFilename(), file::getInputStream));
-          });
-        }));
+    return files
+        .flatMap(file -> MultiStatusResult
+            .withIOException(() -> sub
+                .createFile(file.filename(), file::transferTo)
+                .map(MultiStatusResult::ofOverWritable)))
+        .collectList()
+        .map(list -> ResponseEntity.status(HttpStatus.MULTI_STATUS).body(list));
   }
 
   @PostMapping(headers = { "x-method=MKCOL" })
-  public ResponseEntity<?> mkcol(
+  public Mono<ResponseEntity<?>> mkcol(
       FsItem fsItem,
-      @RequestBody @Valid MkColParam param,
-      BindingResult binding)
+      @RequestBody @Valid Mono<MkColParam> param)
       throws IOException {
-    if (binding.hasErrors()) {
-      return ResponseEntity.badRequest().build();
-    }
-
-    try {
-      var sub = fs.wSub(fsItem.getPath());
-      return ResponseEntity
-          .status(HttpStatus.CREATED)
-          .body(sub.createDirectory(param.getDirname()));
-    } catch (FileAlreadyExistsException e) {
-      return ResponseEntity.status(HttpStatus.FORBIDDEN.value()).build();
-    } catch (InvalidPathException e) {
-      return ResponseEntity.badRequest().build();
-    }
+    return param.flatMap(p -> {
+      try {
+        var sub = fs.wSub(fsItem.getPath());
+        return Mono.just(ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(sub.createDirectory(p.getDirname())));
+      } catch (FileAlreadyExistsException e) {
+        return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN.value()).build());
+      } catch (InvalidPathException e) {
+        return Mono.just(ResponseEntity.badRequest().build());
+      } catch (IOException e) {
+        return Mono.error(e);
+      }
+    });
   }
 
   @PostMapping(headers = { "x-method=MOVE" })
-  public ResponseEntity<?> move(
+  public Mono<ResponseEntity<?>> move(
       FsItem fsItem,
-      @RequestBody @Valid MoveItemParam param,
-      BindingResult binding)
+      @RequestBody @Valid Mono<MoveItemParam> param)
       throws IOException {
-    if (binding.hasErrors()) {
-      return ResponseEntity.badRequest().build();
-    }
-
     var sub = fs.wSub(fsItem.getPath());
-    var dest = fs.wSub(fs.resolve(param.getDestination().split("/")).getPath());
-    return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-        .body(Stream.of(param.getNames()).map(name -> {
-          return MultiStatusResult.withIOException(() -> {
-            return MultiStatusResult.ofOverWritable(
-                sub.move(dest, name, param.isOverwrite()));
-          });
-        }));
+    return param.flatMapMany(p -> {
+      try {
+        var dest = fs.wSub(fs.resolve(p.getDestination().split("/")).getPath());
+        return Flux
+            .just(p.getNames())
+            .map(name -> MultiStatusResult
+                .withIOException(() -> Mono
+                    .just(sub.move(dest, name, p.isOverwrite()))
+                    .map(MultiStatusResult::ofOverWritable)));
+      } catch (AccessDeniedException | FileNotFoundException e) {
+        return Mono.error(e);
+      }
+    }).collectList().map(list -> ResponseEntity.status(HttpStatus.MULTI_STATUS).body(list));
   }
 
   @PostMapping(headers = { "x-method=RENAME" })
-  public ResponseEntity<?> rename(
+  public Mono<ResponseEntity<?>> rename(
       FsItem fsItem,
-      @RequestBody @Valid RenameItemParam param,
-      BindingResult binding)
+      @RequestBody @Valid Mono<RenameItemParam> param)
       throws IOException {
-    if (binding.hasErrors()) {
-      return ResponseEntity.badRequest().build();
-    }
-
     var sub = fs.wSub(fsItem.getPath());
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(sub.rename(param.getName(), param.getNewName()));
+    return param
+        .map(p -> {
+          try {
+            return sub.rename(p.getName(), p.getNewName());
+          } catch (IOException e) {
+            return Mono.error(e);
+          }
+        }).map(item -> ResponseEntity.status(HttpStatus.CREATED).body(item));
   }
 
   @DeleteMapping
-  public ResponseEntity<?> delete(
+  public Mono<ResponseEntity<?>> delete(
       FsItem fsItem,
-      @RequestBody @Valid DeleteItemsParam param,
-      BindingResult binding)
+      @RequestBody @Valid Mono<DeleteItemsParam> param)
       throws IOException {
-    if (binding.hasErrors()) {
-      return ResponseEntity.badRequest().build();
-    }
-
     var sub = fs.wSub(fsItem.getPath());
-    return ResponseEntity.status(HttpStatus.MULTI_STATUS)
-        .body(Stream.of(param.getNames()).map(name -> {
-          return MultiStatusResult.withIOException(() -> {
-            return new MultiStatusResult<>(
-                HttpStatus.NO_CONTENT, sub.delete(name));
-          });
-        }));
+    return param
+        .flatMapMany(p -> Flux.just(p.getNames()))
+        .map(name -> MultiStatusResult
+            .withIOException(() -> Mono
+                .just(sub.delete(name))
+                .map(item -> new MultiStatusResult<>(HttpStatus.NO_CONTENT, item))))
+        .collectList()
+        .map(list -> ResponseEntity.status(HttpStatus.MULTI_STATUS).body(list));
   }
 }

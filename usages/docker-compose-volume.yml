@@ -13,7 +13,7 @@ services:
     command:
       - --app.document-root=/home/app/data
       - --app.max-upload-size=1GB
-      - --app.max-request-size=1GB
+      - --app.max-upload-parts=10
 
 volumes:
   data:

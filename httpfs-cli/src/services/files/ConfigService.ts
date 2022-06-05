@@ -8,7 +8,7 @@ const config = {
   configApiEndpont: `${apiEndpoint}/config`,
   filesApiEndpoint: `${apiEndpoint}/files`,
   maxFileSize: Number.MAX_VALUE,
-  maxRequestSize: Number.MAX_VALUE,
+  maxFileCount: Number.MAX_VALUE,
 };
 
 export function getConfig() {

@@ -12,7 +12,7 @@ public class AppConfig {
 
   private String documentRoot = ".";
   private DataSize maxUploadSize = DataSize.parse("1MB");
-  private DataSize maxRequestSize = DataSize.parse("10MB");
+  private int maxUploadParts = 5;
 
   public Path getDocumentRootPath() {
     var root = Path.of(documentRoot).normalize();
@@ -42,11 +42,11 @@ public class AppConfig {
     this.maxUploadSize = maxUploadSize;
   }
 
-  public DataSize getMaxRequestSize() {
-    return maxRequestSize;
+  public int getMaxUploadParts() {
+    return maxUploadParts;
   }
 
-  public void setMaxRequestSize(DataSize maxRequestSize) {
-    this.maxRequestSize = maxRequestSize;
+  public void setMaxUploadParts(int maxUploadParts) {
+    this.maxUploadParts = maxUploadParts;
   }
 }

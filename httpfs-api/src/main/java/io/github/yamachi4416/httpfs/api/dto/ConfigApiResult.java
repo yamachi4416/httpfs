@@ -2,7 +2,7 @@ package io.github.yamachi4416.httpfs.api.dto;
 
 public class ConfigApiResult {
   private long maxFileSize;
-  private long maxRequestSize;
+  private int maxFileCount;
 
   public void setMaxFileSize(long maxFileSize) {
     this.maxFileSize = maxFileSize;
@@ -12,11 +12,11 @@ public class ConfigApiResult {
     return maxFileSize;
   }
 
-  public void setMaxRequestSize(long maxRequestSize) {
-    this.maxRequestSize = maxRequestSize;
+  public void setMaxFileCount(int maxFileCount) {
+    this.maxFileCount = maxFileCount;
   }
 
-  public long getMaxRequestSize() {
-    return maxRequestSize;
+  public int getMaxFileCount() {
+    return maxFileCount;
   }
 }

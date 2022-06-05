@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.yamachi4416.httpfs.fs.dto.OverWritableResult;
+import reactor.core.publisher.Mono;
 
 public class SubFs {
   private static final Logger logger = LoggerFactory.getLogger(SubFs.class);
@@ -83,6 +84,15 @@ public class SubFs {
     }
 
     return ret;
+  }
+
+  public Mono<OverWritableResult> createFile(String fileName, TransferTo transferTo) throws AccessDeniedException {
+    var path = safePath(fileName);
+    return transferTo.transferTo(path).map(v -> {
+      var ret = new OverWritableResult(path);
+      ret.setItem(new FsItem(path));
+      return ret;
+    });
   }
 
   public FsItem createDirectory(String dirname) throws IOException {

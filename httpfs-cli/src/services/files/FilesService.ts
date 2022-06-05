@@ -32,16 +32,13 @@ export async function fetchDirectoryItems(path: string[]): Promise<FsItem[]> {
   }).then(items => items.map(item => FsItem.fromJson(item, path)));
 }
 
-function toFilesChunks(files: File[], maxSize: number) {
+function toFilesChunks(files: File[], maxFileCount: number) {
   const chunks: File[][] = [[]];
 
-  let size = 0;
   for (const file of Array.from(files)) {
-    if (size + file.size >= maxSize) {
-      size = file.size;
+    if (chunks[0].length > maxFileCount) {
       chunks.unshift([file]);
     } else {
-      size += file.size;
       chunks[0].push(file);
     }
   }
@@ -55,7 +52,7 @@ function toFileUplaodForm(files: File[], maxSize: number) {
   const form = new FormData();
 
   for (const file of files) {
-    if (file.size >= maxSize) {
+    if (file.size > maxSize) {
       ignores.push(file);
     } else {
       uploads.push(file);
@@ -75,8 +72,8 @@ export async function uploadFiles({
   files: FileList;
   callback: (item: FsItem, err?: Error) => void;
 }): Promise<MultiStatus[]> {
-  const { maxFileSize, maxRequestSize } = getConfig();
-  const chunks = toFilesChunks(Array.from(files), maxRequestSize);
+  const { maxFileSize, maxFileCount } = getConfig();
+  const chunks = toFilesChunks(Array.from(files), maxFileCount);
 
   const onErrorHandler = (files: File[], err: Error) => {
     return files.map(file => {
@@ -89,11 +86,13 @@ export async function uploadFiles({
   const uploads = chunks
     .map(files => toFileUplaodForm(files, maxFileSize))
     .map(async ({ form, uploads, ignores }) => {
-      if (ignores.length) {
-        return onErrorHandler(ignores, HttpException.payloadTooLarge());
+      const ignoreFiles = onErrorHandler(ignores, HttpException.payloadTooLarge());
+
+      if (uploads.length === 0) {
+        return ignoreFiles;
       }
 
-      return fetchApi<MultiStatus[]>(path, {
+      const uploaded = await fetchApi<MultiStatus[]>(path, {
         method: 'put',
         body: form,
       })
@@ -108,6 +107,8 @@ export async function uploadFiles({
           });
         })
         .catch(err => onErrorHandler(uploads, err));
+
+        return uploaded.concat(ignoreFiles);
     });
 
   return (await Promise.all(uploads)).reduce(

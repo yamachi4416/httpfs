@@ -3,6 +3,7 @@ package io.github.yamachi4416.httpfs.web;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,8 +33,11 @@ public class PagesController {
   }
 
   @GetMapping(path = { "/", "/index.html" })
-  public String top() {
-    return "redirect:/x/";
+  public ResponseEntity<?> top() {
+    return ResponseEntity
+        .status(HttpStatus.MOVED_PERMANENTLY)
+        .location(URI.create("/x/"))
+        .build();
   }
 
   @GetMapping(path = "/x/**")

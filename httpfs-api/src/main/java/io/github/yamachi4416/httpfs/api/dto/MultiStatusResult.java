@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import io.github.yamachi4416.httpfs.fs.FsItem;
 import io.github.yamachi4416.httpfs.fs.dto.OverWritableResult;
+import reactor.core.publisher.Mono;
 
 public class MultiStatusResult<T> {
   private final HttpStatus status;
@@ -58,19 +59,30 @@ public class MultiStatusResult<T> {
     MultiStatusResult<?> get() throws IOException;
   }
 
+  @FunctionalInterface
+  public static interface WithIOExceptionMono {
+    Mono<MultiStatusResult<?>> get() throws IOException;
+  }
+
   public static MultiStatusResult<?> withIOException(WithIOException fn) {
+    return withIOException(() -> {
+      return Mono.just(fn.get());
+    }).block();
+  }
+
+  public static Mono<MultiStatusResult<?>> withIOException(WithIOExceptionMono fn) {
     try {
       return fn.get();
     } catch (FileNotFoundException | NoSuchFileException e) {
-      return new MultiStatusResult<>(HttpStatus.NOT_FOUND, null);
+      return Mono.just(new MultiStatusResult<>(HttpStatus.NOT_FOUND, null));
     } catch (FileAlreadyExistsException e) {
-      return new MultiStatusResult<>(HttpStatus.FORBIDDEN, null);
+      return Mono.just(new MultiStatusResult<>(HttpStatus.FORBIDDEN, null));
     } catch (DirectoryNotEmptyException e) {
-      return new MultiStatusResult<>(HttpStatus.FORBIDDEN, null, "Directory Not Empty");
+      return Mono.just(new MultiStatusResult<>(HttpStatus.FORBIDDEN, null, "Directory Not Empty"));
     } catch (FileSystemException e) {
-      return new MultiStatusResult<>(HttpStatus.FORBIDDEN, null);
+      return Mono.just(new MultiStatusResult<>(HttpStatus.FORBIDDEN, null));
     } catch (IOException e) {
-      return new MultiStatusResult<>(HttpStatus.INTERNAL_SERVER_ERROR, null);
+      return Mono.just(new MultiStatusResult<>(HttpStatus.INTERNAL_SERVER_ERROR, null));
     }
   }
 }
