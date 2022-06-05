@@ -19,7 +19,7 @@ COPY httpfs-api/pom.xml .
 RUN ./mvnw -B dependency:resolve -DincludeScope=compile
 
 COPY ./httpfs-api/src src
-COPY --from=build-cli /build/dist ./target/classes/public
+COPY --from=build-cli /build/dist ./src/main/resources/public
 RUN ./mvnw clean package -DskipTests
 
 

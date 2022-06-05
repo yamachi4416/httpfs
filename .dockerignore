@@ -1,0 +1,8 @@
+*/.git
+*/.gitignore
+*/.vscode
+.dockerignore
+Dockerfile
+httpfs-cli/dist
+httpfs-cli/node_modules
+httpfs-api/src/main/resources/public
