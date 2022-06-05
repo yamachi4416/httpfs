@@ -12,8 +12,8 @@ services:
       - 127.0.0.1:8080:8080
     command:
       - --app.document-root=/home/app/data
-      - --spring.servlet.multipart.max-file-size=1GB
-      - --spring.servlet.multipart.max-request-size=1GB
+      - --app.max-upload-size=1GB
+      - --app.max-request-size=1GB
 
 volumes:
   data:

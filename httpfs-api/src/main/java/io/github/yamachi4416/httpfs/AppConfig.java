@@ -4,12 +4,15 @@ import java.nio.file.Path;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+import org.springframework.util.unit.DataSize;
 
 @Component
 @ConfigurationProperties(prefix = "app")
 public class AppConfig {
 
   private String documentRoot = ".";
+  private DataSize maxUploadSize = DataSize.parse("1MB");
+  private DataSize maxRequestSize = DataSize.parse("10MB");
 
   public Path getDocumentRootPath() {
     var root = Path.of(documentRoot).normalize();
@@ -29,5 +32,21 @@ public class AppConfig {
       this.documentRoot = ".";
     }
     this.documentRoot = documentRoot;
+  }
+
+  public DataSize getMaxUploadSize() {
+    return maxUploadSize;
+  }
+
+  public void setMaxUploadSize(DataSize maxUploadSize) {
+    this.maxUploadSize = maxUploadSize;
+  }
+
+  public DataSize getMaxRequestSize() {
+    return maxRequestSize;
+  }
+
+  public void setMaxRequestSize(DataSize maxRequestSize) {
+    this.maxRequestSize = maxRequestSize;
   }
 }

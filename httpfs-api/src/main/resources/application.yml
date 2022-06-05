@@ -1,7 +1,4 @@
 app:
   document-root: .
-spring:
-  servlet:
-    multipart:
-      max-file-size: 5MB
-      max-request-size: 20MB
+  max-upload-size: 5MB
+  max-request-size: 20MB

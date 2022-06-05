@@ -1,10 +1,13 @@
 package io.github.yamachi4416.httpfs;
 
+import javax.servlet.MultipartConfigElement;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 
 import io.github.yamachi4416.httpfs.fs.SubFs;
@@ -26,5 +29,14 @@ public class Application {
 		var root = config.getDocumentRootPath();
 		logger.info("Files DocumentRoot {}", root);
 		return new SubFs(root);
+	}
+
+	@Bean
+	public MultipartConfigElement multipartConfigElement() {
+		MultipartConfigFactory factory = new MultipartConfigFactory();
+		factory.setMaxFileSize(config.getMaxUploadSize());
+		factory.setMaxRequestSize(config.getMaxRequestSize());
+		logger.info("{} {}", config.getMaxUploadSize(), config.getMaxRequestSize());
+		return factory.createMultipartConfig();
 	}
 }

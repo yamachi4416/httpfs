@@ -75,8 +75,8 @@ export async function uploadFiles({
   files: FileList;
   callback: (item: FsItem, err?: Error) => void;
 }): Promise<MultiStatus[]> {
-  const { maxFileSize } = getConfig();
-  const chunks = toFilesChunks(Array.from(files), maxFileSize);
+  const { maxFileSize, maxRequestSize } = getConfig();
+  const chunks = toFilesChunks(Array.from(files), maxRequestSize);
 
   const onErrorHandler = (files: File[], err: Error) => {
     return files.map(file => {
