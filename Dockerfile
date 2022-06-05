@@ -5,7 +5,9 @@ COPY httpfs-cli/package*.json .
 RUN npm install
 
 COPY httpfs-cli .
-RUN npm run build
+RUN npm run build && \
+    npm cache verify --force && \
+    rm -rf node_modules
 
 
 FROM openjdk:11-slim AS build-api
@@ -14,11 +16,11 @@ WORKDIR /build
 COPY httpfs-api/.mvn .mvn
 COPY httpfs-api/mvnw .
 COPY httpfs-api/pom.xml .
-RUN ./mvnw -B dependency:resolve dependency:resolve-plugins
+RUN ./mvnw -B dependency:resolve -DincludeScope=compile
 
 COPY ./httpfs-api/src src
 COPY --from=build-cli /build/dist ./target/classes/public
-RUN ./mvnw package -DskipTests
+RUN ./mvnw clean package -DskipTests
 
 
 FROM openjdk:11-jre-slim
@@ -26,11 +28,11 @@ FROM openjdk:11-jre-slim
 ARG UID=1001
 ARG GID=1001
 
-RUN addgroup --system --gid ${GID} app
-RUN adduser  --system --uid ${UID} --group app
-
 WORKDIR /home/app
-RUN mkdir data && chown app:app data
+RUN addgroup --system --gid ${GID} app && \
+    adduser  --system --uid ${UID} --group app && \
+    mkdir data && chown app:app data
+
 VOLUME data
 
 COPY --from=build-api /build/target/*.jar app.jar
