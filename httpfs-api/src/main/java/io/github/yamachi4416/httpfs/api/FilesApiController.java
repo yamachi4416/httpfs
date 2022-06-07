@@ -35,8 +35,8 @@ import io.github.yamachi4416.httpfs.api.dto.MkColParam;
 import io.github.yamachi4416.httpfs.api.dto.MoveItemParam;
 import io.github.yamachi4416.httpfs.api.dto.MultiStatusResult;
 import io.github.yamachi4416.httpfs.api.dto.RenameItemParam;
-import io.github.yamachi4416.httpfs.fs.FsItem;
 import io.github.yamachi4416.httpfs.fs.SubFs;
+import io.github.yamachi4416.httpfs.fs.FsItem;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

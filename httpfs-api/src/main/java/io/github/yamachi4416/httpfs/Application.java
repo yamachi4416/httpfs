@@ -29,7 +29,7 @@ public class Application implements WebFluxConfigurer {
 	public SubFs subFs() {
 		var root = config.getDocumentRootPath();
 		logger.info("Files DocumentRoot {}", root);
-		return new SubFs(root);
+		return SubFs.defaultSubFs(root);
 	}
 
 	@Override

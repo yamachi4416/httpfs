@@ -10,7 +10,7 @@ import java.nio.file.NoSuchFileException;
 import org.springframework.http.HttpStatus;
 
 import io.github.yamachi4416.httpfs.fs.FsItem;
-import io.github.yamachi4416.httpfs.fs.dto.OverWritableResult;
+import io.github.yamachi4416.httpfs.fs.OverWritableResult;
 import reactor.core.publisher.Mono;
 
 public class MultiStatusResult<T> {

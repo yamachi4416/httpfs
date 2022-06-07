@@ -1,4 +1,4 @@
-package io.github.yamachi4416.httpfs.fs;
+package io.github.yamachi4416.httpfs.fs.internal;
 
 import java.io.BufferedReader;
 import java.io.IOException;
