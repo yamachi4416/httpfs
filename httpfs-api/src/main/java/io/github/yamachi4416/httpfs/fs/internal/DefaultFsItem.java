@@ -21,62 +21,77 @@ public class DefaultFsItem implements FsItem {
   private Instant lastModified;
   private Instant creationTime;
 
-  DefaultFsItem(Path path) {
-    var file = path.toFile();
-
-    this.path = path;
-    this.directory = file.isDirectory();
-    this.writable = file.canWrite();
-    this.name = file.getName();
-
-    if (this.directory) {
-      this.size = 0L;
-    } else {
-      this.size = file.length();
-      this.mimeType = MimeTypeHelper.getMimeType(path);
-    }
-
-    try {
-      var attr = Files.readAttributes(path, BasicFileAttributes.class);
-      this.lastModified = attr.lastModifiedTime().toInstant();
-      this.creationTime = attr.creationTime().toInstant();
-    } catch (IOException e) {
-    }
+  private DefaultFsItem() {
   }
 
+  @Override
   public boolean isWritable() {
     return writable;
   }
 
+  @Override
   public Path getPath() {
     return path;
   }
 
+  @Override
   public boolean isDirectory() {
     return directory;
   }
 
+  @Override
   public String getName() {
     return name;
   }
 
+  @Override
   public String getMimeType() {
     return mimeType;
   }
 
+  @Override
   public Long getSize() {
     return size;
   }
 
+  @Override
   public Instant getCreationTime() {
     return creationTime;
   }
 
+  @Override
   public Instant getLastModified() {
     return lastModified;
   }
 
+  @Override
+  public String toString() {
+    return path.toString();
+  }
+
   public static FsItem of(Path path) {
-    return new DefaultFsItem(path);
+    var item = new DefaultFsItem();
+    var file = path.toFile();
+
+    item.path = path;
+    item.directory = file.isDirectory();
+    item.writable = file.canWrite();
+    item.name = file.getName();
+
+    if (item.directory) {
+      item.size = 0L;
+    } else {
+      item.size = file.length();
+      item.mimeType = MimeTypeHelper.getMimeType(path);
+    }
+
+    try {
+      var attr = Files.readAttributes(path, BasicFileAttributes.class);
+      item.lastModified = attr.lastModifiedTime().toInstant();
+      item.creationTime = attr.creationTime().toInstant();
+    } catch (IOException e) {
+    }
+
+    return item;
   }
 }

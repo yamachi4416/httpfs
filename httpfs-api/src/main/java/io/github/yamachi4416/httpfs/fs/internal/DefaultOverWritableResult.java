@@ -32,8 +32,4 @@ public class DefaultOverWritableResult implements OverWritableResult {
   void setItem(FsItem item) {
     this.item = item;
   }
-
-  public static DefaultOverWritableResult of(Path path) {
-    return new DefaultOverWritableResult(path);
-  } 
 }

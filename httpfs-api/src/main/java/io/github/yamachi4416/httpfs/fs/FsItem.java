@@ -3,26 +3,20 @@ package io.github.yamachi4416.httpfs.fs;
 import java.nio.file.Path;
 import java.time.Instant;
 
-import io.github.yamachi4416.httpfs.fs.internal.DefaultFsItem;
-
 public interface FsItem {
-    Path getPath();
+  Path getPath();
 
-    boolean isWritable();
+  boolean isWritable();
 
-    boolean isDirectory();
+  boolean isDirectory();
 
-    String getName();
+  String getName();
 
-    String getMimeType();
+  String getMimeType();
 
-    Long getSize();
+  Long getSize();
 
-    Instant getCreationTime();
+  Instant getCreationTime();
 
-    Instant getLastModified();
-
-    public static FsItem of(Path path) {
-        return DefaultFsItem.of(path);
-    }
+  Instant getLastModified();
 }
