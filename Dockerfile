@@ -16,7 +16,7 @@ WORKDIR /build
 COPY httpfs-api/.mvn .mvn
 COPY httpfs-api/mvnw .
 COPY httpfs-api/pom.xml .
-RUN ./mvnw -B dependency:resolve -DincludeScope=compile
+RUN ./mvnw -B dependency:resolve
 
 COPY ./httpfs-api/src src
 COPY --from=build-cli /build/dist ./src/main/resources/public
